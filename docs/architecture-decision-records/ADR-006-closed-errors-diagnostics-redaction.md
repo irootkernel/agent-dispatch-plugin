@@ -49,12 +49,12 @@ decision to record.
   (32-plus hex and 40-plus base64 runs), sensitive webhook URLs (hosts
   under `hooks.` or any webhook path), and absolute paths outside the
   configured binary and config display policy are redacted — in envelope
-  strings recursively (the open `result` interior included, because rule 1
-  forbids authorization values in wrapped results) and in every diagnostic
-  line. Protected-location paths redact wholly; other absolute paths keep
-  only their final component so a diagnostic can still name what was
-  involved. Allowed display paths are masked first and restored last so the
-  other rules never rewrite them.
+  strings recursively, object keys included (the open `result` interior
+  included, because rule 1 forbids authorization values in wrapped
+  results), and in every diagnostic line. Protected-location paths redact
+  wholly; other absolute paths keep only their final component so a
+  diagnostic can still name what was involved. Allowed display paths are
+  masked first and restored last so the other rules never rewrite them.
 - **Redaction failure is its own closed error.** If the redaction pipeline
   itself raises, the result closes as `redaction_failure` with the
   inspection output discarded; a redaction outage can never leak the very

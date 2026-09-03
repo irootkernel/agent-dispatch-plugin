@@ -41,8 +41,11 @@ and calls `register(ctx)`.
   retry (ADR-005).
 - `envelopes.py` owns the closed output boundary: the frozen-envelope
   validation with command identity and exit consistency, the closed
-  wrapper carrier rule, bounded diagnostics, and the five frozen
-  redaction rules with the redaction_failure guard (ADR-006).
+  output-error and diagnostics vocabulary, and the five frozen redaction
+  rules with the redaction_failure guard (ADR-006). The runner constructs
+  every wrapper result under the carrier rule that the frozen wrapper
+  schema defines; the tests validate each produced shape against that
+  schema.
 - `plugin.yaml` is generated and verified by `scripts/manifest_parity.py`,
   which also proves catalog, manifest, registration, and expected-inventory
   parity for exactly ten tools by driving the real registration path.

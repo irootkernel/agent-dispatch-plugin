@@ -202,11 +202,18 @@ def _redact_protected_paths(text: str) -> str:
 
 
 def redact_value(value: Any, allowed_paths: Iterable[str] = ()) -> Any:
-    """Recursively redact every string inside one parsed envelope."""
+    """Recursively redact every string inside one parsed envelope.
+
+    Object keys are redacted like values: a secret surfacing in a JSON key
+    position must not survive the boundary either.
+    """
     if isinstance(value, str):
         return redact_text(value, allowed_paths)
     if isinstance(value, dict):
-        return {key: redact_value(item, allowed_paths) for key, item in value.items()}
+        return {
+            redact_value(key, allowed_paths): redact_value(item, allowed_paths)
+            for key, item in value.items()
+        }
     if isinstance(value, list):
         return [redact_value(item, allowed_paths) for item in value]
     return value

@@ -227,6 +227,28 @@ def test_base64url_seeded_secret_never_survives_the_boundary(plugin, runner, tmp
     assert SEEDED_BASE64URL_TOKEN not in json.dumps(result)
 
 
+def test_seeded_secret_in_object_key_position_never_survives(plugin, runner, tmp_path):
+    """A secret surfacing as a JSON key is redacted like one in value
+    position; the redacted shape keeps the envelope structure."""
+    envelope = {
+        **VALID_ENVELOPE,
+        "result": {
+            SEEDED_HEX_TOKEN: "route-count",
+            "nested": {SEEDED_BASE64URL_TOKEN: 3},
+        },
+    }
+    result = _run_raw(plugin, runner, tmp_path, envelope=envelope)
+    assert result["ok"] is True
+    dumped = json.dumps(result)
+    assert SEEDED_HEX_TOKEN not in dumped
+    assert SEEDED_BASE64URL_TOKEN not in dumped
+    inner = result["agent_dispatch"]["result"]
+    assert "[redacted]" in list(inner)[0]
+    assert list(inner["nested"])[0] == "[redacted]"
+    assert inner["[redacted]"] == "route-count"
+    assert inner["nested"]["[redacted]"] == 3
+
+
 def test_missing_api_version_is_a_structural_mismatch(plugin, runner, tmp_path):
     envelope = dict(VALID_ENVELOPE)
     envelope.pop("api_version")
