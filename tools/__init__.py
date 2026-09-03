@@ -12,7 +12,10 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-from ..registry import ToolSpec
+if "." in __package__:  # Normal path: imported as a namespaced plugin submodule.
+    from ..registry import ToolSpec
+else:  # Degenerate top-level import of the plugin root file.
+    from registry import ToolSpec
 
 RESULT_SCHEMA_VERSION = "agent-dispatch-plugin.result/v1"
 

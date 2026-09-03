@@ -84,9 +84,7 @@ class ToolSpec:
             with self.input_schema_path.open(encoding="utf-8") as handle:
                 return json.load(handle)
         except (OSError, json.JSONDecodeError) as exc:
-            raise ContractSourceError(
-                f"{self.name}: input schema unavailable: {exc}"
-            ) from exc
+            raise ContractSourceError(f"{self.name}: input schema unavailable: {exc}") from exc
 
 
 @lru_cache(maxsize=1)
@@ -163,15 +161,11 @@ def tool_specs() -> tuple[ToolSpec, ...]:
         )
     names = [spec.name for spec in specs]
     if len(names) != 10 or len(set(names)) != len(names):
-        raise ContractSourceError(
-            "the frozen roster must contain exactly ten unique tools"
-        )
+        raise ContractSourceError("the frozen roster must contain exactly ten unique tools")
     for spec in specs:  # fail before registration on any unreadable schema
         schema = spec.load_input_schema()
         if not isinstance(schema, dict):
-            raise ContractSourceError(
-                f"{spec.name}: input schema file is not a JSON object"
-            )
+            raise ContractSourceError(f"{spec.name}: input schema file is not a JSON object")
     return tuple(specs)
 
 

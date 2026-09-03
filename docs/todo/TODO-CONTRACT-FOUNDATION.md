@@ -55,6 +55,11 @@ frozen artifacts live in contracts/v0.1.0/ with the offline gate
   test contract should run checks through `uv run` in that environment
   (`uv run contracts/validate.py`, `uv run scripts/manifest_parity.py`) and
   add the baseline suite as a project dev dependency.
+- TASK-003 established aquarium-test-contract/v1 (see TESTING.md): the
+  Makefile owns the aggregate with fail-fast serial stages; pytest is the
+  canonical framework for unit, integration, and e2e layers; ruff (format +
+  check) and compileall run in prepare; the e2e layer drives the Hermes
+  Plugin Doctor through its public CLI and fails on the missing prerequisite.
 
 ## Acceptance
 

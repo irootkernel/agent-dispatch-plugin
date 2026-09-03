@@ -13,7 +13,10 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from .registry import ActionSpec
+if "." in __package__:  # Normal path: imported as a plugin package module.
+    from .registry import ActionSpec
+else:  # Degenerate top-level import of the plugin root file.
+    from registry import ActionSpec
 
 BOUNDARY_UNIMPLEMENTED = (
     "runner.run_inspection is implemented by EPIC-002; the skeleton never "

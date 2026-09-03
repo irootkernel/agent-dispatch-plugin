@@ -87,9 +87,7 @@ def build_manifest(catalog: dict) -> dict:
 
 def main() -> int:
     module = load_plugin_module()
-    catalog = json.loads(
-        module.registry.CATALOG_PATH.read_text(encoding="utf-8")
-    )
+    catalog = json.loads(module.registry.CATALOG_PATH.read_text(encoding="utf-8"))
     expected_manifest = build_manifest(catalog)
 
     if "--write" in sys.argv[1:]:

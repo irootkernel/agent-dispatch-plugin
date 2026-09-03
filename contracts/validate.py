@@ -130,7 +130,8 @@ def check_catalog(catalog: dict) -> None:
     state_max = catalog["state_token_grammar"]["max_length"]
     closed_enums = catalog["closed_enums"]
     offset_tools = {
-        f"agent_dispatch_{name.split()[0]}" for name in catalog["pagination"]["offset"]["applies_to"]
+        f"agent_dispatch_{name.split()[0]}"
+        for name in catalog["pagination"]["offset"]["applies_to"]
     }
 
     for tool in catalog["tools"]:
@@ -158,7 +159,9 @@ def check_catalog(catalog: dict) -> None:
         if action_enum_key in closed_enums:
             declared = props.get("action", {}).get("enum")
             if declared != closed_enums[action_enum_key]:
-                fail(f"{tool_name}: action enum mismatch with catalog closed_enums.{action_enum_key}")
+                fail(
+                    f"{tool_name}: action enum mismatch with catalog closed_enums.{action_enum_key}"
+                )
         for prop, spec in props.items():
             if prop in catalog["identifier_grammar"]["applies_to"]:
                 if spec.get("pattern") != identifier_pattern:
@@ -218,8 +221,7 @@ def check_catalog(catalog: dict) -> None:
         for action in tool["actions"]:
             argv = resolve_argv(action, {})
             flat_denied_hits.extend(
-                f"{tool['name']}/{action['id']}:{token}"
-                for token in argv if token in denied
+                f"{tool['name']}/{action['id']}:{token}" for token in argv if token in denied
             )
     if flat_denied_hits:
         fail(f"catalog: denied subcommand tokens present in fixed argv: {flat_denied_hits}")
@@ -355,7 +357,8 @@ def check_fixtures(registry: Registry, catalog: dict) -> None:
                 fail(f"fixtures: {case_id} expected invalid but validated")
 
     orphan_files = {
-        p.relative_to(VERSION_DIR) for p in (VERSION_DIR / "fixtures").rglob("*.json")
+        p.relative_to(VERSION_DIR)
+        for p in (VERSION_DIR / "fixtures").rglob("*.json")
         if p != index_path and p not in seen_files
     }
     if orphan_files:
@@ -370,7 +373,8 @@ def check_fixtures(registry: Registry, catalog: dict) -> None:
         for action in tool["actions"]:
             wanted = action.get("input_action_value")
             candidates = [
-                c["instance"] for c in cases_doc["cases"]
+                c["instance"]
+                for c in cases_doc["cases"]
                 if c["expect"] == "valid"
                 and (wanted is None or c["instance"].get("action") == wanted)
             ]
@@ -397,7 +401,8 @@ def check_fixtures(registry: Registry, catalog: dict) -> None:
     # every plugin error code is exercised by a valid error fixture
     error_cases = load_json(VERSION_DIR / "fixtures" / "error.cases.json")
     covered = {
-        c["instance"]["code"] for c in error_cases["cases"]
+        c["instance"]["code"]
+        for c in error_cases["cases"]
         if c["expect"] == "valid" and "code" in c["instance"]
     }
     missing = set(PRD_ERROR_CODES) - covered

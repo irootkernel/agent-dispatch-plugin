@@ -1,0 +1,64 @@
+{
+  "schema": "aquarium.hardening-deferral-findings/v1",
+  "work_unit": {
+    "kind": "task",
+    "id": "TASK-003"
+  },
+  "target": {
+    "capture_kind": "stage",
+    "content_sha256": "sha256:e530b7b09d24719eca0ab75b67c70eb5bdef73d7a5f81771453dccba9188b66c"
+  },
+  "coverage_status": "complete",
+  "ci_decision": "pass",
+  "publication_status": "committed",
+  "structured_extraction_status": "reports_only",
+  "findings": [
+    {
+      "id": "TASK-003-R2-F01",
+      "severity": "medium",
+      "disposition": "deferred-for-hardening",
+      "summary": "The degenerate-path test for the tools package deletes the top-level registry module without seeding a replacement and returns early when a tools module already exists, so the asserted import either fails or passes vacuously depending on the environment.",
+      "paths": [
+        "tests/unit/test_tools.py"
+      ]
+    },
+    {
+      "id": "TASK-003-R2-F02",
+      "severity": "low",
+      "disposition": "deferred-for-hardening",
+      "summary": "The broken_catalog fixture clears only the load_catalog cache inside its writer, so a prior tool_specs call can serve a stale pre-mutation roster despite the fixture's advertised call-order independence.",
+      "paths": [
+        "tests/conftest.py"
+      ]
+    },
+    {
+      "id": "TASK-003-R2-F03",
+      "severity": "medium",
+      "disposition": "deferred-for-hardening",
+      "summary": "The integration test still carries a verbatim duplicate of the Hermes-style loader beside the parameterized conftest implementation; the round-one reuse remediation did not land and the parameterization is currently dead code, leaving the two copies free to drift.",
+      "paths": [
+        "tests/integration/test_registration_and_gates.py",
+        "tests/conftest.py"
+      ]
+    },
+    {
+      "id": "TASK-003-R2-F04",
+      "severity": "info",
+      "disposition": "rejected-by-design",
+      "summary": "The e2e test pins two exact Plugin Doctor output phrases deliberately as the doctor-contract assertion; the removed round-one assertion was the unanchored lowercase error-word heuristic, not these pins.",
+      "paths": [
+        "tests/e2e/test_plugin_doctor.py"
+      ]
+    },
+    {
+      "id": "TASK-003-R2-F05",
+      "severity": "info",
+      "disposition": "rejected-by-design",
+      "summary": "Prepare applies ruff format rather than --check because aquarium-test-contract/v1 defines prepare as applying meaning-preserving formatting before the deterministic checks.",
+      "paths": [
+        "Makefile",
+        "TESTING.md"
+      ]
+    }
+  ]
+}

@@ -10,7 +10,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from .registry import ContractSourceError, ToolSpec, load_catalog
+if "." in __package__:  # Normal path: imported as a plugin package module.
+    from .registry import ContractSourceError, ToolSpec, load_catalog
+else:  # Degenerate top-level import of the plugin root file.
+    from registry import ContractSourceError, ToolSpec, load_catalog
 
 
 def input_schema(spec: ToolSpec) -> dict[str, Any]:

@@ -12,9 +12,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from . import registry
-from . import schemas
-from . import tools as tool_handlers
+if "." in __package__:  # The Hermes loader imports this directory as a package.
+    from . import registry
+    from . import schemas
+    from . import tools as tool_handlers
+else:  # Degenerate top-level import of the plugin root file.
+    import registry
+    import schemas
+    import tools as tool_handlers
 
 __all__ = ["register", "registry", "schemas", "toolset"]
 
