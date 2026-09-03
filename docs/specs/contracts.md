@@ -54,11 +54,15 @@ The closed receipt-kind and quarantine-state sets, the envelope command-path
 identity, the closed envelope error object, and the stdout-success versus
 stderr-error stream policy were confirmed against the installed Agent
 Dispatch v0.1.6 command help and disposable probes during TASK-001; they are
-frozen in the catalog. EPIC-002 must still verify against the real binary
-that the PRD-documented `quarantine list --route/--limit` filters and the
-absence of a notifications `--offset` filter match actual flag support; a
-mismatch is an upstream compatibility finding, never a silent contract
-change.
+frozen in the catalog. During TASK-004 the remaining EPIC-002 duty was
+verified against the real binary: `quarantine list` accepts and applies the
+PRD-documented `--route` and `--limit` filters, and `notifications list`
+supports no `--offset` filter — the binary's parser tolerates the flag but
+silently ignores it (`--limit 2 --offset 2` returns the same leading page as
+`--limit 2`). The frozen contract correctly omits the flag; the parser
+tolerance is an upstream observation, not a contract change. TASK-004 also
+verified the version surface: the binary rejects `--version` and answers
+`agent-dispatch version --json`, which the runner trust gate now uses.
 
 ## Change control
 

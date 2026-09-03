@@ -28,20 +28,20 @@ def _validators() -> dict[str, Draft202012Validator]:
     return validators
 
 
-def test_availability_check_hides_the_toolset(plugin):
-    assert plugin.tools.availability_check() is False
+def test_availability_check_hides_the_unconfigured_toolset(plugin, unconfigured_ctx):
+    assert plugin.tools.make_availability_check(unconfigured_ctx)() is False
 
 
-def test_every_handler_result_validates_against_the_frozen_wrapper(plugin):
+def test_every_handler_result_validates_against_the_frozen_wrapper(plugin, unconfigured_ctx):
     wrapper = _validators()["wrapper"]
     for spec in plugin.registry.tool_specs():
-        wrapper.validate(plugin.tools.handler_for(spec)())
+        wrapper.validate(plugin.tools.handler_for(spec, unconfigured_ctx)())
 
 
-def test_every_handler_fails_closed_with_the_frozen_error_contract(plugin):
+def test_every_handler_fails_closed_with_the_frozen_error_contract(plugin, unconfigured_ctx):
     error_validator = _validators()["error"]
     for spec in plugin.registry.tool_specs():
-        result = plugin.tools.handler_for(spec)(action="list", route_id="../evil")
+        result = plugin.tools.handler_for(spec, unconfigured_ctx)(action="list", route_id="../evil")
         assert result["ok"] is False
         assert result["exit_code"] == -1
         assert result["operation"] == spec.name
@@ -50,10 +50,12 @@ def test_every_handler_fails_closed_with_the_frozen_error_contract(plugin):
         assert result["error"]["retryable"] is False
 
 
-def test_handlers_never_reflect_caller_arguments(plugin):
-    message = plugin.tools._UNAVAILABLE_MESSAGE
+def test_handlers_never_reflect_caller_arguments(plugin, unconfigured_ctx):
+    message = plugin.runner.NOT_CONFIGURED_MESSAGE
     for spec in plugin.registry.tool_specs():
-        result = plugin.tools.handler_for(spec)(anything="ignored", flags=["--evil"])
+        result = plugin.tools.handler_for(spec, unconfigured_ctx)(
+            anything="ignored", flags=["--evil"]
+        )
         assert result["diagnostics"] == []
         assert result["error"]["message"] == message
 
@@ -75,7 +77,7 @@ def test_wrapper_and_error_fixture_cases_behave_as_labeled():
 
 
 def test_runner_boundary_stays_fail_closed(plugin):
-    """The reserved process-execution boundary must raise until EPIC-002."""
+    """The reserved process-execution entrypoint raises until TASK-005."""
     import importlib
 
     runner = importlib.import_module(plugin.__name__ + ".runner")
@@ -110,15 +112,17 @@ def test_guarded_modules_import_on_the_degenerate_top_level_path(module_file, to
 
 
 def test_tools_package_imports_on_the_degenerate_top_level_path():
-    """tools resolves its registry dependency without a namespaced parent."""
-    saved = {k: v for k, v in sys.modules.items() if k in ("registry", "tools")}
+    """tools resolves its registry and runner dependencies without a parent."""
+    wanted = ("registry", "runner", "tools")
+    saved = {k: v for k, v in sys.modules.items() if k in wanted}
     for k in saved:
         del sys.modules[k]
     try:
-        registry_spec = importlib.util.spec_from_file_location("registry", ROOT / "registry.py")
-        registry = importlib.util.module_from_spec(registry_spec)
-        sys.modules["registry"] = registry
-        registry_spec.loader.exec_module(registry)
+        for dependency in ("registry", "runner"):
+            spec = importlib.util.spec_from_file_location(dependency, ROOT / f"{dependency}.py")
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[dependency] = module
+            spec.loader.exec_module(module)
         tools_spec = importlib.util.spec_from_file_location(
             "tools", ROOT / "tools" / "__init__.py", submodule_search_locations=[]
         )
@@ -128,8 +132,8 @@ def test_tools_package_imports_on_the_degenerate_top_level_path():
         sys.modules["tools"] = tools
         tools_spec.loader.exec_module(tools)
         assert callable(tools.handler_for)
-        assert tools.ToolSpec is registry.ToolSpec
+        assert tools.ToolSpec is sys.modules["registry"].ToolSpec
     finally:
-        for k in ("tools", "registry"):
+        for k in wanted:
             sys.modules.pop(k, None)
         sys.modules.update(saved)

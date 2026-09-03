@@ -43,6 +43,8 @@ def load_plugin_module() -> types.ModuleType:
         REPO_ROOT / "__init__.py",
         submodule_search_locations=[str(REPO_ROOT)],
     )
+    if spec is None or spec.loader is None:
+        raise RuntimeError("cannot build the plugin module spec for the parity run")
     module = importlib.util.module_from_spec(spec)
     module.__package__ = MODULE_NAME
     module.__path__ = [str(REPO_ROOT)]

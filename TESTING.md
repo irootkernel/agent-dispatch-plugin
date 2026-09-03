@@ -12,7 +12,7 @@ blocking contract defect.
 
 ```bash
 make test           # aggregate: prepare, unit, integration, e2e in order, fail-fast
-make test-prepare   # format, lint, byte-compilation, contracts gate, parity gate
+make test-prepare   # format, lint, type checking, byte-compilation, contracts gate, parity gate
 make test-unit      # uv run pytest tests/unit
 make test-int       # uv run pytest tests/integration
 make test-e2e       # uv run pytest tests/e2e
@@ -24,16 +24,18 @@ The aggregate calls each stage handler exactly once through recursive
 ## Stage Mapping
 
 - `test-prepare`: `ruff format` (meaning-preserving formatting) over the
-  Python sources, `ruff check` (static analysis), `python -m compileall`
+  Python sources, `ruff check` (static analysis), `mypy` (type checking over
+  the runtime modules), `python -m compileall`
   (byte-compilation), then the two deterministic offline gates:
   `contracts/validate.py` (frozen contract oracle) and
   `scripts/manifest_parity.py` (manifest/registry/inventory parity through
   the real registration path).
 - `test-unit`: `tests/unit` — one logical unit per test module:
   the registry derivation from the frozen catalog (`test_registry.py`), the
-  model-facing schema layer (`test_schemas.py`), and the fail-closed
-  skeleton handlers validated against the frozen wrapper and error schemas
-  (`test_tools.py`).
+  model-facing schema layer (`test_schemas.py`), the fail-closed handlers
+  validated against the frozen wrapper and error schemas
+  (`test_tools.py`), and the runner trust gate with deterministic fake
+  Agent Dispatch executables (`test_runner.py`).
 - `test-int`: `tests/integration` — cross-module cooperation: registering
   the plugin through the Hermes-style directory loader, and running the two
   repository gates as subprocesses.
@@ -75,10 +77,14 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
 - Static analysis: `ruff check` (pinned `ruff==0.14.7`).
 - Byte-compilation: `python -m compileall`.
 - Runtime/race diagnostics: not applicable — Python has no native race
-  detector; concurrency diagnostics are not warranted for this
-  registration-inert skeleton (no threads, no subprocesses in the plugin).
-- Type checking: no type checker is established yet; the runner work in
-  EPIC-002 will select one when typed execution code exists.
+  detector; the runner uses threads only for bounded concurrent stream
+  draining, which the execution tests exercise deterministically.
+- Type checking: `mypy` (pinned `mypy==2.3.1` with the matching
+  `types-jsonschema` and `types-pyyaml` stubs) over the runtime modules.
+  The repository root is a hyphen-named Hermes plugin package, so the
+  static view mirrors the degenerate top-level import path
+  (`explicit_package_bases` in `pyproject.toml`); the root registration
+  shim and the pytest tree remain under ruff and the executed suites.
 
 ## Legacy Waivers
 

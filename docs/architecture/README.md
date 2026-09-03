@@ -26,11 +26,16 @@ and calls `register(ctx)`.
   the expected inventory. Every downstream view derives from it (ADR-001).
 - `schemas.py` serves the frozen input schemas and descriptions to Hermes;
   it composes nothing of its own.
-- `tools/__init__.py` builds the skeleton handlers: every tool fails closed
-  with the frozen `binary_unavailable` error and the availability check hides
-  the toolset until the EPIC-002 runner exists.
-- `runner.py` is the reserved sole process-execution boundary; nothing calls
-  it in the skeleton.
+- `tools/__init__.py` builds the handlers over the runner trust gate: the
+  availability check exposes the toolset only when the configured
+  executable, trusted configuration, and version verify (ADR-004), and
+  every invocation fails closed with a frozen closed error until the
+  bounded execution path lands later in EPIC-002.
+- `runner.py` is the sole process boundary. Its trust gate resolves the
+  immutable plugin configuration and verifies the platform, both trusted
+  paths, the executable SHA-256, and the supported Agent Dispatch version
+  (ADR-004); the bounded process-group execution and envelope validation
+  arrive with the remaining EPIC-002 tasks.
 - `plugin.yaml` is generated and verified by `scripts/manifest_parity.py`,
   which also proves catalog, manifest, registration, and expected-inventory
   parity for exactly ten tools by driving the real registration path.

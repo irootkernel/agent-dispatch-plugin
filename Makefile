@@ -11,6 +11,7 @@ test:
 test-prepare:
 	uv run ruff format $(PY_SOURCES)
 	uv run ruff check $(PY_SOURCES)
+	uv run mypy
 	uv run python -m compileall -q $(PY_SOURCES)
 	uv run contracts/validate.py
 	uv run scripts/manifest_parity.py

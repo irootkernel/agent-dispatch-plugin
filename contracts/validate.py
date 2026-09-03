@@ -224,7 +224,7 @@ def check_catalog(catalog: dict) -> None:
         if unbound:
             fail(f"{tool_name}: schema properties not bound by any action: {sorted(unbound)}")
 
-    flat_denied_hits = []
+    flat_denied_hits: list[str] = []
     for tool in catalog["tools"]:
         for action in tool["actions"]:
             argv = resolve_argv(action, {})

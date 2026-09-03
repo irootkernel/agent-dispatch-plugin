@@ -5,13 +5,17 @@ package-relatively, so they load correctly only under a parent namespace
 package. The ``plugin`` fixture reproduces that import path for every test
 layer. ``broken_catalog`` mutates the frozen catalog, points the registry at
 the copy, and clears the caches as one atomic step so no test depends on the
-caching call order.
+caching call order. ``HermesCtxStub`` and ``make_fake_binary`` back the
+runner trust tests with a bounded config double and deterministic fake
+Agent Dispatch executables.
 """
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
+import shlex
 import sys
 import types
 from pathlib import Path
@@ -21,6 +25,50 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 PLUGIN_MODULE = "hermes_plugins.agent_dispatch_plugin"
+
+
+class HermesCtxStub:
+    """Bounded Hermes plugin-context double exposing only get_config."""
+
+    def __init__(self, settings: dict[str, Any] | None = None) -> None:
+        self._settings: dict[str, Any] = dict(settings or {})
+
+    def get_config(self, key: str, default: Any = None) -> Any:
+        return self._settings.get(key, default)
+
+
+def make_fake_binary(
+    directory: Path, version: str = "v0.1.6", body: str | None = None
+) -> dict[str, Any]:
+    """Build a trusted-looking fake Agent Dispatch executable with config.
+
+    Returns the binary path, the trusted config file path, the matching
+    lowercase SHA-256 digest, and the resolved five-setting plugin config.
+    The default body answers the ``version --json`` probe; a custom body
+    replaces the whole script for negative probes.
+    """
+    trusted = directory / "trusted"
+    trusted.mkdir(parents=True, exist_ok=True)
+    binary = trusted / "agent-dispatch"
+    if body is None:
+        payload = json.dumps({"name": "agent-dispatch", "version": version})
+        body = f"#!/bin/sh\nprintf '%s' {shlex.quote(payload)}\n"
+    binary.write_text(body, encoding="utf-8")
+    binary.chmod(0o755)
+    config_file = trusted / "agent-dispatch.json"
+    config_file.write_text("{}\n", encoding="utf-8")
+    digest = hashlib.sha256(binary.read_bytes()).hexdigest()
+    config = {
+        "binary_path": str(binary),
+        "binary_sha256": digest,
+        "config_path": str(config_file),
+    }
+    return {
+        "binary": binary,
+        "config_file": config_file,
+        "digest": digest,
+        "config": config,
+    }
 
 
 def load_plugin(module_name: str = PLUGIN_MODULE) -> types.ModuleType:
@@ -96,3 +144,15 @@ def fresh_plugin_with_unreadable_schemas(monkeypatch):
     yield module
     module.registry.load_catalog.cache_clear()
     module.registry.tool_specs.cache_clear()
+
+
+@pytest.fixture
+def unconfigured_ctx():
+    """A Hermes context whose plugin settings are entirely absent."""
+    return HermesCtxStub()
+
+
+@pytest.fixture
+def fake_agent_dispatch(tmp_path):
+    """A default in-range fake Agent Dispatch installation under tmp_path."""
+    return make_fake_binary(tmp_path)

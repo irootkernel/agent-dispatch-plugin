@@ -13,8 +13,12 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 
 
 class RecordingContext:
-    def __init__(self) -> None:
+    def __init__(self, settings: dict | None = None) -> None:
         self.registered: dict[str, dict] = {}
+        self._settings: dict = dict(settings or {})
+
+    def get_config(self, key: str, default=None):
+        return self._settings.get(key, default)
 
     def register_tool(self, **kwargs) -> None:
         name = kwargs["name"]
@@ -37,6 +41,25 @@ def test_registration_through_the_hermes_style_loader_registers_ten_tools():
         assert callable(kwargs["check_fn"])
         assert kwargs["description"].strip()
         assert not kwargs.get("override")
+
+
+def test_registered_availability_and_handlers_route_through_the_trust_gate(tmp_path):
+    """Registration wires every tool to the shared runner trust gate."""
+    from conftest import make_fake_binary
+
+    module = load_plugin("hermes_plugins.agent_dispatch_plugin_trust")
+    installation = make_fake_binary(tmp_path)
+    hidden_ctx = RecordingContext()
+    module.register(hidden_ctx)
+    assert all(kwargs["check_fn"]() is False for kwargs in hidden_ctx.registered.values())
+    assert all(
+        kwargs["handler"](action="list")["error"]["code"] == "binary_unavailable"
+        for kwargs in hidden_ctx.registered.values()
+    )
+
+    exposed_ctx = RecordingContext(installation["config"])
+    module.register(exposed_ctx)
+    assert all(kwargs["check_fn"]() is True for kwargs in exposed_ctx.registered.values())
 
 
 def test_contracts_validation_gate_runs_green():

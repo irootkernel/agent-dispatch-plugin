@@ -3,9 +3,11 @@
 register(ctx) is the Hermes entrypoint. It derives the complete tool surface
 from the frozen contract source through the declarative registry and
 registers each tool under the dynamic agent_dispatch toolset with an
-availability check that keeps the toolset hidden until the EPIC-002 runner
-exists. Registration performs no network, database, migration, or Agent
-Dispatch state activity; the only I/O is reading the frozen contract files.
+availability check that exposes the toolset only when the EPIC-002 runner
+trust gate verifies the configured executable, trusted configuration, and
+supported version. Registration performs no network, database, migration,
+or Agent Dispatch state activity; the only I/O is reading the frozen
+contract files.
 """
 
 from __future__ import annotations
@@ -41,7 +43,7 @@ def register(ctx: Any) -> None:
             name=spec.name,
             toolset=registry.toolset(),
             schema=schemas.input_schema(spec),
-            handler=tool_handlers.handler_for(spec),
-            check_fn=tool_handlers.availability_check,
+            handler=tool_handlers.handler_for(spec, ctx),
+            check_fn=tool_handlers.make_availability_check(ctx),
             description=schemas.describe(spec),
         )

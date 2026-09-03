@@ -8,9 +8,11 @@ independent authority).
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-if "." in __package__:  # Normal path: imported as a plugin package module.
+if TYPE_CHECKING:  # The static view matches the degenerate top-level import.
+    from registry import ContractSourceError, ToolSpec, load_catalog
+elif "." in __package__:  # Normal path: imported as a plugin package module.
     from .registry import ContractSourceError, ToolSpec, load_catalog
 else:  # Degenerate top-level import of the plugin root file.
     from registry import ContractSourceError, ToolSpec, load_catalog
