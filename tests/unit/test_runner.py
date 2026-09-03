@@ -249,6 +249,25 @@ def test_version_probe_that_closes_stdout_and_hangs_still_meets_the_deadline(run
     assert excinfo.value.code == runner.BINARY_UNAVAILABLE
 
 
+@pytest.mark.parametrize(
+    ("setting", "value"),
+    [
+        ("timeout_seconds", 1),
+        ("timeout_seconds", 300),
+        ("max_output_bytes", 1),
+        ("max_output_bytes", 1048576),
+    ],
+)
+def test_trust_gate_accepts_the_frozen_boundary_values(
+    runner, fake_agent_dispatch, setting, value
+):
+    """The inclusive bounds themselves are accepted, not only their
+    rejection beyond the edges."""
+    config = {**fake_agent_dispatch["config"], setting: value}
+    trust = runner.resolve_trust(config)
+    assert getattr(trust, setting) == value
+
+
 def test_configured_bounds_are_honored(runner, fake_agent_dispatch):
     config = {**fake_agent_dispatch["config"], "timeout_seconds": 5, "max_output_bytes": 4096}
     trust = runner.resolve_trust(config)
