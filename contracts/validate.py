@@ -262,6 +262,20 @@ def check_catalog(catalog: dict) -> None:
         if compatibility.get(key) != expected:
             fail(f"catalog: compatibility.{key} mismatch")
 
+    schema_enums: dict[str, list] = {}
+    for tool in catalog["tools"]:
+        schema = json.loads((VERSION_DIR / tool["input_schema"]).read_text(encoding="utf-8"))
+        short = tool["name"].removeprefix("agent_dispatch_")
+        for prop, spec in schema.get("properties", {}).items():
+            if "enum" in spec:
+                schema_enums.setdefault(f"{short}.{prop}", []).append(spec["enum"])
+    for enum_key, declared in catalog["closed_enums"].items():
+        holders = schema_enums.get(enum_key)
+        if not holders:
+            fail(f"catalog closed_enums.{enum_key} matches no schema property enum")
+        elif len(holders) != 1 or holders[0] != declared:
+            fail(f"catalog closed_enums.{enum_key} does not match exactly one schema enum")
+
     schema_properties: dict[str, set[str]] = {}
     for tool in catalog["tools"]:
         schema = json.loads((VERSION_DIR / tool["input_schema"]).read_text(encoding="utf-8"))
@@ -433,6 +447,8 @@ def check_fixtures(registry: Registry, catalog: dict) -> None:
 
     # every plugin error code is exercised by a valid error fixture
     error_cases = load_json(VERSION_DIR / "fixtures" / "error.cases.json")
+    if error_cases is None:
+        return  # the load failure is already recorded
     covered = {
         c["instance"]["code"]
         for c in error_cases["cases"]
