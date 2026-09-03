@@ -221,6 +221,70 @@ def test_configured_ceiling_tightens_the_stream_cap(plugin, runner, tmp_path):
     assert result["error"]["code"] == "output_too_large"
 
 
+def test_stdout_exactly_at_the_ceiling_is_not_an_overflow(plugin, runner, tmp_path):
+    """The frozen ceilings are inclusive: exactly 1048576 stdout bytes pass
+    the ceiling check (the flood is then rejected as malformed output, not
+    as an overflow), while one byte more is output_too_large."""
+    for name, extra, expected in (
+        ("at-cap", 0, "malformed_json"),
+        ("over-cap", 1, "output_too_large"),
+    ):
+        installation = make_fake_binary(
+            tmp_path / name, behavior={"kind": "flood_exit", "bytes": 1048576 + extra}
+        )
+        config = {**installation["config"], "timeout_seconds": 10}
+        action = _action(plugin, "agent_dispatch_status", "inspect")
+        result = runner.run_inspection(action, "agent_dispatch_status", {}, config)
+        assert result["error"]["code"] == expected, name
+
+
+def test_stderr_exactly_at_the_ceiling_is_not_an_overflow(plugin, runner, tmp_path):
+    """Exactly 65536 stderr bytes (one line of 65535 plus its newline) stay
+    inside the frozen per-stream ceiling; 65537 bytes overflow it."""
+    for name, line_length, expected in (
+        ("at-cap", 65535, "malformed_json"),
+        ("over-cap", 65536, "output_too_large"),
+    ):
+        installation = make_fake_binary(
+            tmp_path / name,
+            behavior={
+                "kind": "raw",
+                "stdout": "not json\n",
+                "stderr_lines": ["y" * line_length],
+                "exit": 0,
+            },
+        )
+        config = {**installation["config"], "timeout_seconds": 10}
+        action = _action(plugin, "agent_dispatch_status", "inspect")
+        result = runner.run_inspection(action, "agent_dispatch_status", {}, config)
+        assert result["error"]["code"] == expected, name
+
+
+def test_combined_streams_exactly_at_the_ceiling_is_not_an_overflow(
+    plugin, runner, tmp_path
+):
+    """stdout 988576 plus stderr 60000 is exactly the 1048576 combined
+    ceiling and stays inside; one more stdout byte overflows the combined
+    bound while each stream stays under its own cap."""
+    for name, stdout_bytes, expected in (
+        ("at-cap", 988576, "malformed_json"),
+        ("over-cap", 988577, "output_too_large"),
+    ):
+        installation = make_fake_binary(
+            tmp_path / name,
+            behavior={
+                "kind": "raw",
+                "stdout": "x" * stdout_bytes,
+                "stderr_lines": ["y" * 59999],
+                "exit": 0,
+            },
+        )
+        config = {**installation["config"], "timeout_seconds": 10}
+        action = _action(plugin, "agent_dispatch_status", "inspect")
+        result = runner.run_inspection(action, "agent_dispatch_status", {}, config)
+        assert result["error"]["code"] == expected, name
+
+
 def test_term_to_force_kill_kills_the_whole_process_group(plugin, runner, tmp_path):
     child_pid_file = tmp_path / "child.pid"
     installation = make_fake_binary(
