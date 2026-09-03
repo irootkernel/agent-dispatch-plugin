@@ -94,9 +94,25 @@ _PYTHON3_SHIM_INJECTED = {
 }
 
 
+def _raw_echo(plugin, runner, installation):
+    """Run the echo fake through the executor and return its parsed result."""
+    trust = runner.resolve_trust(installation["config"])
+    argv = (
+        os.fspath(trust.binary_path),
+        "status",
+        "--output",
+        "json",
+        "--config",
+        os.fspath(trust.config_path),
+    )
+    outcome = runner._execute_bounded(argv, trust)
+    assert outcome.timed_out is False and outcome.overflowed is False
+    return json.loads(outcome.stdout)["result"]
+
+
 def test_environment_is_the_fixed_minimal_allowlist(plugin, runner, fake_agent_dispatch):
-    result = _run(plugin, runner, "agent_dispatch_status", "inspect", fake_agent_dispatch)
-    child_env = result["agent_dispatch"]["result"]["env"]
+    raw = _raw_echo(plugin, runner, fake_agent_dispatch)
+    child_env = raw["env"]
     leaked = {
         key: value
         for key, value in child_env.items()
@@ -108,8 +124,17 @@ def test_environment_is_the_fixed_minimal_allowlist(plugin, runner, fake_agent_d
 
 
 def test_working_directory_is_neutral_and_trusted(plugin, runner, fake_agent_dispatch):
+    raw = _raw_echo(plugin, runner, fake_agent_dispatch)
+    assert Path(raw["cwd"]) == runner.NEUTRAL_CWD
+
+
+def test_the_public_wrapper_redacts_echoed_absolute_paths(plugin, runner, fake_agent_dispatch):
+    """Defense in depth: the echoed environment and cwd never survive the
+    output boundary verbatim."""
     result = _run(plugin, runner, "agent_dispatch_status", "inspect", fake_agent_dispatch)
-    assert Path(result["agent_dispatch"]["result"]["cwd"]) == runner.NEUTRAL_CWD
+    dumped = json.dumps(result)
+    assert str(runner.NEUTRAL_CWD) not in dumped
+    assert "/tmp" not in dumped
 
 
 def test_model_inputs_never_reach_execution_settings(plugin, runner, fake_agent_dispatch):

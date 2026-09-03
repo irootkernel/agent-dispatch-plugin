@@ -72,9 +72,16 @@ KIND = SPEC.get("kind", "echo")
 
 
 def envelope(ok=True, result=None):
+    args = list(ARGS)
+    if args[-2:-1] == ["--config"]:
+        args = args[:-2]
+    if args[-2:] == ["--output", "json"]:
+        args = args[:-2]
+    words = [token for token in args if not token.startswith("-")]
+    command = SPEC.get("command") or " ".join(words[:2])
     payload = {
         "api_version": "agent-dispatch.cli/v1",
-        "command": "inspection",
+        "command": command,
         "ok": ok,
         "result": result if result is not None else {},
         "warnings": [],
@@ -136,6 +143,15 @@ elif KIND == "count":
     with open(SPEC["count_file"], "a", encoding="utf-8") as handle:
         handle.write("invoked\\n")
     envelope()
+elif KIND == "raw":
+    for line in SPEC.get("stderr_lines", []):
+        sys.stderr.write(line + "\\n")
+    sys.stderr.flush()
+    if "envelope" in SPEC:
+        print(json.dumps(SPEC["envelope"]))
+    else:
+        sys.stdout.write(SPEC.get("stdout", "not json\\n"))
+    raise SystemExit(int(SPEC.get("exit", 0)))
 else:
     envelope()
 raise SystemExit(0)

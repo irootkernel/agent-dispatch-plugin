@@ -9,8 +9,11 @@ argv in a fresh process group with a neutral working directory, a minimal
 environment allowlist, closed extra descriptors, and concurrent bounded
 draining of both streams; the deadline and the byte ceilings terminate the
 whole process group through the TERM-then-force-kill ladder and discard
-every captured byte. Failures map onto the frozen closed error set and
-never raise into Hermes.
+every captured byte. Completed output is validated against the frozen
+closed envelope boundary with command identity and exit consistency, every
+string is redacted under the five frozen rules, and diagnostics stay
+bounded. Failures map onto the frozen closed error set and never raise
+into Hermes.
 
 Every limit and compatibility constant is derived from the frozen catalog
 (ADR-001); nothing here hand-edits a derived view of the command surface.
@@ -34,10 +37,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
 if TYPE_CHECKING:  # The static view matches the degenerate top-level import.
+    import envelopes
     from registry import ActionSpec, PLUGIN_ROOT, load_catalog
 elif "." in __package__:  # Normal path: imported as a plugin package module.
+    from . import envelopes
     from .registry import ActionSpec, PLUGIN_ROOT, load_catalog
 else:  # Degenerate top-level import of the plugin root file.
+    import envelopes
     from registry import ActionSpec, PLUGIN_ROOT, load_catalog
 
 RESULT_SCHEMA_VERSION = "agent-dispatch-plugin.result/v1"
@@ -48,8 +54,10 @@ INVALID_ARGUMENT = "invalid_argument"
 TIMEOUT = "timeout"
 OUTPUT_TOO_LARGE = "output_too_large"
 MALFORMED_JSON = "malformed_json"
+CONTRACT_MISMATCH = "contract_mismatch"
 ADAPTER_USAGE_ERROR = "adapter_usage_error"
 EXECUTION_FAILED = "execution_failed"
+REDACTION_FAILURE = "redaction_failure"
 
 NOT_CONFIGURED_MESSAGE = (
     "No Agent Dispatch executable is configured; inspection requires "
@@ -420,62 +428,100 @@ def run_inspection(
             ],
         }
 
-    return _map_completed_process(operation, outcome)
+    return _map_completed_process(operation, outcome, spec, trust)
 
 
-def _map_completed_process(operation: str, outcome: _Outcome) -> dict[str, Any]:
+def _map_completed_process(
+    operation: str, outcome: _Outcome, spec: ActionSpec, trust: RunnerTrust
+) -> dict[str, Any]:
     """Map one completed process onto the closed wrapper shape.
 
-    Closed structural envelope validation and diagnostic redaction arrive
-    with the remaining EPIC-002 task; this mapping already fails closed on
-    anything that is not one JSON envelope object on stdout.
+    The envelope is validated against the frozen closed boundary with the
+    action's expected command identity, every string inside it is redacted
+    under the five frozen rules, and diagnostics are bounded and redacted;
+    a failure inside the redaction pipeline itself closes as
+    redaction_failure.
     """
-    try:
-        envelope = json.loads(outcome.stdout.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError):
-        return closed_error_result(
-            operation,
-            MALFORMED_JSON,
-            "the Agent Dispatch output was not one parseable JSON envelope on stdout",
-            exit_code=outcome.exit_code if outcome.exit_code is not None else -1,
-        )
-    if not isinstance(envelope, dict):
-        return closed_error_result(
-            operation,
-            MALFORMED_JSON,
-            "the Agent Dispatch output was not one JSON envelope object",
-            exit_code=outcome.exit_code if outcome.exit_code is not None else -1,
-        )
-    if envelope.get("api_version") != "agent-dispatch.cli/v1":
-        return closed_error_result(
-            operation,
-            MALFORMED_JSON,
-            "the Agent Dispatch envelope carries an unknown protocol version",
-            exit_code=outcome.exit_code if outcome.exit_code is not None else -1,
-        )
-    if envelope.get("command") is None:
-        return closed_error_result(
-            operation,
-            MALFORMED_JSON,
-            "the Agent Dispatch envelope carries no command identity",
-            exit_code=outcome.exit_code if outcome.exit_code is not None else -1,
-        )
-    if not isinstance(envelope.get("ok"), bool):
-        return closed_error_result(
-            operation,
-            MALFORMED_JSON,
-            "the Agent Dispatch envelope carries no boolean ok member",
-            exit_code=outcome.exit_code if outcome.exit_code is not None else -1,
-        )
     exit_code = outcome.exit_code if outcome.exit_code is not None else -1
+    try:
+        parsed = json.loads(outcome.stdout.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return _malformed_with_stderr_tail(
+            operation, exit_code, outcome, trust, "stdout was not parseable JSON"
+        )
+    try:
+        envelope = envelopes.validate_envelope(parsed, spec.expected_command)
+        if envelope["ok"] and exit_code != 0:
+            raise envelopes.EnvelopeViolation(
+                CONTRACT_MISMATCH,
+                "the envelope reports success while the process exited with a failure status",
+            )
+        redacted, changed = envelopes.redact_envelope(envelope, _display_policy_paths(trust))
+    except envelopes.EnvelopeViolation as violation:
+        return _malformed_with_stderr_tail(
+            operation, exit_code, outcome, trust, violation.message, violation.code
+        )
+    except Exception:
+        return closed_error_result(
+            operation,
+            REDACTION_FAILURE,
+            "the redaction pipeline failed; the inspection output was discarded",
+            exit_code=exit_code,
+        )
+
+    diagnostics: list[str] = []
+    if changed:
+        diagnostics.append(
+            "upstream output contained redactable content; sensitive strings "
+            "were removed before returning the envelope"
+        )
     return {
         "schema_version": RESULT_SCHEMA_VERSION,
         "ok": envelope["ok"],
         "operation": operation,
         "exit_code": exit_code,
-        "agent_dispatch": envelope,
-        "diagnostics": [],
+        "agent_dispatch": redacted,
+        "diagnostics": diagnostics,
     }
+
+
+def _malformed_with_stderr_tail(
+    operation: str,
+    exit_code: int,
+    outcome: _Outcome,
+    trust: RunnerTrust,
+    reason: str,
+    code: str = MALFORMED_JSON,
+) -> dict[str, Any]:
+    """Fail closed with a bounded, redacted stderr tail as diagnostics.
+
+    Stderr never enters results raw; only bounded redacted lines from its
+    tail are surfaced, and only when no validated envelope exists.
+    """
+    try:
+        tail = outcome.stderr.decode("utf-8", errors="replace").splitlines()[-16:]
+        diagnostics = envelopes.redact_diagnostics(tail, _display_policy_paths(trust))
+    except Exception:
+        return closed_error_result(
+            operation, REDACTION_FAILURE, "the redaction pipeline failed", exit_code=-1
+        )
+    return {
+        "schema_version": RESULT_SCHEMA_VERSION,
+        "ok": False,
+        "operation": operation,
+        "exit_code": exit_code,
+        "error": {
+            "code": code,
+            "message": f"the Agent Dispatch output was rejected: {reason}",
+            "retryable": False,
+        },
+        "diagnostics": diagnostics,
+    }
+
+
+def _display_policy_paths(trust: RunnerTrust) -> tuple[str, ...]:
+    """The absolute paths the display policy allows to appear verbatim."""
+    return (os.fspath(trust.binary_path), os.fspath(trust.config_path))
 
 
 @dataclass
@@ -497,6 +543,7 @@ class _Outcome:
     overflowed: bool
     exit_code: int | None
     stdout: bytes
+    stderr: bytes = b""
 
 
 def _drain_stream(stream: Any, cap: int, state: _DrainState, sink: list[bytes]) -> None:
@@ -616,4 +663,10 @@ def _execute_bounded(argv: tuple[str, ...], trust: RunnerTrust) -> _Outcome:
     exit_code = process.returncode
     if timed_out or overflowed:
         return _Outcome(timed_out=timed_out, overflowed=overflowed, exit_code=exit_code, stdout=b"")
-    return _Outcome(timed_out=False, overflowed=False, exit_code=exit_code, stdout=stdout_sink[0])
+    return _Outcome(
+        timed_out=False,
+        overflowed=False,
+        exit_code=exit_code,
+        stdout=stdout_sink[0],
+        stderr=stderr_sink[0],
+    )

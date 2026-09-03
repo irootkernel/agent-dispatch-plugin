@@ -1,4 +1,4 @@
-PY_SOURCES := registry.py schemas.py runner.py __init__.py tools contracts/validate.py scripts tests
+PY_SOURCES := registry.py schemas.py envelopes.py runner.py __init__.py tools contracts/validate.py scripts tests
 
 .PHONY: test test-prepare test-unit test-int test-e2e
 

@@ -39,6 +39,7 @@ explicit_package_bases = true
 files = [
     "registry.py",
     "schemas.py",
+    "envelopes.py",
     "runner.py",
     "tools",
     "contracts/validate.py",

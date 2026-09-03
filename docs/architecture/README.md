@@ -38,8 +38,11 @@ and calls `register(ctx)`.
   process group with a neutral working directory, a minimal environment
   allowlist, closed extra descriptors, and concurrent bounded stream
   draining, terminating the whole group on deadline or overflow with no
-  retry (ADR-005). Closed envelope validation and diagnostic redaction
-  arrive with the remaining EPIC-002 task.
+  retry (ADR-005).
+- `envelopes.py` owns the closed output boundary: the frozen-envelope
+  validation with command identity and exit consistency, the closed
+  wrapper carrier rule, bounded diagnostics, and the five frozen
+  redaction rules with the redaction_failure guard (ADR-006).
 - `plugin.yaml` is generated and verified by `scripts/manifest_parity.py`,
   which also proves catalog, manifest, registration, and expected-inventory
   parity for exactly ten tools by driving the real registration path.
