@@ -39,25 +39,28 @@ def test_every_handler_result_validates_against_the_frozen_wrapper(plugin, uncon
 
 
 def test_every_handler_fails_closed_with_the_frozen_error_contract(plugin, unconfigured_ctx):
+    """Without operator configuration every registered action fails closed."""
     error_validator = _validators()["error"]
     for spec in plugin.registry.tool_specs():
-        result = plugin.tools.handler_for(spec, unconfigured_ctx)(action="list", route_id="../evil")
-        assert result["ok"] is False
-        assert result["exit_code"] == -1
-        assert result["operation"] == spec.name
-        error_validator.validate(result["error"])
-        assert result["error"]["code"] == "binary_unavailable"
-        assert result["error"]["retryable"] is False
+        for action in spec.actions:
+            params = {"action": action.input_action_value} if action.input_action_value else {}
+            result = plugin.tools.handler_for(spec, unconfigured_ctx)(**params)
+            assert result["ok"] is False
+            assert result["exit_code"] == -1
+            assert result["operation"] == spec.name
+            error_validator.validate(result["error"])
+            assert result["error"]["code"] == "binary_unavailable"
+            assert result["error"]["retryable"] is False
 
 
 def test_handlers_never_reflect_caller_arguments(plugin, unconfigured_ctx):
-    message = plugin.runner.NOT_CONFIGURED_MESSAGE
     for spec in plugin.registry.tool_specs():
         result = plugin.tools.handler_for(spec, unconfigured_ctx)(
-            anything="ignored", flags=["--evil"]
+            anything="ignored", flags=["--evil"], binary="/bin/sh", cwd="/tmp"
         )
         assert result["diagnostics"] == []
-        assert result["error"]["message"] == message
+        dumped = json.dumps(result)
+        assert "ignored" not in dumped and "--evil" not in dumped and "/bin/sh" not in dumped
 
 
 def test_wrapper_and_error_fixture_cases_behave_as_labeled():
@@ -74,16 +77,6 @@ def test_wrapper_and_error_fixture_cases_behave_as_labeled():
                 assert not errors, (case["id"], errors[0].message)
             else:
                 assert errors, case["id"]
-
-
-def test_runner_boundary_stays_fail_closed(plugin):
-    """The reserved process-execution entrypoint raises until TASK-005."""
-    import importlib
-
-    runner = importlib.import_module(plugin.__name__ + ".runner")
-    action = plugin.registry.tool_specs()[0].actions[0]
-    with pytest.raises(RuntimeError, match="EPIC-002"):
-        runner.run_inspection(action, {}, {})
 
 
 @pytest.mark.parametrize(

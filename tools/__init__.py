@@ -1,13 +1,12 @@
-"""Tool handlers over the EPIC-002 runner trust gate.
+"""Tool handlers over the EPIC-002 runner boundary.
 
 Every declared tool registers one handler here. Handlers never create a
 process themselves and never touch the network, a database, or Agent
 Dispatch state: they resolve the immutable plugin configuration through the
-Hermes config API and hand it to the runner trust gate, which owns every
-trust failure as a closed contract error. While the bounded execution path
-is still being delivered by EPIC-002, a trusted configuration also fails
-closed with the frozen execution error; the availability check exposes the
-toolset only when the real binary, configuration, and version checks pass.
+Hermes config API, select the registered action for the validated request,
+and delegate to the sole process boundary in runner.run_inspection. Every
+failure — trust, unknown action, or bounded execution — comes back as one
+closed fail-closed wrapper result; nothing raises into Hermes.
 """
 
 from __future__ import annotations
@@ -16,13 +15,13 @@ from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:  # The static view matches the degenerate top-level import.
     import runner
-    from registry import ToolSpec
+    from registry import ActionSpec, ToolSpec
 elif "." in __package__:  # Normal path: imported as a namespaced plugin submodule.
     from .. import runner
-    from ..registry import ToolSpec
+    from ..registry import ActionSpec, ToolSpec
 else:  # Degenerate top-level import of the plugin root file.
     import runner
-    from registry import ToolSpec
+    from registry import ActionSpec, ToolSpec
 
 RESULT_SCHEMA_VERSION = "agent-dispatch-plugin.result/v1"
 
@@ -34,11 +33,6 @@ _SETTING_KEYS = (
     "config_path",
     "timeout_seconds",
     "max_output_bytes",
-)
-
-_EXECUTION_PENDING_MESSAGE = (
-    "The runner trust gate passed, but the bounded inspection path is not "
-    "wired yet; no process was created."
 )
 
 
@@ -70,18 +64,35 @@ def make_availability_check(ctx: Any) -> Callable[[], bool]:
     return check
 
 
+def resolve_action(spec: ToolSpec, params: dict[str, Any]) -> ActionSpec | None:
+    """Select the one registered action a validated request maps to.
+
+    Multi-action tools match their frozen action value; a single-action tool
+    with no action parameter accepts exactly its one registered action.
+    """
+    requested = params.get("action")
+    for action in spec.actions:
+        if action.input_action_value is not None:
+            if action.input_action_value == requested:
+                return action
+        elif len(spec.actions) == 1:
+            return action
+    return None
+
+
 def handler_for(spec: ToolSpec, ctx: Any) -> Callable[..., dict[str, Any]]:
     """Build the closed fail-closed handler for one declared tool."""
 
-    def handler(**_kwargs: Any) -> dict[str, Any]:
-        try:
-            runner.resolve_trust(runner_config(ctx))
-        except runner.TrustFailure as failure:
-            return runner.trust_failure_result(spec.name, failure)
-        return runner.closed_error_result(
-            spec.name, runner.EXECUTION_FAILED, _EXECUTION_PENDING_MESSAGE
-        )
+    def handler(**kwargs: Any) -> dict[str, Any]:
+        action = resolve_action(spec, kwargs)
+        if action is None:
+            return runner.closed_error_result(
+                spec.name,
+                runner.INVALID_ARGUMENT,
+                f"{spec.name}: the request does not map to one registered action",
+            )
+        return runner.run_inspection(action, spec.name, kwargs, runner_config(ctx))
 
     handler.__name__ = f"{spec.name}_handler"
-    handler.__doc__ = f"Fail-closed handler for {spec.name} over the runner trust gate."
+    handler.__doc__ = f"Fail-closed handler for {spec.name} over the runner boundary."
     return handler

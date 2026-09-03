@@ -15,7 +15,6 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
-import shlex
 import sys
 import types
 from pathlib import Path
@@ -37,26 +36,138 @@ class HermesCtxStub:
         return self._settings.get(key, default)
 
 
+# A deterministic Agent Dispatch double. It answers the trust gate's
+# `version --json` probe and then plays one scripted inspection behavior
+# chosen by the trusted config file's "behavior" object, so every execution
+# test stays offline and reproducible.
+_FAKE_BINARY_TEMPLATE = """#!/usr/bin/env python3
+import json
+import os
+import signal
+import subprocess
+import sys
+import time
+
+ARGS = sys.argv[1:]
+
+
+def behavior():
+    try:
+        if ARGS[-2:-1] == ["--config"]:
+            with open(ARGS[-1], encoding="utf-8") as handle:
+                loaded = json.load(handle)
+            if isinstance(loaded, dict):
+                return loaded.get("behavior", {})
+    except Exception:
+        pass
+    return {}
+
+
+if ARGS[:1] == ["version"]:
+    print(json.dumps({"name": "agent-dispatch", "version": "v{version}"}))
+    raise SystemExit(0)
+
+SPEC = behavior()
+KIND = SPEC.get("kind", "echo")
+
+
+def envelope(ok=True, result=None):
+    payload = {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "inspection",
+        "ok": ok,
+        "result": result if result is not None else {},
+        "warnings": [],
+        "trace_id": "",
+    }
+    if not ok:
+        payload.pop("result")
+        payload["error"] = {
+            "code": "config_invalid",
+            "category": "configuration",
+            "message": "scripted rejection",
+            "retryable": False,
+        }
+    print(json.dumps(payload))
+
+
+if KIND == "echo":
+    envelope(result={
+        "argv": list(sys.argv),
+        "env": dict(os.environ),
+        "cwd": os.getcwd(),
+    })
+elif KIND == "sleep":
+    if "count_file" in SPEC:
+        with open(SPEC["count_file"], "a", encoding="utf-8") as handle:
+            handle.write("invoked\\n")
+    sys.stdout.write(SPEC.get("prefix", ""))
+    sys.stdout.flush()
+    time.sleep(float(SPEC.get("seconds", 30)))
+elif KIND == "stdout_overflow":
+    sys.stdout.write("x" * int(SPEC["bytes"]) + "\\n")
+    sys.stdout.flush()
+    time.sleep(30)
+elif KIND == "stderr_overflow":
+    sys.stderr.write("x" * int(SPEC["bytes"]) + "\\n")
+    sys.stderr.flush()
+    time.sleep(30)
+elif KIND == "combined_overflow":
+    sys.stdout.write("o" * int(SPEC["stdout_bytes"]))
+    sys.stderr.write("e" * int(SPEC["stderr_bytes"]))
+    sys.stdout.flush()
+    sys.stderr.flush()
+    time.sleep(30)
+elif KIND == "trap":
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    child = subprocess.Popen(["/bin/sleep", "60"], start_new_session=False)
+    with open(SPEC["child_pid_file"], "w", encoding="utf-8") as handle:
+        handle.write(str(child.pid))
+    sys.stdout.write("ignoring TERM\\n")
+    sys.stdout.flush()
+    time.sleep(60)
+elif KIND == "reject":
+    envelope(ok=False)
+    raise SystemExit(int(SPEC.get("exit", 3)))
+elif KIND == "garbage":
+    sys.stdout.write("this is not json\\n")
+    raise SystemExit(0)
+elif KIND == "count":
+    with open(SPEC["count_file"], "a", encoding="utf-8") as handle:
+        handle.write("invoked\\n")
+    envelope()
+else:
+    envelope()
+raise SystemExit(0)
+"""
+
+
 def make_fake_binary(
-    directory: Path, version: str = "v0.1.6", body: str | None = None
+    directory: Path,
+    version: str = "v0.1.6",
+    body: str | None = None,
+    behavior: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build a trusted-looking fake Agent Dispatch executable with config.
 
     Returns the binary path, the trusted config file path, the matching
     lowercase SHA-256 digest, and the resolved five-setting plugin config.
-    The default body answers the ``version --json`` probe; a custom body
-    replaces the whole script for negative probes.
+    The default script answers the ``version --json`` probe and plays the
+    config-file ``behavior`` script for inspections; a custom body replaces
+    the whole script for negative probes.
     """
     trusted = directory / "trusted"
     trusted.mkdir(parents=True, exist_ok=True)
     binary = trusted / "agent-dispatch"
     if body is None:
-        payload = json.dumps({"name": "agent-dispatch", "version": version})
-        body = f"#!/bin/sh\nprintf '%s' {shlex.quote(payload)}\n"
+        body = _FAKE_BINARY_TEMPLATE.replace("{version}", version.lstrip("v"))
     binary.write_text(body, encoding="utf-8")
     binary.chmod(0o755)
     config_file = trusted / "agent-dispatch.json"
-    config_file.write_text("{}\n", encoding="utf-8")
+    config_file.write_text(
+        json.dumps({"behavior": behavior} if behavior is not None else {}),
+        encoding="utf-8",
+    )
     digest = hashlib.sha256(binary.read_bytes()).hexdigest()
     config = {
         "binary_path": str(binary),

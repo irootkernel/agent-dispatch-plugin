@@ -52,10 +52,12 @@ def test_registered_availability_and_handlers_route_through_the_trust_gate(tmp_p
     hidden_ctx = RecordingContext()
     module.register(hidden_ctx)
     assert all(kwargs["check_fn"]() is False for kwargs in hidden_ctx.registered.values())
-    assert all(
-        kwargs["handler"](action="list")["error"]["code"] == "binary_unavailable"
-        for kwargs in hidden_ctx.registered.values()
-    )
+    for name, kwargs in hidden_ctx.registered.items():
+        spec = next(s for s in module.registry.tool_specs() if s.name == name)
+        action = spec.actions[0]
+        params = {"action": action.input_action_value} if action.input_action_value else {}
+        result = kwargs["handler"](**params)
+        assert result["error"]["code"] == "binary_unavailable", name
 
     exposed_ctx = RecordingContext(installation["config"])
     module.register(exposed_ctx)

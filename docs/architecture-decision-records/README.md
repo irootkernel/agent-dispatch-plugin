@@ -13,3 +13,4 @@ Superseded, and Rejected. A superseding ADR links the record it replaces.
 | ADR-002 | Identifier grammar, state tokens, and pagination bounds | Accepted |
 | ADR-003 | Closed result boundaries and command-specific envelope identity | Accepted |
 | ADR-004 | Runner trust gate — path verification, time-of-check, and version probing | Accepted |
+| ADR-005 | Bounded process-group runner — execution environment, concurrent capture, and termination | Accepted |

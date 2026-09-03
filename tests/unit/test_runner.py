@@ -193,14 +193,18 @@ def test_handler_fails_closed_without_configuration(plugin, unconfigured_ctx):
     assert result["error"]["message"] == plugin.runner.NOT_CONFIGURED_MESSAGE
 
 
-def test_handler_fails_closed_after_a_passing_trust_gate(plugin, fake_agent_dispatch):
-    """A trusted configuration still creates no process until execution lands."""
+def test_handler_executes_through_the_boundary_after_a_passing_trust_gate(
+    plugin, fake_agent_dispatch
+):
+    """A trusted configuration runs exactly one inspection through the
+    boundary; the detailed execution behavior is proven in test_execution."""
     ctx = HermesCtxStub(fake_agent_dispatch["config"])
     spec = plugin.registry.tool_specs()[0]
-    result = plugin.tools.handler_for(spec, ctx)(action="list")
-    assert result["ok"] is False
-    assert result["error"]["code"] == plugin.runner.EXECUTION_FAILED
-    assert result["exit_code"] == -1
+    result = plugin.tools.handler_for(spec, ctx)()
+    assert result["ok"] is True
+    assert result["exit_code"] == 0
+    assert result["operation"] == spec.name
+    assert result["agent_dispatch"]["api_version"] == "agent-dispatch.cli/v1"
 
 
 def test_runner_config_reads_only_the_five_settings(plugin):

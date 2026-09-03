@@ -22,7 +22,7 @@ evidence named by the Detailed SOT, not prose assertion.
 | TASK-002 | EPIC-001 | Create the Python package, manifest, and declarative registry skeleton | Completed | Python project authority, Plugin Doctor, and registry/manifest parity evidence |
 | TASK-003 | EPIC-001 | Run $aquarium:test-setup to establish aquarium-test-contract/v1 and baseline checks | Completed | Approved test contract and reachable baseline gate |
 | TASK-004 | EPIC-002 | Implement trusted configuration, platform, binary identity, and version checks | Completed | Positive and negative dependency checks |
-| TASK-005 | EPIC-002 | Implement the bounded process-group runner | Planned | Timeout, stream limit, termination, and argv tests |
+| TASK-005 | EPIC-002 | Implement the bounded process-group runner | Completed | Timeout, stream limit, termination, and argv tests |
 | TASK-006 | EPIC-002 | Implement closed errors, diagnostics, and defense-in-depth redaction | Planned | Seeded-secret and bounded-diagnostic tests |
 | TASK-007 | EPIC-003 | Implement status and doctor tools | Planned | Schema, mapping, success, and failure evidence |
 | TASK-008 | EPIC-003 | Implement routes, schedule inspection, and config tools | Planned | Action-level positive and negative evidence |

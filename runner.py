@@ -4,14 +4,16 @@ This is the only module allowed to create a process. Before any inspection
 command runs, the trust gate resolves immutable plugin configuration and
 verifies the host platform, the absolute non-symlink executable and trusted
 configuration paths, the executable SHA-256 identity, and the supported
-Agent Dispatch version. Trust failures map onto the frozen closed error set
-and never raise into Hermes.
+Agent Dispatch version. The bounded executor then runs exactly one fixed
+argv in a fresh process group with a neutral working directory, a minimal
+environment allowlist, closed extra descriptors, and concurrent bounded
+draining of both streams; the deadline and the byte ceilings terminate the
+whole process group through the TERM-then-force-kill ladder and discard
+every captured byte. Failures map onto the frozen closed error set and
+never raise into Hermes.
 
 Every limit and compatibility constant is derived from the frozen catalog
 (ADR-001); nothing here hand-edits a derived view of the command surface.
-The bounded process-group execution and envelope validation arrive with the
-remaining EPIC-002 tasks; until then run_inspection fails closed after the
-trust gate.
 """
 
 from __future__ import annotations
@@ -21,39 +23,52 @@ import json
 import os
 import platform as platform_module
 import re
+import signal
 import subprocess
 import sys
-from dataclasses import dataclass
+import threading
+import time
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
 if TYPE_CHECKING:  # The static view matches the degenerate top-level import.
-    from registry import ActionSpec, load_catalog
+    from registry import ActionSpec, PLUGIN_ROOT, load_catalog
 elif "." in __package__:  # Normal path: imported as a plugin package module.
-    from .registry import ActionSpec, load_catalog
+    from .registry import ActionSpec, PLUGIN_ROOT, load_catalog
 else:  # Degenerate top-level import of the plugin root file.
-    from registry import ActionSpec, load_catalog
+    from registry import ActionSpec, PLUGIN_ROOT, load_catalog
 
 RESULT_SCHEMA_VERSION = "agent-dispatch-plugin.result/v1"
 
 BINARY_UNAVAILABLE = "binary_unavailable"
 UNSUPPORTED_AGENT_DISPATCH_VERSION = "unsupported_agent_dispatch_version"
+INVALID_ARGUMENT = "invalid_argument"
+TIMEOUT = "timeout"
+OUTPUT_TOO_LARGE = "output_too_large"
+MALFORMED_JSON = "malformed_json"
 ADAPTER_USAGE_ERROR = "adapter_usage_error"
 EXECUTION_FAILED = "execution_failed"
-
-BOUNDARY_UNIMPLEMENTED = (
-    "runner.run_inspection executes the bounded process group from the EPIC-002 "
-    "process-runner task onward; the trust gate is the only active stage."
-)
 
 NOT_CONFIGURED_MESSAGE = (
     "No Agent Dispatch executable is configured; inspection requires "
     "operator-provided binary_path, binary_sha256, and config_path."
 )
 
+# The execution environment is fixed in code (ADR-005): a system PATH, a
+# writable temp directory, and nothing else — no HOME, no inherited Hermes
+# or agent environment, no proxy or credential variables.
+MINIMAL_ENVIRONMENT: dict[str, str] = {
+    "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+    "TMPDIR": "/tmp",
+}
+NEUTRAL_CWD = PLUGIN_ROOT
+
 _SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
 _VERSION_OUTPUT_MAX_BYTES = 65536
+_DRAIN_CHUNK_BYTES = 65536
+_WAIT_SLICE_SECONDS = 0.05
 
 
 class TrustFailure(Exception):
@@ -246,6 +261,8 @@ def _verify_supported_version(trust: RunnerTrust) -> None:
             stderr=subprocess.DEVNULL,
             timeout=trust.timeout_seconds,
             check=False,
+            env=MINIMAL_ENVIRONMENT,
+            cwd=NEUTRAL_CWD,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise TrustFailure(
@@ -333,13 +350,270 @@ def probe_availability(config: Mapping[str, Any]) -> bool:
 
 
 def run_inspection(
-    spec: ActionSpec, params: Mapping[str, Any], config: Mapping[str, Any]
+    spec: ActionSpec,
+    operation: str,
+    params: Mapping[str, Any],
+    config: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Execute one fixed inspection command (not implemented yet).
+    """Execute exactly one fixed inspection command through the full boundary.
 
-    The trust gate above is complete; the bounded process-group execution
-    arrives with the next EPIC-002 task. Nothing calls this entrypoint until
-    then: handlers fail closed through the trust gate instead, so this
-    boundary still never creates a process.
+    The argv is the trusted executable, the action's registered template,
+    and the trusted --config flag; shell is never used and no execution
+    setting is reachable from model input. Both streams drain concurrently
+    under the frozen byte ceilings; the deadline and any overflow terminate
+    the whole process group through the TERM-then-force-kill ladder and
+    discard every captured byte. Nothing is ever retried.
     """
-    raise RuntimeError(BOUNDARY_UNIMPLEMENTED)
+    try:
+        trust = resolve_trust(config)
+    except TrustFailure as failure:
+        return trust_failure_result(operation, failure)
+
+    argv = (os.fspath(trust.binary_path),) + spec.resolve_argv(params)
+    argv = argv + ("--config", os.fspath(trust.config_path))
+    try:
+        outcome = _execute_bounded(argv, trust)
+    except OSError:
+        return closed_error_result(
+            operation,
+            EXECUTION_FAILED,
+            "the inspection process could not be started; no output was captured",
+        )
+
+    if outcome.timed_out:
+        return {
+            "schema_version": RESULT_SCHEMA_VERSION,
+            "ok": False,
+            "operation": operation,
+            "exit_code": -1,
+            "error": {
+                "code": TIMEOUT,
+                "message": (
+                    "the inspection exceeded its deadline and the process "
+                    "group was terminated; captured output was discarded"
+                ),
+                "retryable": False,
+            },
+            "diagnostics": [
+                f"deadline of {trust.timeout_seconds} seconds reached; "
+                "terminated the process group and discarded all captured output"
+            ],
+        }
+    if outcome.overflowed:
+        return {
+            "schema_version": RESULT_SCHEMA_VERSION,
+            "ok": False,
+            "operation": operation,
+            "exit_code": -1,
+            "error": {
+                "code": OUTPUT_TOO_LARGE,
+                "message": (
+                    "the inspection output exceeded a frozen byte ceiling; "
+                    "the process group was terminated and captured output "
+                    "was discarded"
+                ),
+                "retryable": False,
+            },
+            "diagnostics": [
+                "a stream or combined byte ceiling was exceeded; terminated "
+                "the process group and discarded all captured output"
+            ],
+        }
+
+    return _map_completed_process(operation, outcome)
+
+
+def _map_completed_process(operation: str, outcome: _Outcome) -> dict[str, Any]:
+    """Map one completed process onto the closed wrapper shape.
+
+    Closed structural envelope validation and diagnostic redaction arrive
+    with the remaining EPIC-002 task; this mapping already fails closed on
+    anything that is not one JSON envelope object on stdout.
+    """
+    try:
+        envelope = json.loads(outcome.stdout.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return closed_error_result(
+            operation,
+            MALFORMED_JSON,
+            "the Agent Dispatch output was not one parseable JSON envelope on stdout",
+            exit_code=outcome.exit_code if outcome.exit_code is not None else -1,
+        )
+    if not isinstance(envelope, dict):
+        return closed_error_result(
+            operation,
+            MALFORMED_JSON,
+            "the Agent Dispatch output was not one JSON envelope object",
+            exit_code=outcome.exit_code if outcome.exit_code is not None else -1,
+        )
+    if envelope.get("api_version") != "agent-dispatch.cli/v1":
+        return closed_error_result(
+            operation,
+            MALFORMED_JSON,
+            "the Agent Dispatch envelope carries an unknown protocol version",
+            exit_code=outcome.exit_code if outcome.exit_code is not None else -1,
+        )
+    if envelope.get("command") is None:
+        return closed_error_result(
+            operation,
+            MALFORMED_JSON,
+            "the Agent Dispatch envelope carries no command identity",
+            exit_code=outcome.exit_code if outcome.exit_code is not None else -1,
+        )
+    if not isinstance(envelope.get("ok"), bool):
+        return closed_error_result(
+            operation,
+            MALFORMED_JSON,
+            "the Agent Dispatch envelope carries no boolean ok member",
+            exit_code=outcome.exit_code if outcome.exit_code is not None else -1,
+        )
+    exit_code = outcome.exit_code if outcome.exit_code is not None else -1
+    return {
+        "schema_version": RESULT_SCHEMA_VERSION,
+        "ok": envelope["ok"],
+        "operation": operation,
+        "exit_code": exit_code,
+        "agent_dispatch": envelope,
+        "diagnostics": [],
+    }
+
+
+@dataclass
+class _DrainState:
+    """Shared bounded-capture state between the two drain threads."""
+
+    combined_cap: int
+    combined_bytes: int = 0
+    overflow: bool = False
+    lock: threading.Lock = field(default_factory=threading.Lock)
+
+
+@dataclass(frozen=True)
+class _Outcome:
+    """One terminal execution result; captured bytes are already discarded
+    whenever timed_out or overflowed is set."""
+
+    timed_out: bool
+    overflowed: bool
+    exit_code: int | None
+    stdout: bytes
+
+
+def _drain_stream(stream: Any, cap: int, state: _DrainState, sink: list[bytes]) -> None:
+    """Drain one stream into a bounded sink, flagging the first overflow.
+
+    Reads are unbuffered partial reads: each os.read returns whatever the
+    pipe currently holds, so every partial chunk is checked against the
+    ceilings immediately instead of blocking until a full buffer or EOF.
+    The reader stops storing at the first byte that would cross its own or
+    the combined ceiling; the executor terminates the group immediately.
+    """
+    descriptor = stream.fileno()
+    try:
+        while True:
+            chunk = os.read(descriptor, _DRAIN_CHUNK_BYTES)
+            if not chunk:
+                break
+            with state.lock:
+                if state.overflow:
+                    break
+                if (
+                    len(sink[0]) + len(chunk) > cap
+                    or state.combined_bytes + len(chunk) > state.combined_cap
+                ):
+                    state.overflow = True
+                    sink[0] = b""
+                    break
+                sink[0] += chunk
+                state.combined_bytes += len(chunk)
+    finally:
+        stream.close()
+
+
+def _terminate_process_group(process: subprocess.Popen[Any], grace_seconds: float) -> None:
+    """Run the frozen TERM-then-force-kill ladder over the whole group."""
+    try:
+        group = os.getpgid(process.pid)
+    except ProcessLookupError:
+        group = None
+    if group is not None:
+        try:
+            os.killpg(group, signal.SIGTERM)
+        except (ProcessLookupError, PermissionError):
+            pass
+    try:
+        process.wait(timeout=grace_seconds)
+        return
+    except subprocess.TimeoutExpired:
+        pass
+    if group is not None:
+        try:
+            os.killpg(group, signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            pass
+    process.wait()
+
+
+def _execute_bounded(argv: tuple[str, ...], trust: RunnerTrust) -> _Outcome:
+    """Spawn one fresh process group and drain it under the frozen bounds."""
+    limits = _limits()
+    termination = limits["termination"]
+    grace_seconds = float(termination["grace_period_seconds"])
+    stdout_cap = min(int(limits["stdout_max_bytes"]), trust.max_output_bytes)
+    stderr_cap = min(int(limits["stderr_max_bytes"]), trust.max_output_bytes)
+
+    process = subprocess.Popen(
+        argv,
+        shell=False,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=NEUTRAL_CWD,
+        env=MINIMAL_ENVIRONMENT,
+        close_fds=True,
+        start_new_session=True,
+    )
+    state = _DrainState(combined_cap=trust.max_output_bytes)
+    stdout_sink: list[bytes] = [b""]
+    stderr_sink: list[bytes] = [b""]
+    readers = [
+        threading.Thread(target=_drain_stream, args=(s, c, state, k), daemon=True)
+        for s, c, k in (
+            (process.stdout, stdout_cap, stdout_sink),
+            (process.stderr, stderr_cap, stderr_sink),
+        )
+    ]
+    for reader in readers:
+        reader.start()
+
+    timed_out = False
+    deadline = time.monotonic() + trust.timeout_seconds
+    while True:
+        try:
+            process.wait(timeout=_WAIT_SLICE_SECONDS)
+            break
+        except subprocess.TimeoutExpired:
+            pass
+        with state.lock:
+            overflow_now = state.overflow
+        if overflow_now:
+            _terminate_process_group(process, grace_seconds)
+            break
+        if time.monotonic() >= deadline:
+            timed_out = True
+            _terminate_process_group(process, grace_seconds)
+            break
+
+    for reader in readers:
+        reader.join(timeout=grace_seconds + 5.0)
+
+    # A stream can cross its ceiling in the same instant the process exits
+    # (or through the pipe backlog after the reader stopped), so the overflow
+    # flag is authoritative even when the wait loop observed a clean exit.
+    with state.lock:
+        overflowed = state.overflow
+
+    exit_code = process.returncode
+    if timed_out or overflowed:
+        return _Outcome(timed_out=timed_out, overflowed=overflowed, exit_code=exit_code, stdout=b"")
+    return _Outcome(timed_out=False, overflowed=False, exit_code=exit_code, stdout=stdout_sink[0])

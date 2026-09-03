@@ -34,8 +34,11 @@ The aggregate calls each stage handler exactly once through recursive
   the registry derivation from the frozen catalog (`test_registry.py`), the
   model-facing schema layer (`test_schemas.py`), the fail-closed handlers
   validated against the frozen wrapper and error schemas
-  (`test_tools.py`), and the runner trust gate with deterministic fake
-  Agent Dispatch executables (`test_runner.py`).
+  (`test_tools.py`), the runner trust gate with deterministic fake
+  Agent Dispatch executables (`test_runner.py`), and the bounded
+  process-group execution — argv, environment, deadline, stream limits,
+  termination, and no-retry — against behavior-scripted fakes
+  (`test_execution.py`).
 - `test-int`: `tests/integration` — cross-module cooperation: registering
   the plugin through the Hermes-style directory loader, and running the two
   repository gates as subprocesses.
