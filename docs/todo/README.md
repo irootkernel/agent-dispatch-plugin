@@ -5,7 +5,6 @@ SOT. Dossiers refine delivery without changing the PRD.
 
 | Epic | Adopted dossier |
 |---|---|
-| EPIC-001 | docs/todo/TODO-CONTRACT-FOUNDATION.md |
 | EPIC-002 | docs/todo/TODO-SECURE-RUNNER.md |
 | EPIC-003 | docs/todo/TODO-INSPECTION-TOOLS.md |
 | EPIC-004 | docs/todo/TODO-SECURITY-COMPATIBILITY.md |

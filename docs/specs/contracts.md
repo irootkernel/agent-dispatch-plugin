@@ -48,6 +48,18 @@ of the frozen surface; a canonical amendment must update the catalog, the
 schemas, and the oracle together, and TASK-003 supersedes the pinned
 invocation with the locked project toolchain.
 
+## Upstream surface observations
+
+The closed receipt-kind and quarantine-state sets, the envelope command-path
+identity, the closed envelope error object, and the stdout-success versus
+stderr-error stream policy were confirmed against the installed Agent
+Dispatch v0.1.6 command help and disposable probes during TASK-001; they are
+frozen in the catalog. EPIC-002 must still verify against the real binary
+that the PRD-documented `quarantine list --route/--limit` filters and the
+absence of a notifications `--offset` filter match actual flag support; a
+mismatch is an upstream compatibility finding, never a silent contract
+change.
+
 ## Change control
 
 Frozen for v0.1.0. Any change to the roster, mappings, schemas, error,
