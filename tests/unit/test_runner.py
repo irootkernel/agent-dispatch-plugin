@@ -153,6 +153,39 @@ def test_unanswerable_version_probes_fail_closed(runner, tmp_path, body):
         _expect_failure(runner, config, runner.UNSUPPORTED_AGENT_DISPATCH_VERSION)
 
 
+def test_digest_is_reverified_on_every_call(runner, fake_agent_dispatch):
+    """The trust gate never caches the binary identity: swapping the file
+    content after one successful resolution must fail the next one."""
+    assert runner.probe_availability(fake_agent_dispatch["config"]) is True
+    binary = fake_agent_dispatch["binary"]
+    binary.write_text(binary.read_text(encoding="utf-8") + "\n# tampered\n", encoding="utf-8")
+    assert runner.probe_availability(fake_agent_dispatch["config"]) is False
+    with pytest.raises(runner.TrustFailure) as excinfo:
+        runner.resolve_trust(fake_agent_dispatch["config"])
+    assert excinfo.value.code == runner.BINARY_UNAVAILABLE
+
+
+def test_oversized_version_probe_output_is_bounded_not_buffered(runner, tmp_path):
+    """A probe that floods stdout is cut at the frozen bound instead of
+    buffering unbounded output in memory."""
+    installation = make_fake_binary(
+        tmp_path,
+        body=(
+            "#!/usr/bin/env python3\n"
+            "import sys\n"
+            "if sys.argv[1:2] == ['version']:\n"
+            "    sys.stdout.write('x' * 200000)\n"
+            "    sys.stdout.flush()\n"
+            "    import time; time.sleep(30)\n"
+            "sys.exit(0)\n"
+        ),
+    )
+    config = {**installation["config"], "timeout_seconds": 10}
+    with pytest.raises(runner.TrustFailure) as excinfo:
+        runner.resolve_trust(config)
+    assert excinfo.value.code == runner.UNSUPPORTED_AGENT_DISPATCH_VERSION
+
+
 def test_configured_bounds_are_honored(runner, fake_agent_dispatch):
     config = {**fake_agent_dispatch["config"], "timeout_seconds": 5, "max_output_bytes": 4096}
     trust = runner.resolve_trust(config)

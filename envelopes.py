@@ -17,6 +17,8 @@ from typing import Any, Iterable, Mapping
 
 ENVELOPE_API_VERSION = "agent-dispatch.cli/v1"
 
+# The closed output-error codes live here once (ADR-006); the runner aliases
+# these constants so no second copy of the frozen vocabulary exists.
 MALFORMED_JSON = "malformed_json"
 CONTRACT_MISMATCH = "contract_mismatch"
 REDACTION_FAILURE = "redaction_failure"
@@ -40,7 +42,7 @@ _RE_SECRET_REFERENCE = re.compile(
     r"(?i)\b(secret|password|credential|private[_-]?key|api[_-]?key)\b[^\S\n]*[:=@\s]+\S+"
 )
 _RE_TOKEN_HEX = re.compile(r"(?<![0-9A-Za-z])[0-9a-fA-F]{32,}(?![0-9A-Za-z])")
-_RE_TOKEN_BASE64 = re.compile(r"(?<![0-9A-Za-z+/])[A-Za-z0-9+/]{40,}={0,2}(?![0-9A-Za-z+/])")
+_RE_TOKEN_BASE64 = re.compile(r"(?<![0-9A-Za-z+/])[A-Za-z0-9+/_-]{40,}={0,2}(?![0-9A-Za-z+/=-])")
 _RE_WEBHOOK_URL = re.compile(
     r"(?i)\bhttps?://(?:[a-z0-9-]+\.)*hooks\.[a-z0-9.-]+(?:/\S*)?|\bhttps?://\S*webhook\S*"
 )
@@ -77,8 +79,6 @@ def validate_envelope(payload: Any, expected_command: str) -> Mapping[str, Any]:
     """
     if not isinstance(payload, Mapping):
         raise EnvelopeViolation(MALFORMED_JSON, "the output was not one JSON envelope object")
-    if payload.get("api_version") != ENVELOPE_API_VERSION:
-        raise EnvelopeViolation(MALFORMED_JSON, "the envelope carries an unknown protocol version")
     unknown = set(payload) - _ENVELOPE_MEMBERS
     if unknown:
         raise EnvelopeViolation(
@@ -90,6 +90,8 @@ def validate_envelope(payload: Any, expected_command: str) -> Mapping[str, Any]:
             raise EnvelopeViolation(
                 CONTRACT_MISMATCH, f"the envelope is missing the {member!r} member"
             )
+    if payload["api_version"] != ENVELOPE_API_VERSION:
+        raise EnvelopeViolation(MALFORMED_JSON, "the envelope carries an unknown protocol version")
     command = payload["command"]
     if not isinstance(command, str) or not 1 <= len(command) <= 64:
         raise EnvelopeViolation(CONTRACT_MISMATCH, "the envelope command is not a bounded string")
@@ -112,8 +114,8 @@ def validate_envelope(payload: Any, expected_command: str) -> Mapping[str, Any]:
             )
         _validate_envelope_error(payload["error"])
 
-    warnings = payload.get("warnings")
-    if warnings is not None:
+    if "warnings" in payload:
+        warnings = payload["warnings"]
         if not isinstance(warnings, list) or len(warnings) > 64:
             raise EnvelopeViolation(
                 CONTRACT_MISMATCH, "the envelope warnings exceed the frozen bound"
@@ -122,9 +124,10 @@ def validate_envelope(payload: Any, expected_command: str) -> Mapping[str, Any]:
             raise EnvelopeViolation(
                 CONTRACT_MISMATCH, "an envelope warning exceeds its frozen bound"
             )
-    trace_id = payload.get("trace_id")
-    if trace_id is not None and (not isinstance(trace_id, str) or len(trace_id) > 128):
-        raise EnvelopeViolation(CONTRACT_MISMATCH, "the envelope trace id is not bounded")
+    if "trace_id" in payload:
+        trace_id = payload["trace_id"]
+        if not isinstance(trace_id, str) or len(trace_id) > 128:
+            raise EnvelopeViolation(CONTRACT_MISMATCH, "the envelope trace id is not bounded")
 
     if command != expected_command:
         raise EnvelopeViolation(

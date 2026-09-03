@@ -72,6 +72,12 @@ frozen argv template.
 - The exit status of a terminated or overflowed process is not trusted as
   evidence; those results carry `exit_code` -1.
 - A hostile producer can force at most one bounded execution per call.
+- Accepted residual: a descendant that escapes the process group with its
+  own session can hold the pipe write end open past the ladder, leaving a
+  daemon reader blocked past its bounded join. The sinks are already capped
+  so nothing grows, the result is built from the bounded sink, and a
+  same-user process escaping the group is outside the threat model — the
+  same boundary ADR-004 draws for the time-of-check window.
 
 ## Alternatives
 

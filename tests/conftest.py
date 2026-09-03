@@ -70,6 +70,12 @@ if ARGS[:1] == ["version"]:
 SPEC = behavior()
 KIND = SPEC.get("kind", "echo")
 
+# Every behavior counts its own invocation when asked, so no-retry proofs
+# can span failure modes with one counter file.
+if "count_file" in SPEC:
+    with open(SPEC["count_file"], "a", encoding="utf-8") as handle:
+        handle.write("invoked\\n")
+
 
 def envelope(ok=True, result=None):
     args = list(ARGS)
@@ -105,9 +111,6 @@ if KIND == "echo":
         "cwd": os.getcwd(),
     })
 elif KIND == "sleep":
-    if "count_file" in SPEC:
-        with open(SPEC["count_file"], "a", encoding="utf-8") as handle:
-            handle.write("invoked\\n")
     sys.stdout.write(SPEC.get("prefix", ""))
     sys.stdout.flush()
     time.sleep(float(SPEC.get("seconds", 30)))
@@ -139,10 +142,6 @@ elif KIND == "reject":
 elif KIND == "garbage":
     sys.stdout.write("this is not json\\n")
     raise SystemExit(0)
-elif KIND == "count":
-    with open(SPEC["count_file"], "a", encoding="utf-8") as handle:
-        handle.write("invoked\\n")
-    envelope()
 elif KIND == "raw":
     for line in SPEC.get("stderr_lines", []):
         sys.stderr.write(line + "\\n")

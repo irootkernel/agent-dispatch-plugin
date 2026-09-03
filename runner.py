@@ -26,6 +26,7 @@ import json
 import os
 import platform as platform_module
 import re
+import select
 import signal
 import subprocess
 import sys
@@ -53,11 +54,13 @@ UNSUPPORTED_AGENT_DISPATCH_VERSION = "unsupported_agent_dispatch_version"
 INVALID_ARGUMENT = "invalid_argument"
 TIMEOUT = "timeout"
 OUTPUT_TOO_LARGE = "output_too_large"
-MALFORMED_JSON = "malformed_json"
-CONTRACT_MISMATCH = "contract_mismatch"
 ADAPTER_USAGE_ERROR = "adapter_usage_error"
 EXECUTION_FAILED = "execution_failed"
-REDACTION_FAILURE = "redaction_failure"
+# The closed output-error vocabulary is owned by envelopes (ADR-006); these
+# aliases keep one frozen copy of every code.
+MALFORMED_JSON = envelopes.MALFORMED_JSON
+CONTRACT_MISMATCH = envelopes.CONTRACT_MISMATCH
+REDACTION_FAILURE = envelopes.REDACTION_FAILURE
 
 NOT_CONFIGURED_MESSAGE = (
     "No Agent Dispatch executable is configured; inspection requires "
@@ -259,30 +262,79 @@ def _verify_supported_version(trust: RunnerTrust) -> None:
     """Probe the executable identity through the real `version` subcommand.
 
     The probe reuses the configured deadline so a hung binary cannot pin the
-    availability check beyond the operator-chosen bound. A binary that cannot
-    answer, or answers outside the frozen range, is not trusted.
+    availability check beyond the operator-chosen bound, and its stdout is
+    captured through a select loop capped at the frozen probe bound, so a
+    hostile producer cannot balloon the plugin's memory before the size
+    check. A binary that cannot answer, or answers outside the frozen
+    range, is not trusted.
     """
+    argv = (os.fspath(trust.binary_path), "version", "--json")
     try:
-        completed = subprocess.run(
-            [os.fspath(trust.binary_path), "version", "--json"],
+        process = subprocess.Popen(
+            argv,
+            shell=False,
+            stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
-            timeout=trust.timeout_seconds,
-            check=False,
             env=MINIMAL_ENVIRONMENT,
             cwd=NEUTRAL_CWD,
+            close_fds=True,
         )
-    except (OSError, subprocess.TimeoutExpired) as exc:
+    except OSError as exc:
         raise TrustFailure(
             BINARY_UNAVAILABLE,
             "the configured Agent Dispatch executable did not answer the version probe",
         ) from exc
-    if completed.returncode != 0:
+    sink = bytearray()
+    timed_out = False
+    overflowed = False
+    stdout = process.stdout
+    if stdout is None:  # stdout=PIPE always provides a stream; stay typed and closed
+        process.kill()
+        process.wait()
+        raise TrustFailure(
+            BINARY_UNAVAILABLE,
+            "the configured Agent Dispatch executable did not answer the version probe",
+        )
+    descriptor = stdout.fileno()
+    deadline = time.monotonic() + trust.timeout_seconds
+    try:
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                timed_out = True
+                break
+            ready, _, _ = select.select([descriptor], [], [], min(remaining, 0.1))
+            if not ready:
+                continue
+            chunk = os.read(descriptor, _DRAIN_CHUNK_BYTES)
+            if not chunk:
+                break
+            if len(sink) + len(chunk) > _VERSION_OUTPUT_MAX_BYTES:
+                overflowed = True
+                break
+            sink += chunk
+    finally:
+        if timed_out or overflowed:
+            process.kill()
+        process.wait()
+        stdout.close()
+    if timed_out:
+        raise TrustFailure(
+            BINARY_UNAVAILABLE,
+            "the configured Agent Dispatch executable did not answer the version probe",
+        )
+    if overflowed:
+        raise TrustFailure(
+            UNSUPPORTED_AGENT_DISPATCH_VERSION,
+            "the Agent Dispatch version probe exceeded its bounded output",
+        )
+    if process.returncode != 0:
         raise TrustFailure(
             UNSUPPORTED_AGENT_DISPATCH_VERSION,
             "the Agent Dispatch version probe exited with a failure status",
         )
-    version = _parse_version_output(completed.stdout)
+    version = _parse_version_output(bytes(sink))
     low, high = _supported_version_range()
     if not low <= version < high:
         raise TrustFailure(
@@ -445,7 +497,7 @@ def _map_completed_process(
     exit_code = outcome.exit_code if outcome.exit_code is not None else -1
     try:
         parsed = json.loads(outcome.stdout.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError):
+    except (UnicodeDecodeError, json.JSONDecodeError, RecursionError):
         return _malformed_with_stderr_tail(
             operation, exit_code, outcome, trust, "stdout was not parseable JSON"
         )
@@ -503,7 +555,10 @@ def _malformed_with_stderr_tail(
         diagnostics = envelopes.redact_diagnostics(tail, _display_policy_paths(trust))
     except Exception:
         return closed_error_result(
-            operation, REDACTION_FAILURE, "the redaction pipeline failed", exit_code=-1
+            operation,
+            REDACTION_FAILURE,
+            "the redaction pipeline failed",
+            exit_code=exit_code,
         )
     return {
         "schema_version": RESULT_SCHEMA_VERSION,

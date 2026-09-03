@@ -247,20 +247,35 @@ def test_term_to_force_kill_kills_the_whole_process_group(plugin, runner, tmp_pa
 
 
 def test_no_retry_under_every_failure_mode(plugin, runner, tmp_path):
-    """One call is one process: a timed-out command is invoked exactly once
-    and never rerun, and successful calls invoke exactly once each."""
+    """One call is one process across failure modes: a timed-out, a
+    malformed-output, a domain-rejection, and a successful call each invoke
+    the executable exactly once (the version probe reads no behavior config
+    and never counts)."""
     count_file = tmp_path / "count.log"
-    installation = make_fake_binary(
-        tmp_path,
-        behavior={"kind": "sleep", "seconds": 30, "count_file": str(count_file)},
-    )
-    # Two seconds (not one) so interpreter startup under load always lands
-    # inside the deadline window the invocation is counted in.
-    config = {**installation["config"], "timeout_seconds": 2}
-    action = _action(plugin, "agent_dispatch_status", "inspect")
-    result = runner.run_inspection(action, "agent_dispatch_status", {}, config)
-    assert result["error"]["code"] == "timeout"
-    assert count_file.read_text(encoding="utf-8").count("invoked") == 1
+    counter = {"count_file": str(count_file)}
+    status = _action(plugin, "agent_dispatch_status", "inspect")
+
+    def install(name, behavior):
+        installation = make_fake_binary(tmp_path / name, behavior={**behavior, **counter})
+        return {**installation["config"], "timeout_seconds": 10}
+
+    sleepy = install("sleepy", {"kind": "sleep", "seconds": 30})
+    sleepy["timeout_seconds"] = 2  # startup under load stays inside the window
+    garbage = install("garbage", {"kind": "raw", "stdout": "not json\n"})
+    rejection = install("reject", {"kind": "reject", "exit": 3})
+    echo = install("echo", {})
+
+    results = [
+        runner.run_inspection(status, "agent_dispatch_status", {}, sleepy),
+        runner.run_inspection(status, "agent_dispatch_status", {}, garbage),
+        runner.run_inspection(status, "agent_dispatch_status", {}, rejection),
+        runner.run_inspection(status, "agent_dispatch_status", {}, echo),
+    ]
+    assert results[0]["error"]["code"] == "timeout"
+    assert results[1]["error"]["code"] == "malformed_json"
+    assert results[2]["agent_dispatch"]["error"]["code"] == "config_invalid"
+    assert results[3]["ok"] is True
+    assert count_file.read_text(encoding="utf-8").count("invoked") == 4
 
 
 def test_domain_rejection_carries_the_envelope_and_exit_status(plugin, runner, tmp_path):

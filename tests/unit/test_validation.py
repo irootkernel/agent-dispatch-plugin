@@ -163,6 +163,7 @@ SEEDED_WEBHOOK = "https://hooks.example.com/services/T000000/B000000/XXXXXXXXXXX
 SEEDED_SECRET_PATH = "/Users/operator/.ssh/id_ed25519"
 SEEDED_ABSOLUTE_PATH = "/Users/operator/state/store.db"
 SEEDED_API_KEY = "api_key: k8sSk2xQ4vBn7mZpL1wR6tYc0uJ3hF5aD9g"
+SEEDED_BASE64URL_TOKEN = "c2VjcmV0LXZhbHVlLXdpdGgtYmFzZTY0dXJsLXBhZGRpbmctdG9rZW4"
 
 
 def test_seeded_secrets_never_survive_the_output_boundary(plugin, runner, tmp_path):
@@ -209,10 +210,87 @@ def test_each_redaction_rule_redacts_its_seed(envelopes):
         (f"token {SEEDED_HEX_TOKEN}", SEEDED_HEX_TOKEN),
         (f"webhook {SEEDED_WEBHOOK}", "hooks.example.com"),
         (f"store at {SEEDED_ABSOLUTE_PATH}", "/Users/operator/state"),
+        (f"token {SEEDED_BASE64URL_TOKEN}", SEEDED_BASE64URL_TOKEN),
     ]
     for text, must_vanish in cases:
         redacted = envelopes.redact_text(text)
         assert must_vanish not in redacted, text
+
+
+def test_base64url_seeded_secret_never_survives_the_boundary(plugin, runner, tmp_path):
+    envelope = {
+        **VALID_ENVELOPE,
+        "result": {"credential": SEEDED_BASE64URL_TOKEN},
+    }
+    result = _run_raw(plugin, runner, tmp_path, envelope=envelope)
+    assert result["ok"] is True
+    assert SEEDED_BASE64URL_TOKEN not in json.dumps(result)
+
+
+def test_missing_api_version_is_a_structural_mismatch(plugin, runner, tmp_path):
+    envelope = dict(VALID_ENVELOPE)
+    envelope.pop("api_version")
+    result = _run_raw(plugin, runner, tmp_path, envelope=envelope)
+    assert result["error"]["code"] == "contract_mismatch"
+
+
+def test_unknown_protocol_version_stays_malformed_json(plugin, runner, tmp_path):
+    envelope = {**VALID_ENVELOPE, "api_version": "agent-dispatch.cli/v9"}
+    result = _run_raw(plugin, runner, tmp_path, envelope=envelope)
+    assert result["error"]["code"] == "malformed_json"
+
+
+@pytest.mark.parametrize(
+    "member",
+    ["warnings", "trace_id"],
+    ids=["null-warnings", "null-trace-id"],
+)
+def test_explicit_null_optional_members_are_rejected(plugin, runner, tmp_path, member):
+    envelope = {**VALID_ENVELOPE, member: None}
+    result = _run_raw(plugin, runner, tmp_path, envelope=envelope)
+    assert result["error"]["code"] == "contract_mismatch"
+
+
+def test_deeply_nested_output_closes_as_malformed_json(plugin, runner, tmp_path):
+    result = _run_raw(plugin, runner, tmp_path, stdout="[" * 20000 + "]" * 20000)
+    assert result["error"]["code"] == "malformed_json"
+    assert "agent_dispatch" not in result
+
+
+def test_rejection_with_zero_exit_carries_the_envelope(plugin, runner, tmp_path):
+    """The real binary reports some domain rejections with exit 0; the
+    carrier rule carries the actual status, whatever it is."""
+    rejection = {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "status",
+        "ok": False,
+        "error": {
+            "code": "config_invalid",
+            "category": "configuration",
+            "message": "scripted rejection",
+            "retryable": False,
+        },
+        "warnings": [],
+        "trace_id": "",
+    }
+    result = _run_raw(plugin, runner, tmp_path, envelope=rejection, exit_code=0)
+    assert result["ok"] is False
+    assert result["exit_code"] == 0
+    assert result["agent_dispatch"]["ok"] is False
+    assert "error" not in result
+
+
+def test_stderr_tail_redaction_failure_carries_the_process_exit_code(
+    plugin, runner, tmp_path, monkeypatch
+):
+    def exploding(lines, allowed_paths=()):
+        raise RuntimeError("tail redaction broken")
+
+    monkeypatch.setattr(plugin.envelopes, "redact_diagnostics", exploding)
+    monkeypatch.setattr(runner.envelopes, "redact_diagnostics", exploding)
+    result = _run_raw(plugin, runner, tmp_path, stdout="not json\n", exit_code=0)
+    assert result["error"]["code"] == "redaction_failure"
+    assert result["exit_code"] == 0
 
 
 def test_diagnostics_are_bounded_and_redacted(plugin, runner, tmp_path):
