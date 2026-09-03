@@ -336,7 +336,13 @@ def _verify_supported_version(trust: RunnerTrust) -> None:
         if timed_out or overflowed:
             _kill_probe_tree(process)
         else:
-            process.wait()
+            # A binary can close stdout and still hang: the reap honors the
+            # same deadline, and a late expiry discards the whole group.
+            try:
+                process.wait(timeout=max(0.0, deadline - time.monotonic()))
+            except subprocess.TimeoutExpired:
+                timed_out = True
+                _kill_probe_tree(process)
         stdout.close()
     if timed_out:
         raise TrustFailure(

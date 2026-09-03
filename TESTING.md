@@ -25,7 +25,8 @@ The aggregate calls each stage handler exactly once through recursive
 
 - `test-prepare`: `ruff format` (meaning-preserving formatting) over the
   Python sources, `ruff check` (static analysis), `mypy` (type checking over
-  the runtime modules), `python -m compileall`
+  the typed runtime subset, derived from the same source enumeration in the
+  Makefile), `python -m compileall`
   (byte-compilation), then the two deterministic offline gates:
   `contracts/validate.py` (frozen contract oracle) and
   `scripts/manifest_parity.py` (manifest/registry/inventory parity through

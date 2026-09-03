@@ -31,20 +31,11 @@ target-version = "py311"
 [tool.mypy]
 python_version = "3.11"
 explicit_package_bases = true
-# The repository root is itself a hyphen-named Hermes plugin package, so the
-# static view deliberately mirrors the degenerate top-level import path: the
-# guarded runtime modules are checked as top-level modules. The root
-# __init__.py registration shim and the pytest tree stay under ruff and the
-# executed suites.
-files = [
-    "registry.py",
-    "schemas.py",
-    "envelopes.py",
-    "runner.py",
-    "tools",
-    "contracts/validate.py",
-    "scripts",
-]
+# The typed file list is derived in the Makefile (MYPY_SOURCES) so one
+# hand-maintained source enumeration exists; the repository root is a
+# hyphen-named Hermes plugin package, so the static view deliberately
+# mirrors the degenerate top-level import path: the guarded runtime
+# modules are checked as top-level modules.
 
 [tool.uv]
 # Source-only project: no wheel is built or distributed (PRD non-goal).

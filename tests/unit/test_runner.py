@@ -228,6 +228,27 @@ def test_version_probe_timeout_kills_the_whole_process_tree(runner, tmp_path):
         pytest.fail("the probe helper survived the probe discard")
 
 
+def test_version_probe_that_closes_stdout_and_hangs_still_meets_the_deadline(runner, tmp_path):
+    """A binary can close stdout and keep running: the reap honors the same
+    deadline instead of blocking forever after EOF."""
+    probe_body = (
+        "#!/usr/bin/env python3\n"
+        "import os, sys, time\n"
+        "if sys.argv[1:2] == ['version']:\n"
+        "    os.close(1)\n"
+        "    time.sleep(30)\n"
+        "sys.exit(0)\n"
+    )
+    installation = make_fake_binary(tmp_path, body=probe_body)
+    config = {**installation["config"], "timeout_seconds": 1}
+    started = time.monotonic()
+    with pytest.raises(runner.TrustFailure) as excinfo:
+        runner.resolve_trust(config)
+    elapsed = time.monotonic() - started
+    assert elapsed < 5
+    assert excinfo.value.code == runner.BINARY_UNAVAILABLE
+
+
 def test_configured_bounds_are_honored(runner, fake_agent_dispatch):
     config = {**fake_agent_dispatch["config"], "timeout_seconds": 5, "max_output_bytes": 4096}
     trust = runner.resolve_trust(config)
