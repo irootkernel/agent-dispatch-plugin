@@ -1,0 +1,18 @@
+{
+  "schema_version": "agent-dispatch-plugin.fixtures/v1",
+  "subjects": [
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_status", "schema": "schemas/tools/agent_dispatch_status.input.json", "cases": "fixtures/tools/agent_dispatch_status.cases.json"},
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_doctor", "schema": "schemas/tools/agent_dispatch_doctor.input.json", "cases": "fixtures/tools/agent_dispatch_doctor.cases.json"},
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_routes", "schema": "schemas/tools/agent_dispatch_routes.input.json", "cases": "fixtures/tools/agent_dispatch_routes.cases.json"},
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_dispatches", "schema": "schemas/tools/agent_dispatch_dispatches.input.json", "cases": "fixtures/tools/agent_dispatch_dispatches.cases.json"},
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_receipts", "schema": "schemas/tools/agent_dispatch_receipts.input.json", "cases": "fixtures/tools/agent_dispatch_receipts.cases.json"},
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_event_show", "schema": "schemas/tools/agent_dispatch_event_show.input.json", "cases": "fixtures/tools/agent_dispatch_event_show.cases.json"},
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_quarantine", "schema": "schemas/tools/agent_dispatch_quarantine.input.json", "cases": "fixtures/tools/agent_dispatch_quarantine.cases.json"},
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_notifications", "schema": "schemas/tools/agent_dispatch_notifications.input.json", "cases": "fixtures/tools/agent_dispatch_notifications.cases.json"},
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_schedule_inspect", "schema": "schemas/tools/agent_dispatch_schedule_inspect.input.json", "cases": "fixtures/tools/agent_dispatch_schedule_inspect.cases.json"},
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_config", "schema": "schemas/tools/agent_dispatch_config.input.json", "cases": "fixtures/tools/agent_dispatch_config.cases.json"},
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:envelope", "schema": "schemas/envelope.schema.json", "cases": "fixtures/envelope.cases.json"},
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:wrapper", "schema": "schemas/wrapper.schema.json", "cases": "fixtures/wrapper.cases.json"},
+    {"subject": "urn:agent-dispatch-plugin:contracts:v0.1.0:error", "schema": "schemas/error.schema.json", "cases": "fixtures/error.cases.json"}
+  ]
+}

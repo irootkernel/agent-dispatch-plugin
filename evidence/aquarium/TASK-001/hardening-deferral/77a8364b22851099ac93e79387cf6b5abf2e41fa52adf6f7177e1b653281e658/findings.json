@@ -1,0 +1,89 @@
+{
+  "schema": "aquarium.hardening-deferral-findings/v1",
+  "work_unit": {
+    "kind": "task",
+    "id": "TASK-001"
+  },
+  "target": {
+    "capture_kind": "stage",
+    "content_sha256": "sha256:77a8364b22851099ac93e79387cf6b5abf2e41fa52adf6f7177e1b653281e658"
+  },
+  "coverage_status": "complete",
+  "ci_decision": "pass",
+  "publication_status": "committed",
+  "structured_extraction_status": "reports_only",
+  "findings": [
+    {
+      "id": "TASK-001-R2-F01",
+      "severity": "medium",
+      "disposition": "deferred-for-hardening",
+      "summary": "The offline gate does not compare the error schema code enum, the error message bound, or the wrapper diagnostics bounds against the catalog or PRD oracle, so widening drift of the closed ten-code enum is undetectable.",
+      "paths": [
+        "contracts/validate.py",
+        "contracts/v0.1.0/schemas/error.schema.json",
+        "contracts/v0.1.0/catalog.json"
+      ]
+    },
+    {
+      "id": "TASK-001-R2-F02",
+      "severity": "low",
+      "disposition": "deferred-for-hardening",
+      "summary": "An unreadable catalog or error fixture file crashes the gate with a Python traceback instead of the bounded enumerated failure report the gate documents.",
+      "paths": [
+        "contracts/validate.py"
+      ]
+    },
+    {
+      "id": "TASK-001-R2-F03",
+      "severity": "low",
+      "disposition": "deferred-for-hardening",
+      "summary": "The identifier and state-token patterns end in a dollar anchor that also matches before a single trailing newline under the pinned Python validator, contradicting the frozen control-byte rejection claim; locally verified that a trailing-newline identifier validates today.",
+      "paths": [
+        "contracts/v0.1.0/catalog.json",
+        "contracts/v0.1.0/schemas/tools/agent_dispatch_dispatches.input.json",
+        "contracts/v0.1.0/schemas/tools/agent_dispatch_notifications.input.json",
+        "contracts/v0.1.0/schemas/tools/agent_dispatch_routes.input.json"
+      ]
+    },
+    {
+      "id": "TASK-001-R2-F04",
+      "severity": "info",
+      "disposition": "deferred-for-hardening",
+      "summary": "Two normative documents still cite the validation gate without the pinned dependency versions.",
+      "paths": [
+        "docs/architecture-decision-records/ADR-001-declarative-contract-registry.md",
+        "docs/todo/TODO-CONTRACT-FOUNDATION.md"
+      ]
+    },
+    {
+      "id": "TASK-001-R2-F05",
+      "severity": "info",
+      "disposition": "deferred-for-hardening",
+      "summary": "pagination.offset.applies_to mixes prose command phrases into a machine-checked invariant and its first-word parsing assumes the command noun equals the tool short name, which does not hold project-wide.",
+      "paths": [
+        "contracts/v0.1.0/catalog.json",
+        "contracts/validate.py"
+      ]
+    },
+    {
+      "id": "TASK-001-R2-F06",
+      "severity": "info",
+      "disposition": "deferred-for-hardening",
+      "summary": "The gate's enum and grammar equality check is one-directional and registry-keyed, weaker than the documented claim: schema-side enum or pattern additions absent from the catalog pass silently, and stale applies_to names match nothing without failing.",
+      "paths": [
+        "contracts/README.md",
+        "contracts/validate.py"
+      ]
+    },
+    {
+      "id": "TASK-001-R2-F07",
+      "severity": "info",
+      "disposition": "rejected-by-design",
+      "summary": "Wrapper exit_code semantics are prose-only in the schema; the PRD assigns exit consistency validation to the runner, so the contract layer intentionally does not encode it.",
+      "paths": [
+        "contracts/v0.1.0/schemas/wrapper.schema.json",
+        "contracts/v0.1.0/catalog.json"
+      ]
+    }
+  ]
+}

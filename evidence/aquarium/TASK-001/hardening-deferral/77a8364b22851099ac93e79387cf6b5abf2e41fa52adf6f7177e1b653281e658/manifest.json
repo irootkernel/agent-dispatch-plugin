@@ -1,0 +1,23 @@
+{
+  "schema": "aquarium.promoted-evidence/v1",
+  "work_unit": {
+    "kind": "task",
+    "id": "TASK-001"
+  },
+  "purpose": "hardening-deferral",
+  "target": {
+    "git_head": "44080f6a7e282797119162206dd914fcad1cfce0",
+    "capture_kind": "stage",
+    "content_sha256": "sha256:77a8364b22851099ac93e79387cf6b5abf2e41fa52adf6f7177e1b653281e658"
+  },
+  "source": {
+    "tool": "mulgae"
+  },
+  "payloads": [
+    {
+      "path": "evidence/aquarium/TASK-001/hardening-deferral/77a8364b22851099ac93e79387cf6b5abf2e41fa52adf6f7177e1b653281e658/findings.json",
+      "media_type": "application/json",
+      "sha256": "sha256:ba954303476a83807350276648133b35414d04818d30ea38204d450b146e82a8"
+    }
+  ]
+}

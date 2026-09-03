@@ -1,0 +1,52 @@
+{
+  "cases": [
+    {
+      "id": "receipts-valid-list-kind",
+      "description": "list with the closed kind filter.",
+      "expect": "valid",
+      "instance": {"action": "list", "kind": "acceptance"}
+    },
+    {
+      "id": "receipts-valid-list-all-filters",
+      "description": "All documented list filters at boundary values.",
+      "expect": "valid",
+      "instance": {"action": "list", "route": "wiki", "dispatch": "d_7f3a2b", "kind": "work", "limit": 100, "offset": 1000000}
+    },
+    {
+      "id": "receipts-valid-show",
+      "description": "show requires receipt_id and accepts no filters.",
+      "expect": "valid",
+      "instance": {"action": "show", "receipt_id": "r_01jz"}
+    },
+    {
+      "id": "receipts-invalid-unknown-kind",
+      "description": "An unknown kind value fails the closed enum.",
+      "expect": "invalid",
+      "instance": {"action": "list", "kind": "delivery"}
+    },
+    {
+      "id": "receipts-invalid-show-with-limit",
+      "description": "Filters are list-only and rejected for show.",
+      "expect": "invalid",
+      "instance": {"action": "show", "receipt_id": "r_01jz", "limit": 10}
+    },
+    {
+      "id": "receipts-invalid-show-missing-id",
+      "description": "show without receipt_id violates the conditional requirement.",
+      "expect": "invalid",
+      "instance": {"action": "show"}
+    },
+    {
+      "id": "receipts-invalid-list-with-receipt-id",
+      "description": "receipt_id is show-only and rejected for list.",
+      "expect": "invalid",
+      "instance": {"action": "list", "receipt_id": "r_01jz"}
+    },
+    {
+      "id": "receipts-invalid-limit-string",
+      "description": "Limit must be an integer.",
+      "expect": "invalid",
+      "instance": {"action": "list", "limit": "25"}
+    }
+  ]
+}

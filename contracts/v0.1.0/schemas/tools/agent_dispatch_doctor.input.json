@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_doctor",
+  "title": "agent_dispatch_doctor input",
+  "description": "probe_targets defaults to false. Findings are examined only; remediation is never executed.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "probe_targets": {
+      "type": "boolean",
+      "default": false,
+      "description": "Add the read-only live target probes."
+    }
+  }
+}

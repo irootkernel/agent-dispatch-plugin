@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.1.0:wrapper",
+  "title": "agent-dispatch-plugin.result/v1 wrapper",
+  "description": "Plugin-owned closed result wrapper. A validated envelope is embedded unflattened whenever one exists; a plugin error object is the sole carrier when no envelope exists. Diagnostics are bounded and redacted.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "ok",
+    "operation",
+    "exit_code",
+    "diagnostics"
+  ],
+  "properties": {
+    "schema_version": {"const": "agent-dispatch-plugin.result/v1"},
+    "ok": {"type": "boolean"},
+    "operation": {
+      "enum": [
+        "agent_dispatch_status",
+        "agent_dispatch_doctor",
+        "agent_dispatch_routes",
+        "agent_dispatch_dispatches",
+        "agent_dispatch_receipts",
+        "agent_dispatch_event_show",
+        "agent_dispatch_quarantine",
+        "agent_dispatch_notifications",
+        "agent_dispatch_schedule_inspect",
+        "agent_dispatch_config"
+      ]
+    },
+    "exit_code": {
+      "type": "integer",
+      "description": "0 on validated success, the Agent Dispatch exit status on domain rejection, and -1 when no process completed (plugin failure)."
+    },
+    "agent_dispatch": {"$ref": "urn:agent-dispatch-plugin:contracts:v0.1.0:envelope"},
+    "error": {"$ref": "urn:agent-dispatch-plugin:contracts:v0.1.0:error"},
+    "diagnostics": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {"type": "string", "maxLength": 512}
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"ok": {"const": true}}, "required": ["ok"]},
+      "then": {
+        "required": ["agent_dispatch"],
+        "not": {"required": ["error"]},
+        "properties": {
+          "agent_dispatch": {"properties": {"ok": {"const": true}}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"ok": {"const": false}}, "required": ["ok"]},
+      "then": {
+        "oneOf": [
+          {
+            "required": ["agent_dispatch"],
+            "not": {"required": ["error"]},
+            "properties": {
+              "agent_dispatch": {"properties": {"ok": {"const": false}}}
+            }
+          },
+          {
+            "required": ["error"],
+            "not": {"required": ["agent_dispatch"]}
+          }
+        ]
+      }
+    }
+  ]
+}

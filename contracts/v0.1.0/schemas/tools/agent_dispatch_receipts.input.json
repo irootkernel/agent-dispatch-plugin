@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_receipts",
+  "title": "agent_dispatch_receipts input",
+  "description": "action selects list with documented filters or show for one receipt. kind is the closed upstream receipt kind set. Filters apply to list only; receipt_id applies to show only.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "action": {"enum": ["list", "show"]},
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
+      "maxLength": 128
+    },
+    "route": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
+      "maxLength": 128
+    },
+    "dispatch": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
+      "maxLength": 128
+    },
+    "kind": {"enum": ["acceptance", "execution_projection", "work"]},
+    "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25},
+    "offset": {"type": "integer", "minimum": 0, "maximum": 1000000}
+  },
+  "required": ["action"],
+  "allOf": [
+    {
+      "if": {"properties": {"action": {"const": "list"}}, "required": ["action"]},
+      "then": {"not": {"required": ["receipt_id"]}}
+    },
+    {
+      "if": {"properties": {"action": {"const": "show"}}, "required": ["action"]},
+      "then": {
+        "required": ["receipt_id"],
+        "not": {
+          "anyOf": [
+            {"required": ["route"]},
+            {"required": ["dispatch"]},
+            {"required": ["kind"]},
+            {"required": ["limit"]},
+            {"required": ["offset"]}
+          ]
+        }
+      }
+    }
+  ]
+}

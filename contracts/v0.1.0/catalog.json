@@ -1,0 +1,446 @@
+{
+  "schema_version": "agent-dispatch-plugin.contracts/v1",
+  "product_version": "0.1.0",
+  "authority": "docs/specs/PRD.md",
+  "toolset": "agent_dispatch",
+  "identifier_grammar": {
+    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
+    "max_length": 128,
+    "preserved_literally": true,
+    "rejects_before_process_creation": true,
+    "rejects": [
+      "empty values",
+      "leading option prefixes such as -x or --flag",
+      "whitespace, shell metacharacters, NUL, and control bytes",
+      "any path separator (/) and whole-value traversal tokens such as ..",
+      "values longer than 128 characters"
+    ],
+    "embedded_dots_note": "Embedded dots (including a..b) are permitted by design because identifiers are single argv elements with no shell or path semantics; they must never be used as filesystem path components.",
+    "applies_to": [
+      "route_id",
+      "dispatch_id",
+      "receipt_id",
+      "aggregate_id",
+      "quarantine_id",
+      "route",
+      "dispatch",
+      "sink"
+    ]
+  },
+  "state_token_grammar": {
+    "pattern": "^[a-z][a-z0-9-]{0,63}$",
+    "max_length": 64,
+    "applies_to": [
+      "state on dispatches list (upstream does not enumerate these values)",
+      "state on notifications list (upstream does not enumerate these values)"
+    ]
+  },
+  "closed_enums": {
+    "routes.action": ["list", "show", "preflight"],
+    "dispatches.action": ["list", "show"],
+    "receipts.action": ["list", "show"],
+    "receipts.kind": ["acceptance", "execution_projection", "work"],
+    "quarantine.action": ["list", "show"],
+    "quarantine.state": ["held", "released", "discarded", "superseded"],
+    "config.action": ["show", "validate"]
+  },
+  "pagination": {
+    "limit": {"min": 1, "max": 100, "default": 25},
+    "offset": {"min": 0, "max": 1000000, "applies_to": ["dispatches list", "receipts list"]}
+  },
+  "tools": [
+    {
+      "name": "agent_dispatch_status",
+      "description": "Inspect the Agent Dispatch operational snapshot: routes, queues, quarantine, targets, drift, and notification drain posture.",
+      "input_schema": "schemas/tools/agent_dispatch_status.input.json",
+      "actions": [
+        {
+          "id": "inspect",
+          "argv_prefix": ["status"],
+          "value_bindings": [],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "status"
+        }
+      ]
+    },
+    {
+      "name": "agent_dispatch_doctor",
+      "description": "Examine Agent Dispatch configuration, store, and integration findings. Target probing is optional; remediation is never executed.",
+      "input_schema": "schemas/tools/agent_dispatch_doctor.input.json",
+      "actions": [
+        {
+          "id": "inspect",
+          "argv_prefix": ["doctor"],
+          "value_bindings": [],
+          "optional_flags": [
+            {"param": "probe_targets", "tokens": ["--probe-targets"]}
+          ],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "doctor"
+        }
+      ]
+    },
+    {
+      "name": "agent_dispatch_routes",
+      "description": "Inspect materialized routes, one route's runtime projection, or run the read-only destination preflight. Never enables, disables, or edits routes.",
+      "input_schema": "schemas/tools/agent_dispatch_routes.input.json",
+      "actions": [
+        {
+          "id": "list",
+          "input_action_value": "list",
+          "argv_prefix": ["route", "list"],
+          "value_bindings": [],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "route list"
+        },
+        {
+          "id": "show",
+          "input_action_value": "show",
+          "argv_prefix": ["route", "show"],
+          "value_bindings": [{"param": "route_id", "flag": "--route"}],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "route show"
+        },
+        {
+          "id": "preflight",
+          "input_action_value": "preflight",
+          "argv_prefix": ["route", "preflight"],
+          "value_bindings": [{"param": "route_id", "flag": "--route"}],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "route preflight"
+        }
+      ]
+    },
+    {
+      "name": "agent_dispatch_dispatches",
+      "description": "Inspect redacted dispatch lists or one dispatch's full lineage. Read-only; retry, drain, discard, rerun, reprocess, and refresh are never reachable.",
+      "input_schema": "schemas/tools/agent_dispatch_dispatches.input.json",
+      "actions": [
+        {
+          "id": "list",
+          "input_action_value": "list",
+          "argv_prefix": ["dispatches", "list"],
+          "value_bindings": [
+            {"param": "route", "flag": "--route"},
+            {"param": "state", "flag": "--state"},
+            {"param": "limit", "flag": "--limit"},
+            {"param": "offset", "flag": "--offset"}
+          ],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "dispatches list"
+        },
+        {
+          "id": "show",
+          "input_action_value": "show",
+          "argv_prefix": ["dispatches", "show"],
+          "value_bindings": [{"param": "dispatch_id", "positional": true}],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "dispatches show"
+        }
+      ]
+    },
+    {
+      "name": "agent_dispatch_receipts",
+      "description": "Inspect acceptance and execution receipt evidence. Read-only inspection; it never submits, completes, or fails worker receipts.",
+      "input_schema": "schemas/tools/agent_dispatch_receipts.input.json",
+      "actions": [
+        {
+          "id": "list",
+          "input_action_value": "list",
+          "argv_prefix": ["receipts", "list"],
+          "value_bindings": [
+            {"param": "route", "flag": "--route"},
+            {"param": "dispatch", "flag": "--dispatch"},
+            {"param": "kind", "flag": "--kind"},
+            {"param": "limit", "flag": "--limit"},
+            {"param": "offset", "flag": "--offset"}
+          ],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "receipts list"
+        },
+        {
+          "id": "show",
+          "input_action_value": "show",
+          "argv_prefix": ["receipts", "show"],
+          "value_bindings": [{"param": "receipt_id", "positional": true}],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "receipts show"
+        }
+      ]
+    },
+    {
+      "name": "agent_dispatch_event_show",
+      "description": "Inspect one aggregate event with its per-destination child evidence. Never triggers follow-up work.",
+      "input_schema": "schemas/tools/agent_dispatch_event_show.input.json",
+      "actions": [
+        {
+          "id": "show",
+          "argv_prefix": ["events", "show"],
+          "value_bindings": [{"param": "aggregate_id", "positional": true}],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "events show"
+        }
+      ]
+    },
+    {
+      "name": "agent_dispatch_quarantine",
+      "description": "Inspect held or resolved structural quarantine cases. Read-only; release and discard are never reachable.",
+      "input_schema": "schemas/tools/agent_dispatch_quarantine.input.json",
+      "actions": [
+        {
+          "id": "list",
+          "input_action_value": "list",
+          "argv_prefix": ["quarantine", "list"],
+          "value_bindings": [
+            {"param": "route", "flag": "--route"},
+            {"param": "state", "flag": "--state"},
+            {"param": "limit", "flag": "--limit"}
+          ],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "quarantine list"
+        },
+        {
+          "id": "show",
+          "input_action_value": "show",
+          "argv_prefix": ["quarantine", "show"],
+          "value_bindings": [{"param": "quarantine_id", "positional": true}],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "quarantine show"
+        }
+      ]
+    },
+    {
+      "name": "agent_dispatch_notifications",
+      "description": "Inspect notification delivery evidence. Read-only; sink tests, retries, and drains are never reachable.",
+      "input_schema": "schemas/tools/agent_dispatch_notifications.input.json",
+      "actions": [
+        {
+          "id": "list",
+          "argv_prefix": ["notifications", "list"],
+          "value_bindings": [
+            {"param": "route", "flag": "--route"},
+            {"param": "state", "flag": "--state"},
+            {"param": "sink", "flag": "--sink"},
+            {"param": "limit", "flag": "--limit"}
+          ],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "notifications list"
+        }
+      ]
+    },
+    {
+      "name": "agent_dispatch_schedule_inspect",
+      "description": "Inspect the managed launchd drain schedule for one route: presence, loaded state, definition match, digests, and health. Never renders, installs, disables, uninstalls, or runs a schedule.",
+      "input_schema": "schemas/tools/agent_dispatch_schedule_inspect.input.json",
+      "actions": [
+        {
+          "id": "inspect",
+          "argv_prefix": ["schedule", "inspect"],
+          "value_bindings": [{"param": "route_id", "flag": "--route"}],
+          "optional_flags": [],
+          "argv_suffix": ["--platform", "launchd", "--output", "json"],
+          "expected_command": "schedule inspect"
+        }
+      ]
+    },
+    {
+      "name": "agent_dispatch_config",
+      "description": "Inspect the redacted normalized configuration with computed revisions, or validate it with optional read-only target probes. Never returns secret values and never rewrites configuration.",
+      "input_schema": "schemas/tools/agent_dispatch_config.input.json",
+      "actions": [
+        {
+          "id": "show",
+          "input_action_value": "show",
+          "argv_prefix": ["config", "show"],
+          "value_bindings": [],
+          "optional_flags": [],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "config show"
+        },
+        {
+          "id": "validate",
+          "input_action_value": "validate",
+          "argv_prefix": ["config", "validate"],
+          "value_bindings": [],
+          "optional_flags": [
+            {"param": "probe_targets", "tokens": ["--probe-targets"]}
+          ],
+          "argv_suffix": ["--output", "json"],
+          "expected_command": "config validate"
+        }
+      ]
+    }
+  ],
+  "command_vocabulary": {
+    "allowed": {
+      "status": ["status"],
+      "doctor": ["doctor"],
+      "route": ["list", "show", "preflight"],
+      "dispatches": ["list", "show"],
+      "receipts": ["list", "show"],
+      "events": ["show"],
+      "quarantine": ["list", "show"],
+      "notifications": ["list"],
+      "schedule": ["inspect"],
+      "config": ["show", "validate"]
+    },
+    "denied_subcommands": [
+      "plan",
+      "enable",
+      "disable",
+      "stale",
+      "set-profile",
+      "set-skills",
+      "retry",
+      "reprocess",
+      "rerun",
+      "refresh",
+      "drain",
+      "discard",
+      "release",
+      "render",
+      "install",
+      "uninstall",
+      "run",
+      "test",
+      "begin",
+      "complete",
+      "fail",
+      "backup",
+      "integrity",
+      "prune",
+      "probe",
+      "capabilities",
+      "profiles",
+      "set-minimum-version",
+      "submit",
+      "wiki"
+    ]
+  },
+  "forbidden_input_properties": [
+    "flags",
+    "command",
+    "args",
+    "argv",
+    "environment",
+    "env",
+    "cwd",
+    "binary",
+    "binary_path",
+    "binary_sha256",
+    "config",
+    "config_path",
+    "state_dir",
+    "timeout",
+    "timeout_seconds",
+    "max_output_bytes",
+    "output"
+  ],
+  "wrapper": {
+    "schema_version": "agent-dispatch-plugin.result/v1",
+    "schema": "schemas/wrapper.schema.json",
+    "members": ["schema_version", "ok", "operation", "exit_code", "agent_dispatch", "error", "diagnostics"],
+    "closed_boundary": true,
+    "carrier_rule": "When ok is true the validated envelope (with its own ok true) is the sole evidence carrier. When ok is false exactly one carrier is present: the validated envelope (with its own ok false) for a domain rejection, or the plugin error object when no envelope exists.",
+    "exit_code_semantics": {
+      "validated_success": 0,
+      "domain_rejection": "the Agent Dispatch exit status",
+      "plugin_failure_without_completed_process": -1
+    }
+  },
+  "envelope": {
+    "api_version": "agent-dispatch.cli/v1",
+    "schema": "schemas/envelope.schema.json",
+    "members": ["api_version", "command", "ok", "result", "error", "warnings", "trace_id"],
+    "closed_boundary": true,
+    "open_domain_member": "result",
+    "error_member": {
+      "members": ["code", "category", "message", "retryable"],
+      "closed_boundary": true
+    },
+    "forward_compatibility": "Additive fields inside the domain result member are unconstrained domain values and may be ignored. Every other structural boundary is closed and additive members there fail validation.",
+    "command_identity": "The envelope command member carries the requested command path, for example 'config show'. The runner requires it to equal the action's expected_command exactly.",
+    "stream_policy": "Success envelopes are written to stdout as one JSON object. Error reporting surfaces through the documented exit codes and stderr; stderr content is never returned raw and enters only bounded redacted diagnostics."
+  },
+  "errors": {
+    "codes": [
+      "binary_unavailable",
+      "unsupported_agent_dispatch_version",
+      "invalid_argument",
+      "timeout",
+      "output_too_large",
+      "malformed_json",
+      "contract_mismatch",
+      "adapter_usage_error",
+      "execution_failed",
+      "redaction_failure"
+    ],
+    "schema": "schemas/error.schema.json",
+    "retryable": false,
+    "message_max_length": 512,
+    "exclusions": "Errors never expose tracebacks, unrestricted stderr, environment dumps, raw partial output, or file bodies."
+  },
+  "diagnostics_bounds": {
+    "max_items": 16,
+    "max_length_per_item": 512
+  },
+  "limits": {
+    "timeout_seconds": {"default": 30, "min": 1, "max": 300},
+    "termination": {
+      "deadline_covers": "spawn through normal completion",
+      "signal": "TERM",
+      "grace_period_seconds": 2,
+      "then": "force-kill the entire process group"
+    },
+    "stdout_max_bytes": 1048576,
+    "stderr_max_bytes": 65536,
+    "combined_max_bytes": 1048576,
+    "combined_ceiling_policy": "Configuration may tighten but never raise the combined hard ceiling.",
+    "overflow_behavior": "A deadline returns timeout; any stream or combined overflow returns output_too_large. Both terminate the process group, discard captured raw output, and return only bounded redacted diagnostics."
+  },
+  "compatibility": {
+    "agent_dispatch": ">=0.1.6,<0.2.0",
+    "agent_dispatch_envelope": "agent-dispatch.cli/v1",
+    "hermes": "0.20.5",
+    "platform": "darwin/arm64",
+    "plugin_format": {"kind": "standalone", "manifest_version": 2, "api_version": 1},
+    "qualification_policy": "Qualification records exact artifact identities on a disposable, isolated Darwin arm64 profile with synthetic Agent Dispatch state and controlled fake targets. The support matrix includes Agent Dispatch v0.1.6 and the selected highest available compatible release below 0.2.0.",
+    "initial_verification_state": "unverified",
+    "failed_assumption_policy": "Any failed compatibility assumption blocks v0.1.0. First distinguish a plugin defect from upstream incompatibility. The implementation may not silently narrow, widen, or adapt the baseline."
+  },
+  "redaction_rules": [
+    {
+      "id": "redact-authorization-values",
+      "rule": "Authorization values are never returned in plugin diagnostics or wrapped results."
+    },
+    {
+      "id": "redact-secret-references",
+      "rule": "Secret references that reveal protected paths are redacted."
+    },
+    {
+      "id": "redact-token-like-strings",
+      "rule": "Token-like strings are redacted from diagnostics."
+    },
+    {
+      "id": "redact-sensitive-webhook-urls",
+      "rule": "Full webhook URLs are redacted when Agent Dispatch output policy marks them sensitive."
+    },
+    {
+      "id": "redact-unexpected-paths",
+      "rule": "Absolute paths other than those allowed by the configured binary and config display policy are redacted."
+    }
+  ],
+  "fixtures_index": "fixtures/catalog.json"
+}

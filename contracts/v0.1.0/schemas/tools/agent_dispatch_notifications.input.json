@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_notifications",
+  "title": "agent_dispatch_notifications input",
+  "description": "Single fixed list action with documented filters only. No sink test, retry, or drain is reachable.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "route": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
+      "maxLength": 128
+    },
+    "state": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$",
+      "maxLength": 64
+    },
+    "sink": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
+      "maxLength": 128
+    },
+    "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25}
+  }
+}

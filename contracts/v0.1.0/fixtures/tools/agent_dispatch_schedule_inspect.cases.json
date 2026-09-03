@@ -1,0 +1,28 @@
+{
+  "cases": [
+    {
+      "id": "schedule-valid-route",
+      "description": "route_id is required and preserved literally.",
+      "expect": "valid",
+      "instance": {"route_id": "wiki"}
+    },
+    {
+      "id": "schedule-invalid-missing-route",
+      "description": "route_id is required.",
+      "expect": "invalid",
+      "instance": {}
+    },
+    {
+      "id": "schedule-invalid-platform-not-offered",
+      "description": "The platform is fixed by the mapping and is not a model input.",
+      "expect": "invalid",
+      "instance": {"route_id": "wiki", "platform": "launchd"}
+    },
+    {
+      "id": "schedule-invalid-route-slash",
+      "description": "Path separators are rejected by the identifier grammar.",
+      "expect": "invalid",
+      "instance": {"route_id": "wiki/../../etc"}
+    }
+  ]
+}

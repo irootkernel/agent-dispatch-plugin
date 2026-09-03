@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_routes",
+  "title": "agent_dispatch_routes input",
+  "description": "action selects the fixed route command. route_id is required for show and preflight and rejected for list.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "action": {"enum": ["list", "show", "preflight"]},
+    "route_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
+      "maxLength": 128
+    }
+  },
+  "required": ["action"],
+  "allOf": [
+    {
+      "if": {"properties": {"action": {"const": "list"}}, "required": ["action"]},
+      "then": {"not": {"required": ["route_id"]}}
+    },
+    {
+      "if": {"properties": {"action": {"enum": ["show", "preflight"]}}, "required": ["action"]},
+      "then": {"required": ["route_id"]}
+    }
+  ]
+}

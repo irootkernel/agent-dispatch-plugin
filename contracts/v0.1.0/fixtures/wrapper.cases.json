@@ -1,0 +1,413 @@
+{
+  "cases": [
+    {
+      "id": "wrapper-valid-success",
+      "description": "A complete successful plugin wrapper embedding a validated envelope.",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_status",
+        "exit_code": 0,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "status",
+          "ok": true,
+          "result": {
+            "routes": []
+          },
+          "warnings": [],
+          "trace_id": ""
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-valid-domain-rejection",
+      "description": "A bounded domain rejection wrapper for a not-found exit.",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_dispatches",
+        "exit_code": 4,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "dispatches show",
+          "ok": false,
+          "error": {
+            "code": "not_found",
+            "category": "usage",
+            "message": "no dispatch with id does-not-exist",
+            "retryable": false
+          },
+          "trace_id": ""
+        },
+        "diagnostics": [
+          "dispatch not found"
+        ]
+      }
+    },
+    {
+      "id": "wrapper-invalid-schema-version",
+      "description": "The wrapper identity is fixed.",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v2",
+        "ok": true,
+        "operation": "agent_dispatch_status",
+        "exit_code": 0,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "status",
+          "ok": true,
+          "result": {}
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-invalid-unknown-operation",
+      "description": "The operation must be one of the ten declared tools.",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_admin",
+        "exit_code": 0,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "status",
+          "ok": true,
+          "result": {}
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-invalid-missing-diagnostics",
+      "description": "diagnostics is required even when empty.",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_status",
+        "exit_code": 0,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "status",
+          "ok": true,
+          "result": {}
+        }
+      }
+    },
+    {
+      "id": "wrapper-invalid-exit-code-type",
+      "description": "exit_code must be an integer.",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_status",
+        "exit_code": "0",
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "status",
+          "ok": true,
+          "result": {}
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-invalid-envelope-inside",
+      "description": "The embedded envelope must itself validate; a wrong api_version fails the composed contract.",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_status",
+        "exit_code": 0,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v9",
+          "command": "status",
+          "ok": true,
+          "result": {}
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-invalid-diagnostic-too-long",
+      "description": "A diagnostic string longer than 512 characters exceeds the bound.",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_status",
+        "exit_code": 0,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "status",
+          "ok": true,
+          "result": {}
+        },
+        "diagnostics": [
+          "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        ]
+      }
+    },
+    {
+      "id": "wrapper-valid-plugin-failure-binary-unavailable",
+      "description": "Plugin failure binary_unavailable carried by the plugin error object with no envelope.",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_status",
+        "exit_code": -1,
+        "error": {
+          "code": "binary_unavailable",
+          "message": "Configured Agent Dispatch executable is unavailable.",
+          "retryable": false
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-valid-plugin-failure-unsupported-agent-dispatch-version",
+      "description": "Plugin failure unsupported_agent_dispatch_version carried by the plugin error object with no envelope.",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_status",
+        "exit_code": -1,
+        "error": {
+          "code": "unsupported_agent_dispatch_version",
+          "message": "Agent Dispatch version is outside the supported range.",
+          "retryable": false
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-valid-plugin-failure-timeout",
+      "description": "Plugin failure timeout carried by the plugin error object with no envelope.",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_status",
+        "exit_code": -1,
+        "error": {
+          "code": "timeout",
+          "message": "Command exceeded the configured deadline and the process group was terminated.",
+          "retryable": false
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-valid-plugin-failure-output-too-large",
+      "description": "Plugin failure output_too_large carried by the plugin error object with no envelope.",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_status",
+        "exit_code": -1,
+        "error": {
+          "code": "output_too_large",
+          "message": "Command output exceeded the configured ceiling and was discarded.",
+          "retryable": false
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-valid-plugin-failure-malformed-json",
+      "description": "Plugin failure malformed_json carried by the plugin error object with no envelope.",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_status",
+        "exit_code": -1,
+        "error": {
+          "code": "malformed_json",
+          "message": "Command output was not one JSON object.",
+          "retryable": false
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-valid-plugin-failure-contract-mismatch",
+      "description": "Plugin failure contract_mismatch carried by the plugin error object with no envelope.",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_status",
+        "exit_code": -1,
+        "error": {
+          "code": "contract_mismatch",
+          "message": "Envelope command did not match the requested command surface.",
+          "retryable": false
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-valid-plugin-failure-adapter-usage-error",
+      "description": "Plugin failure adapter_usage_error carried by the plugin error object with no envelope.",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_status",
+        "exit_code": -1,
+        "error": {
+          "code": "adapter_usage_error",
+          "message": "The Agent Dispatch usage error indicates a plugin mapping defect.",
+          "retryable": false
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-valid-plugin-failure-execution-failed",
+      "description": "Plugin failure execution_failed carried by the plugin error object with no envelope.",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_status",
+        "exit_code": -1,
+        "error": {
+          "code": "execution_failed",
+          "message": "The command failed without a validated envelope.",
+          "retryable": false
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-valid-plugin-failure-redaction-failure",
+      "description": "Plugin failure redaction_failure carried by the plugin error object with no envelope.",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_status",
+        "exit_code": -1,
+        "error": {
+          "code": "redaction_failure",
+          "message": "A diagnostic could not be produced without exposing protected content.",
+          "retryable": false
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-valid-plugin-failure-invalid-argument",
+      "description": "Plugin failure invalid_argument carried by the plugin error object with no envelope.",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_routes",
+        "exit_code": -1,
+        "error": {
+          "code": "invalid_argument",
+          "message": "route_id failed identifier validation before process creation.",
+          "retryable": false
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-invalid-both-carriers",
+      "description": "An envelope and a plugin error object cannot both be present.",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_status",
+        "exit_code": 4,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "status",
+          "ok": false,
+          "error": {
+            "code": "not_found",
+            "category": "usage",
+            "message": "m",
+            "retryable": false
+          }
+        },
+        "error": {
+          "code": "execution_failed",
+          "message": "m",
+          "retryable": false
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-invalid-failure-without-carrier",
+      "description": "A failure wrapper requires exactly one evidence carrier.",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": false,
+        "operation": "agent_dispatch_status",
+        "exit_code": -1,
+        "diagnostics": [
+          "no carrier"
+        ]
+      }
+    },
+    {
+      "id": "wrapper-invalid-success-with-error-carrier",
+      "description": "A success wrapper must carry the envelope, never the plugin error object.",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_status",
+        "exit_code": 0,
+        "error": {
+          "code": "timeout",
+          "message": "m",
+          "retryable": false
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-invalid-success-envelope-ok-mismatch",
+      "description": "A success wrapper cannot embed a failing envelope.",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_status",
+        "exit_code": 0,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "status",
+          "ok": false,
+          "error": {
+            "code": "not_found",
+            "category": "usage",
+            "message": "m",
+            "retryable": false
+          }
+        },
+        "diagnostics": []
+      }
+    }
+  ]
+}

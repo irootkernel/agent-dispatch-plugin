@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_status",
+  "title": "agent_dispatch_status input",
+  "description": "Closed empty object. The status snapshot takes no model-provided parameters.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false,
+  "maxProperties": 0
+}

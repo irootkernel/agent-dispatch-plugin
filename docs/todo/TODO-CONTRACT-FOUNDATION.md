@@ -28,6 +28,29 @@ Hermes plugin skeleton without implementing business-domain behavior.
   command-specific result schemas.
 - Test layers and evidence locations established by TASK-003.
 
+All three groups are recorded as accepted ADR-001, ADR-002, and ADR-003; the
+frozen artifacts live in contracts/v0.1.0/ with the offline gate
+`uv run --with jsonschema contracts/validate.py` (docs/specs/contracts.md).
+
+## Guidance for later tasks and epics
+
+- TASK-002 derives plugin.yaml provides_tools, the Python registration table,
+  and the expected inventory from contracts/v0.1.0/catalog.json; never
+  hand-edit derived views (ADR-001).
+- Observed against the installed Agent Dispatch v0.1.6 help: receipts kind is
+  `acceptance|execution_projection|work`; quarantine state is
+  `held|released|discarded|superseded`; the envelope `command` member carries
+  the full command path (for example `config show`); error envelopes carry a
+  closed `error` object (`code`, `category`, `message`, `retryable`) and are
+  reported through exit codes and stderr, while success envelopes arrive on
+  stdout.
+- EPIC-002 must verify with the real binary that the PRD-documented
+  `quarantine list --route/--limit` and the absence of a notifications
+  `--offset` filter match actual flag support; a mismatch is an upstream
+  compatibility finding, not a contract change.
+- EPIC-002 runner tests should reuse contracts/v0.1.0 fixtures for envelope,
+  wrapper, and error validation cases before writing new ones.
+
 ## Acceptance
 
 - Exactly ten tools appear once in manifest, registry, and expected inventory.

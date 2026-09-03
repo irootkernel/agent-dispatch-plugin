@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_config",
+  "title": "agent_dispatch_config input",
+  "description": "action selects show or validate. probe_targets is valid only for validate.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "action": {"enum": ["show", "validate"]},
+    "probe_targets": {
+      "type": "boolean",
+      "default": false,
+      "description": "Add the read-only live target probes. Valid only for validate."
+    }
+  },
+  "required": ["action"],
+  "allOf": [
+    {
+      "if": {"properties": {"action": {"const": "show"}}, "required": ["action"]},
+      "then": {"not": {"required": ["probe_targets"]}}
+    }
+  ]
+}

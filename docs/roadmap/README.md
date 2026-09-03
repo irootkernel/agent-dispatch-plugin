@@ -8,7 +8,7 @@ evidence named by the Detailed SOT, not prose assertion.
 
 | Epic | Outcome | Status | Detailed SOT |
 |---|---|---|---|
-| EPIC-001 | Establish canonical contracts and a testable plugin skeleton | Planned | docs/todo/TODO-CONTRACT-FOUNDATION.md |
+| EPIC-001 | Establish canonical contracts and a testable plugin skeleton | In Progress | docs/todo/TODO-CONTRACT-FOUNDATION.md |
 | EPIC-002 | Build the single secure process and validation boundary | Planned | docs/todo/TODO-SECURE-RUNNER.md |
 | EPIC-003 | Deliver the exact ten inspection tools and parity evidence | Planned | docs/todo/TODO-INSPECTION-TOOLS.md |
 | EPIC-004 | Prove security and compatibility release gates | Planned | docs/todo/TODO-SECURITY-COMPATIBILITY.md |
@@ -18,7 +18,7 @@ evidence named by the Detailed SOT, not prose assertion.
 
 | Task | Epic | Work unit | Status | Completion evidence |
 |---|---|---|---|---|
-| TASK-001 | EPIC-001 | Freeze compatibility, tool, result, error, security, and fixture contracts | Planned | Reviewed schemas and fixtures traceable to the PRD |
+| TASK-001 | EPIC-001 | Freeze compatibility, tool, result, error, security, and fixture contracts | Completed | Reviewed schemas and fixtures traceable to the PRD |
 | TASK-002 | EPIC-001 | Create the Python package, manifest, and declarative registry skeleton | Planned | Python project authority, Plugin Doctor, and registry/manifest parity evidence |
 | TASK-003 | EPIC-001 | Run $aquarium:test-setup to establish aquarium-test-contract/v1 and baseline checks | Planned | Approved test contract and reachable baseline gate |
 | TASK-004 | EPIC-002 | Implement trusted configuration, platform, binary identity, and version checks | Planned | Positive and negative dependency checks |

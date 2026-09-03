@@ -1,0 +1,194 @@
+{
+  "cases": [
+    {
+      "id": "envelope-valid-success-full",
+      "description": "A complete success envelope as written to stdout.",
+      "expect": "valid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "status",
+        "ok": true,
+        "result": {"routes": [], "queues": {}},
+        "warnings": [],
+        "trace_id": ""
+      }
+    },
+    {
+      "id": "envelope-valid-success-minimal",
+      "description": "Only the required members with a domain result.",
+      "expect": "valid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "config show",
+        "ok": true,
+        "result": {}
+      }
+    },
+    {
+      "id": "envelope-valid-success-array-result",
+      "description": "A list-shaped domain result serializes as an array.",
+      "expect": "valid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "route list",
+        "ok": true,
+        "result": []
+      }
+    },
+    {
+      "id": "envelope-valid-success-additive-domain-fields",
+      "description": "Additive fields inside the open domain result member are unconstrained.",
+      "expect": "valid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "status",
+        "ok": true,
+        "result": {"routes": [], "future_member": {"nested": [1, 2, 3]}}
+      }
+    },
+    {
+      "id": "envelope-valid-error",
+      "description": "A domain rejection carries the closed error object and no result member.",
+      "expect": "valid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "dispatches show",
+        "ok": false,
+        "error": {
+          "code": "not_found",
+          "category": "usage",
+          "message": "no dispatch with id does-not-exist",
+          "retryable": false
+        },
+        "trace_id": "tf_01jz"
+      }
+    },
+    {
+      "id": "envelope-invalid-api-version",
+      "description": "An unknown protocol version fails validation.",
+      "expect": "invalid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v2",
+        "command": "status",
+        "ok": true,
+        "result": {}
+      }
+    },
+    {
+      "id": "envelope-invalid-missing-ok",
+      "description": "ok is required.",
+      "expect": "invalid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "status",
+        "result": {}
+      }
+    },
+    {
+      "id": "envelope-invalid-ok-type",
+      "description": "ok must be boolean.",
+      "expect": "invalid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "status",
+        "ok": 1,
+        "result": {}
+      }
+    },
+    {
+      "id": "envelope-invalid-success-with-error-member",
+      "description": "A success envelope must not carry the error member.",
+      "expect": "invalid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "status",
+        "ok": true,
+        "result": {},
+        "error": {"code": "x", "category": "usage", "message": "m", "retryable": false}
+      }
+    },
+    {
+      "id": "envelope-invalid-error-with-result-member",
+      "description": "An error envelope must not carry the result member.",
+      "expect": "invalid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "status",
+        "ok": false,
+        "result": {},
+        "error": {"code": "x", "category": "usage", "message": "m", "retryable": false}
+      }
+    },
+    {
+      "id": "envelope-invalid-error-missing-error-member",
+      "description": "An error envelope requires the error member.",
+      "expect": "invalid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "status",
+        "ok": false
+      }
+    },
+    {
+      "id": "envelope-invalid-success-missing-result",
+      "description": "A success envelope requires the result member.",
+      "expect": "invalid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "status",
+        "ok": true
+      }
+    },
+    {
+      "id": "envelope-invalid-unknown-member",
+      "description": "An unexpected field at the closed structural boundary fails validation.",
+      "expect": "invalid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "status",
+        "ok": true,
+        "result": {},
+        "stdout_raw": "..."
+      }
+    },
+    {
+      "id": "envelope-invalid-empty-command",
+      "description": "The command identity must be a non-empty bounded string.",
+      "expect": "invalid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "",
+        "ok": true,
+        "result": {}
+      }
+    },
+    {
+      "id": "envelope-invalid-error-member-open",
+      "description": "The error object is a closed boundary; extra members fail validation.",
+      "expect": "invalid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "status",
+        "ok": false,
+        "error": {
+          "code": "not_found",
+          "category": "usage",
+          "message": "m",
+          "retryable": false,
+          "stacktrace": "Traceback..."
+        }
+      }
+    },
+    {
+      "id": "envelope-invalid-error-retryable-type",
+      "description": "The upstream error retryable flag must be boolean.",
+      "expect": "invalid",
+      "instance": {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "status",
+        "ok": false,
+        "error": {"code": "not_found", "category": "usage", "message": "m", "retryable": "no"}
+      }
+    }
+  ]
+}

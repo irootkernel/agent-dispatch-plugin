@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.1.0:envelope",
+  "title": "agent-dispatch.cli/v1 envelope",
+  "description": "Validated Agent Dispatch machine envelope. The member set is a closed structural boundary. The domain result member is the only open interior; error is the closed upstream error object.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["api_version", "command", "ok"],
+  "properties": {
+    "api_version": {"const": "agent-dispatch.cli/v1"},
+    "command": {"type": "string", "minLength": 1, "maxLength": 64},
+    "ok": {"type": "boolean"},
+    "result": {
+      "type": ["object", "array"],
+      "description": "Unflattened Agent Dispatch domain values. Additive fields inside this member are unconstrained."
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "category", "message", "retryable"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1, "maxLength": 64},
+        "category": {"type": "string", "minLength": 1, "maxLength": 32},
+        "message": {"type": "string"},
+        "retryable": {"type": "boolean"}
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {"type": "string", "maxLength": 1024}
+    },
+    "trace_id": {"type": "string", "maxLength": 128}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"ok": {"const": true}}, "required": ["ok"]},
+      "then": {"required": ["result"], "not": {"required": ["error"]}}
+    },
+    {
+      "if": {"properties": {"ok": {"const": false}}, "required": ["ok"]},
+      "then": {"required": ["error"], "not": {"required": ["result"]}}
+    }
+  ]
+}

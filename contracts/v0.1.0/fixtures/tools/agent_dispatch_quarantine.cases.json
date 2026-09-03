@@ -1,0 +1,52 @@
+{
+  "cases": [
+    {
+      "id": "quarantine-valid-list-default",
+      "description": "A plain list action.",
+      "expect": "valid",
+      "instance": {"action": "list"}
+    },
+    {
+      "id": "quarantine-valid-list-state",
+      "description": "list with the closed state filter.",
+      "expect": "valid",
+      "instance": {"action": "list", "state": "held"}
+    },
+    {
+      "id": "quarantine-valid-list-all-filters",
+      "description": "All documented list filters at boundary values.",
+      "expect": "valid",
+      "instance": {"action": "list", "route": "wiki", "state": "superseded", "limit": 100}
+    },
+    {
+      "id": "quarantine-valid-show",
+      "description": "show requires quarantine_id and accepts no filters.",
+      "expect": "valid",
+      "instance": {"action": "show", "quarantine_id": "q_ab12"}
+    },
+    {
+      "id": "quarantine-invalid-unknown-state",
+      "description": "An unknown state value fails the closed enum.",
+      "expect": "invalid",
+      "instance": {"action": "list", "state": "pending"}
+    },
+    {
+      "id": "quarantine-invalid-show-with-route",
+      "description": "Filters are list-only and rejected for show.",
+      "expect": "invalid",
+      "instance": {"action": "show", "quarantine_id": "q_ab12", "route": "wiki"}
+    },
+    {
+      "id": "quarantine-invalid-show-missing-id",
+      "description": "show without quarantine_id violates the conditional requirement.",
+      "expect": "invalid",
+      "instance": {"action": "show"}
+    },
+    {
+      "id": "quarantine-invalid-list-with-id",
+      "description": "quarantine_id is show-only and rejected for list.",
+      "expect": "invalid",
+      "instance": {"action": "list", "quarantine_id": "q_ab12"}
+    }
+  ]
+}

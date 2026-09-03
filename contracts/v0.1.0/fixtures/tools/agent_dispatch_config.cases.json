@@ -1,0 +1,46 @@
+{
+  "cases": [
+    {
+      "id": "config-valid-show",
+      "description": "show takes no further parameters.",
+      "expect": "valid",
+      "instance": {"action": "show"}
+    },
+    {
+      "id": "config-valid-validate",
+      "description": "validate without probes.",
+      "expect": "valid",
+      "instance": {"action": "validate"}
+    },
+    {
+      "id": "config-valid-validate-probe",
+      "description": "validate with the read-only target probes.",
+      "expect": "valid",
+      "instance": {"action": "validate", "probe_targets": true}
+    },
+    {
+      "id": "config-invalid-missing-action",
+      "description": "action is required.",
+      "expect": "invalid",
+      "instance": {}
+    },
+    {
+      "id": "config-invalid-unknown-action",
+      "description": "An unknown action value fails the closed enum.",
+      "expect": "invalid",
+      "instance": {"action": "rewrite"}
+    },
+    {
+      "id": "config-invalid-probe-on-show",
+      "description": "probe_targets is valid only for validate.",
+      "expect": "invalid",
+      "instance": {"action": "show", "probe_targets": true}
+    },
+    {
+      "id": "config-invalid-forbidden-config-path",
+      "description": "A forbidden execution property is rejected before process creation.",
+      "expect": "invalid",
+      "instance": {"action": "show", "config_path": "/etc/agent-dispatch.toml"}
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_quarantine",
+  "title": "agent_dispatch_quarantine input",
+  "description": "action selects list with documented filters or show for one held or resolved case. state is the closed upstream quarantine state set. Filters apply to list only; quarantine_id applies to show only.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "action": {"enum": ["list", "show"]},
+    "quarantine_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
+      "maxLength": 128
+    },
+    "route": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
+      "maxLength": 128
+    },
+    "state": {"enum": ["held", "released", "discarded", "superseded"]},
+    "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25}
+  },
+  "required": ["action"],
+  "allOf": [
+    {
+      "if": {"properties": {"action": {"const": "list"}}, "required": ["action"]},
+      "then": {"not": {"required": ["quarantine_id"]}}
+    },
+    {
+      "if": {"properties": {"action": {"const": "show"}}, "required": ["action"]},
+      "then": {
+        "required": ["quarantine_id"],
+        "not": {
+          "anyOf": [
+            {"required": ["route"]},
+            {"required": ["state"]},
+            {"required": ["limit"]}
+          ]
+        }
+      }
+    }
+  ]
+}

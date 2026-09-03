@@ -1,0 +1,94 @@
+{
+  "cases": [
+    {
+      "id": "error-valid-binary-unavailable",
+      "description": "binary_unavailable error object.",
+      "expect": "valid",
+      "instance": {"code": "binary_unavailable", "message": "Configured Agent Dispatch executable is unavailable.", "retryable": false}
+    },
+    {
+      "id": "error-valid-unsupported-agent-dispatch-version",
+      "description": "unsupported_agent_dispatch_version error object.",
+      "expect": "valid",
+      "instance": {"code": "unsupported_agent_dispatch_version", "message": "Agent Dispatch version is outside the supported range.", "retryable": false}
+    },
+    {
+      "id": "error-valid-invalid-argument",
+      "description": "invalid_argument error object.",
+      "expect": "valid",
+      "instance": {"code": "invalid_argument", "message": "route_id failed identifier validation.", "retryable": false}
+    },
+    {
+      "id": "error-valid-timeout",
+      "description": "timeout error object.",
+      "expect": "valid",
+      "instance": {"code": "timeout", "message": "Command exceeded the configured deadline.", "retryable": false}
+    },
+    {
+      "id": "error-valid-output-too-large",
+      "description": "output_too_large error object.",
+      "expect": "valid",
+      "instance": {"code": "output_too_large", "message": "Command output exceeded the configured ceiling.", "retryable": false}
+    },
+    {
+      "id": "error-valid-malformed-json",
+      "description": "malformed_json error object.",
+      "expect": "valid",
+      "instance": {"code": "malformed_json", "message": "Command output was not one JSON object.", "retryable": false}
+    },
+    {
+      "id": "error-valid-contract-mismatch",
+      "description": "contract_mismatch error object.",
+      "expect": "valid",
+      "instance": {"code": "contract_mismatch", "message": "Envelope command did not match the requested command surface.", "retryable": false}
+    },
+    {
+      "id": "error-valid-adapter-usage-error",
+      "description": "adapter_usage_error error object.",
+      "expect": "valid",
+      "instance": {"code": "adapter_usage_error", "message": "The Agent Dispatch usage error indicates a plugin mapping defect.", "retryable": false}
+    },
+    {
+      "id": "error-valid-execution-failed",
+      "description": "execution_failed error object.",
+      "expect": "valid",
+      "instance": {"code": "execution_failed", "message": "The command failed without a validated envelope.", "retryable": false}
+    },
+    {
+      "id": "error-valid-redaction-failure",
+      "description": "redaction_failure error object.",
+      "expect": "valid",
+      "instance": {"code": "redaction_failure", "message": "A diagnostic could not be produced without exposing protected content.", "retryable": false}
+    },
+    {
+      "id": "error-invalid-unknown-code",
+      "description": "An unknown error code fails the closed enum.",
+      "expect": "invalid",
+      "instance": {"code": "internal_error", "message": "m", "retryable": false}
+    },
+    {
+      "id": "error-invalid-retryable-true",
+      "description": "Plugin errors are never retryable.",
+      "expect": "invalid",
+      "instance": {"code": "timeout", "message": "m", "retryable": true}
+    },
+    {
+      "id": "error-invalid-missing-message",
+      "description": "message is required.",
+      "expect": "invalid",
+      "instance": {"code": "timeout", "retryable": false}
+    },
+    {
+      "id": "error-invalid-empty-message",
+      "description": "message must be non-empty.",
+      "expect": "invalid",
+      "instance": {"code": "timeout", "message": "", "retryable": false}
+    },
+    {
+      "id": "error-invalid-additional-member",
+      "description": "The error object is a closed boundary.",
+      "expect": "invalid",
+      "instance": {"code": "timeout", "message": "m", "retryable": false, "stderr": "raw output"}
+    }
+  ]
+}

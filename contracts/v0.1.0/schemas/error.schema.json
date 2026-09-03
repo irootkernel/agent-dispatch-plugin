@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.1.0:error",
+  "title": "agent-dispatch-plugin closed plugin error",
+  "description": "Closed plugin error object. retryable is always false; the message is bounded and redacted.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["code", "message", "retryable"],
+  "properties": {
+    "code": {
+      "enum": [
+        "binary_unavailable",
+        "unsupported_agent_dispatch_version",
+        "invalid_argument",
+        "timeout",
+        "output_too_large",
+        "malformed_json",
+        "contract_mismatch",
+        "adapter_usage_error",
+        "execution_failed",
+        "redaction_failure"
+      ]
+    },
+    "message": {"type": "string", "minLength": 1, "maxLength": 512},
+    "retryable": {"const": false}
+  }
+}
