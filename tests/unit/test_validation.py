@@ -251,6 +251,74 @@ def test_explicit_null_optional_members_are_rejected(plugin, runner, tmp_path, m
     assert result["error"]["code"] == "contract_mismatch"
 
 
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        {"warnings": "not-a-list"},
+        {"warnings": ["x" * 1025]},
+        {"warnings": ["ok"] * 65},
+        {"trace_id": 123},
+        {"trace_id": "x" * 129},
+    ],
+    ids=[
+        "warnings-not-a-list",
+        "warning-too-long",
+        "too-many-warnings",
+        "trace-id-not-a-string",
+        "trace-id-too-long",
+    ],
+)
+def test_optional_member_bound_branches_close_as_contract_mismatch(
+    plugin, runner, tmp_path, mutation
+):
+    """Each optional-member bound branch is reachable by name, not only
+    through the frozen fixture corpus."""
+    envelope = {**VALID_ENVELOPE, **mutation}
+    result = _run_raw(plugin, runner, tmp_path, envelope=envelope)
+    assert result["error"]["code"] == "contract_mismatch"
+
+
+@pytest.mark.parametrize(
+    "error_mutation",
+    [
+        {"code": "c", "category": "configuration", "message": "m", "retryable": False, "extra": 1},
+        {"code": "c", "category": "configuration", "message": "m"},
+        {"code": "x" * 65, "category": "configuration", "message": "m", "retryable": False},
+        {"code": "c", "category": "x" * 33, "message": "m", "retryable": False},
+        {"code": "c", "category": "configuration", "message": 7, "retryable": False},
+        {"code": "c", "category": "configuration", "message": "m", "retryable": "no"},
+    ],
+    ids=[
+        "unknown-error-member",
+        "missing-retryable",
+        "error-code-too-long",
+        "category-too-long",
+        "message-not-a-string",
+        "retryable-not-boolean",
+    ],
+)
+def test_envelope_error_bound_branches_close_as_contract_mismatch(
+    plugin, runner, tmp_path, error_mutation
+):
+    envelope = dict(VALID_ENVELOPE)
+    envelope.pop("result")
+    envelope["ok"] = False
+    envelope["error"] = error_mutation
+    result = _run_raw(plugin, runner, tmp_path, envelope=envelope)
+    assert result["error"]["code"] == "contract_mismatch"
+
+
+def test_flooding_fast_exiting_producer_is_rejected_by_the_overflow_flag(plugin, runner, tmp_path):
+    """A producer that floods past the ceiling and exits cleanly is still
+    rejected: the overflow flag stays authoritative over a racing exit."""
+    installation = make_fake_binary(tmp_path, behavior={"kind": "flood_exit", "bytes": 2 * 1048576})
+    config = {**installation["config"], "timeout_seconds": 10}
+    result = runner.run_inspection(_status_action(plugin), "agent_dispatch_status", {}, config)
+    assert result["error"]["code"] == "output_too_large"
+    assert "agent_dispatch" not in result
+    assert "xxxx" not in json.dumps(result)
+
+
 def test_deeply_nested_output_closes_as_malformed_json(plugin, runner, tmp_path):
     result = _run_raw(plugin, runner, tmp_path, stdout="[" * 20000 + "]" * 20000)
     assert result["error"]["code"] == "malformed_json"

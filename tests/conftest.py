@@ -151,6 +151,12 @@ elif KIND == "raw":
     else:
         sys.stdout.write(SPEC.get("stdout", "not json\\n"))
     raise SystemExit(int(SPEC.get("exit", 0)))
+elif KIND == "flood_exit":
+    # Flood past the stream ceiling and exit immediately, so the executor's
+    # wait loop observes a clean exit before the overflow flag is read.
+    sys.stdout.write("x" * int(SPEC["bytes"]))
+    sys.stdout.flush()
+    raise SystemExit(0)
 else:
     envelope()
 raise SystemExit(0)
