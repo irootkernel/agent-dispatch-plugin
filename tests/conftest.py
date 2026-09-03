@@ -76,6 +76,7 @@ def broken_catalog(plugin, pristine_registry, tmp_path, monkeypatch):
         catalog_file.write_text(json.dumps(catalog), encoding="utf-8")
         monkeypatch.setattr(pristine_registry, "CATALOG_PATH", catalog_file)
         pristine_registry.load_catalog.cache_clear()
+        pristine_registry.tool_specs.cache_clear()
         return catalog_file
 
     return install

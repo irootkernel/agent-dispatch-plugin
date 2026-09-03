@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-import importlib.util
 import subprocess
-import sys
-import types
 from pathlib import Path
 
+from conftest import load_plugin
+
 ROOT = Path(__file__).resolve().parent.parent.parent
-MODULE_NAME = "hermes_plugins.agent_dispatch_plugin_test"
 
 
 class RecordingContext:
@@ -22,29 +20,8 @@ class RecordingContext:
         self.registered[name] = kwargs
 
 
-def _load_plugin_like_hermes() -> types.ModuleType:
-    if "hermes_plugins" not in sys.modules:
-        ns = types.ModuleType("hermes_plugins")
-        ns.__path__ = []
-        ns.__package__ = "hermes_plugins"
-        sys.modules["hermes_plugins"] = ns
-    for name in [n for n in sys.modules if n == MODULE_NAME or n.startswith(MODULE_NAME + ".")]:
-        del sys.modules[name]
-    spec = importlib.util.spec_from_file_location(
-        MODULE_NAME,
-        ROOT / "__init__.py",
-        submodule_search_locations=[str(ROOT)],
-    )
-    module = importlib.util.module_from_spec(spec)
-    module.__package__ = MODULE_NAME
-    module.__path__ = [str(ROOT)]
-    sys.modules[MODULE_NAME] = module
-    spec.loader.exec_module(module)
-    return module
-
-
 def test_registration_through_the_hermes_style_loader_registers_ten_tools():
-    module = _load_plugin_like_hermes()
+    module = load_plugin("hermes_plugins.agent_dispatch_plugin_integration")
     ctx = RecordingContext()
     module.register(ctx)
 

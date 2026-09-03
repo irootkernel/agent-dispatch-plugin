@@ -5,7 +5,6 @@ from __future__ import annotations
 import importlib.util
 import json
 import sys
-import types
 from pathlib import Path
 
 import pytest
@@ -112,22 +111,25 @@ def test_guarded_modules_import_on_the_degenerate_top_level_path(module_file, to
 
 def test_tools_package_imports_on_the_degenerate_top_level_path():
     """tools resolves its registry dependency without a namespaced parent."""
-    if "tools" in sys.modules:
-        return  # already proven by whichever test imported it first
     saved = {k: v for k, v in sys.modules.items() if k in ("registry", "tools")}
     for k in saved:
         del sys.modules[k]
     try:
-        spec = importlib.util.spec_from_file_location(
+        registry_spec = importlib.util.spec_from_file_location("registry", ROOT / "registry.py")
+        registry = importlib.util.module_from_spec(registry_spec)
+        sys.modules["registry"] = registry
+        registry_spec.loader.exec_module(registry)
+        tools_spec = importlib.util.spec_from_file_location(
             "tools", ROOT / "tools" / "__init__.py", submodule_search_locations=[]
         )
-        tools = types.ModuleType("tools")
+        tools = importlib.util.module_from_spec(tools_spec)
         tools.__package__ = "tools"
+        tools.__path__ = [str(ROOT / "tools")]
         sys.modules["tools"] = tools
-        spec.loader.exec_module(tools)
+        tools_spec.loader.exec_module(tools)
         assert callable(tools.handler_for)
+        assert tools.ToolSpec is registry.ToolSpec
     finally:
         for k in ("tools", "registry"):
-            if k not in saved:
-                sys.modules.pop(k, None)
+            sys.modules.pop(k, None)
         sys.modules.update(saved)
