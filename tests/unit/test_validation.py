@@ -257,6 +257,14 @@ def test_deeply_nested_output_closes_as_malformed_json(plugin, runner, tmp_path)
     assert "agent_dispatch" not in result
 
 
+def test_oversized_integer_closes_as_malformed_json(plugin, runner, tmp_path):
+    """CPython raises a plain ValueError above its integer-digit limit; the
+    closed boundary must map it like any other parse failure."""
+    result = _run_raw(plugin, runner, tmp_path, stdout="9" * 5000)
+    assert result["error"]["code"] == "malformed_json"
+    assert "agent_dispatch" not in result
+
+
 def test_rejection_with_zero_exit_carries_the_envelope(plugin, runner, tmp_path):
     """The real binary reports some domain rejections with exit 0; the
     carrier rule carries the actual status, whatever it is."""

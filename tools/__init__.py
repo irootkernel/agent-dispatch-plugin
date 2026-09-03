@@ -23,8 +23,6 @@ else:  # Degenerate top-level import of the plugin root file.
     import runner
     from registry import ActionSpec, ToolSpec
 
-RESULT_SCHEMA_VERSION = "agent-dispatch-plugin.result/v1"
-
 # The five immutable settings from the frozen plugin config schema; nothing
 # else from the Hermes config tree is ever read.
 _SETTING_KEYS = (

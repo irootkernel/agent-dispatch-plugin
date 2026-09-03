@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import time
 from pathlib import Path
 
 import pytest
@@ -184,6 +185,47 @@ def test_oversized_version_probe_output_is_bounded_not_buffered(runner, tmp_path
     with pytest.raises(runner.TrustFailure) as excinfo:
         runner.resolve_trust(config)
     assert excinfo.value.code == runner.UNSUPPORTED_AGENT_DISPATCH_VERSION
+
+
+def test_execute_only_binary_is_unreadable_for_the_digest(runner, fake_agent_dispatch):
+    """An execute-only file passes the metadata checks but cannot yield its
+    digest bytes, closing on the unreadable-executable branch."""
+    config = dict(fake_agent_dispatch["config"])
+    fake_agent_dispatch["binary"].chmod(0o111)
+    try:
+        failure = _expect_failure(runner, config, runner.BINARY_UNAVAILABLE)
+        assert "unreadable" in failure.message
+    finally:
+        fake_agent_dispatch["binary"].chmod(0o755)
+
+
+def test_version_probe_timeout_kills_the_whole_process_tree(runner, tmp_path):
+    """A probe that forks a helper and stalls is discarded together with
+    its helper; nothing survives the probe."""
+    child_pid_file = tmp_path / "probe-child.pid"
+    probe_body = (
+        "#!/usr/bin/env python3\n"
+        "import subprocess, sys, time\n"
+        "if sys.argv[1:2] == ['version']:\n"
+        f"    child = subprocess.Popen(['/bin/sleep', '60'])\n"
+        f"    open({str(child_pid_file)!r}, 'w').write(str(child.pid))\n"
+        "    time.sleep(30)\n"
+        "sys.exit(0)\n"
+    )
+    installation = make_fake_binary(tmp_path, body=probe_body)
+    config = {**installation["config"], "timeout_seconds": 1}
+    with pytest.raises(runner.TrustFailure) as excinfo:
+        runner.resolve_trust(config)
+    assert excinfo.value.code == runner.BINARY_UNAVAILABLE
+    child_pid = int(child_pid_file.read_text(encoding="utf-8"))
+    for _ in range(60):
+        try:
+            os.kill(child_pid, 0)
+        except ProcessLookupError:
+            break
+        time.sleep(0.05)
+    else:
+        pytest.fail("the probe helper survived the probe discard")
 
 
 def test_configured_bounds_are_honored(runner, fake_agent_dispatch):

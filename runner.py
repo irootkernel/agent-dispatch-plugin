@@ -258,6 +258,24 @@ def _parse_version_output(stdout: bytes) -> tuple[int, int, int]:
     return (int(match[1]), int(match[2]), int(match[3]))
 
 
+def _kill_probe_tree(process: subprocess.Popen[Any]) -> None:
+    """Kill the whole probe process group and reap the direct child.
+
+    The probe runs in its own session; a binary that forks helpers cannot
+    leave them behind when the probe is discarded.
+    """
+    try:
+        group = os.getpgid(process.pid)
+    except ProcessLookupError:
+        group = None
+    if group is not None:
+        try:
+            os.killpg(group, signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            pass
+    process.wait()
+
+
 def _verify_supported_version(trust: RunnerTrust) -> None:
     """Probe the executable identity through the real `version` subcommand.
 
@@ -279,6 +297,7 @@ def _verify_supported_version(trust: RunnerTrust) -> None:
             env=MINIMAL_ENVIRONMENT,
             cwd=NEUTRAL_CWD,
             close_fds=True,
+            start_new_session=True,
         )
     except OSError as exc:
         raise TrustFailure(
@@ -290,8 +309,7 @@ def _verify_supported_version(trust: RunnerTrust) -> None:
     overflowed = False
     stdout = process.stdout
     if stdout is None:  # stdout=PIPE always provides a stream; stay typed and closed
-        process.kill()
-        process.wait()
+        _kill_probe_tree(process)
         raise TrustFailure(
             BINARY_UNAVAILABLE,
             "the configured Agent Dispatch executable did not answer the version probe",
@@ -316,8 +334,9 @@ def _verify_supported_version(trust: RunnerTrust) -> None:
             sink += chunk
     finally:
         if timed_out or overflowed:
-            process.kill()
-        process.wait()
+            _kill_probe_tree(process)
+        else:
+            process.wait()
         stdout.close()
     if timed_out:
         raise TrustFailure(
@@ -497,7 +516,7 @@ def _map_completed_process(
     exit_code = outcome.exit_code if outcome.exit_code is not None else -1
     try:
         parsed = json.loads(outcome.stdout.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError, RecursionError):
+    except (UnicodeDecodeError, json.JSONDecodeError, RecursionError, ValueError):
         return _malformed_with_stderr_tail(
             operation, exit_code, outcome, trust, "stdout was not parseable JSON"
         )
