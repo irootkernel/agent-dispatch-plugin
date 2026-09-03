@@ -59,3 +59,24 @@ def test_manifest_parity_gate_runs_green():
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert "manifest/registry parity passed" in result.stdout
+
+
+def test_register_registers_nothing_partial_when_a_schema_is_unreadable():
+    """The registers-nothing-partial invariant holds through register() itself."""
+    module = load_plugin("hermes_plugins.agent_dispatch_plugin_atomicity")
+    ctx = RecordingContext()
+    broken_dir = ROOT / "contracts" / "nowhere"
+    original = module.registry.CONTRACTS_VERSION_DIR
+    module.registry.load_catalog.cache_clear()
+    module.registry.tool_specs.cache_clear()
+    module.registry.CONTRACTS_VERSION_DIR = broken_dir
+    try:
+        import pytest as _pytest
+
+        with _pytest.raises(module.registry.ContractSourceError):
+            module.register(ctx)
+    finally:
+        module.registry.CONTRACTS_VERSION_DIR = original
+        module.registry.load_catalog.cache_clear()
+        module.registry.tool_specs.cache_clear()
+    assert ctx.registered == {}, "a failed registration must not stay partial"

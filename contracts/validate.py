@@ -262,10 +262,20 @@ def check_catalog(catalog: dict) -> None:
         if compatibility.get(key) != expected:
             fail(f"catalog: compatibility.{key} mismatch")
 
-    schema_enums: dict[str, list] = {}
+    # one guarded read of every tool schema shared by both reverse checks
+    tool_schemas: dict[str, dict | None] = {}
     for tool in catalog["tools"]:
-        schema = json.loads((VERSION_DIR / tool["input_schema"]).read_text(encoding="utf-8"))
+        tool_schemas[tool["name"]] = load_json(VERSION_DIR / tool["input_schema"])
+    if any(loaded is None for loaded in tool_schemas.values()):
+        return  # the load failures are already recorded
+
+    schema_enums: dict[str, list] = {}
+    schema_properties: dict[str, set[str]] = {}
+    for tool in catalog["tools"]:
+        schema = tool_schemas[tool["name"]]
+        assert schema is not None
         short = tool["name"].removeprefix("agent_dispatch_")
+        schema_properties[tool["name"]] = set(schema.get("properties", {}))
         for prop, spec in schema.get("properties", {}).items():
             if "enum" in spec:
                 schema_enums.setdefault(f"{short}.{prop}", []).append(spec["enum"])
@@ -275,11 +285,6 @@ def check_catalog(catalog: dict) -> None:
             fail(f"catalog closed_enums.{enum_key} matches no schema property enum")
         elif len(holders) != 1 or holders[0] != declared:
             fail(f"catalog closed_enums.{enum_key} does not match exactly one schema enum")
-
-    schema_properties: dict[str, set[str]] = {}
-    for tool in catalog["tools"]:
-        schema = json.loads((VERSION_DIR / tool["input_schema"]).read_text(encoding="utf-8"))
-        schema_properties[tool["name"]] = set(schema.get("properties", {}))
     all_properties: set[str] = set().union(*schema_properties.values())
     for registered in catalog["identifier_grammar"]["applies_to"]:
         if registered not in all_properties:
