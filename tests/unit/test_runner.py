@@ -258,9 +258,7 @@ def test_version_probe_that_closes_stdout_and_hangs_still_meets_the_deadline(run
         ("max_output_bytes", 1048576),
     ],
 )
-def test_trust_gate_accepts_the_frozen_boundary_values(
-    runner, fake_agent_dispatch, setting, value
-):
+def test_trust_gate_accepts_the_frozen_boundary_values(runner, fake_agent_dispatch, setting, value):
     """The inclusive bounds themselves are accepted, not only their
     rejection beyond the edges."""
     config = {**fake_agent_dispatch["config"], setting: value}

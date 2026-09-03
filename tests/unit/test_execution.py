@@ -260,9 +260,7 @@ def test_stderr_exactly_at_the_ceiling_is_not_an_overflow(plugin, runner, tmp_pa
         assert result["error"]["code"] == expected, name
 
 
-def test_combined_streams_exactly_at_the_ceiling_is_not_an_overflow(
-    plugin, runner, tmp_path
-):
+def test_combined_streams_exactly_at_the_ceiling_is_not_an_overflow(plugin, runner, tmp_path):
     """stdout 988576 plus stderr 60000 is exactly the 1048576 combined
     ceiling and stays inside; one more stdout byte overflows the combined
     bound while each stream stays under its own cap."""
