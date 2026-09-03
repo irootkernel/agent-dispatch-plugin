@@ -1,0 +1,64 @@
+{
+  "schema": "aquarium.hardening-deferral-findings/v1",
+  "work_unit": {
+    "kind": "task",
+    "id": "TASK-002"
+  },
+  "target": {
+    "capture_kind": "stage",
+    "content_sha256": "sha256:c78d4c992d710defa01803a5763222732b3ec512b40fd01f1516fc4c82d0014f"
+  },
+  "coverage_status": "complete",
+  "ci_decision": "pass",
+  "publication_status": "committed",
+  "structured_extraction_status": "reports_only",
+  "findings": [
+    {
+      "id": "TASK-002-R2-F01",
+      "severity": "low",
+      "disposition": "deferred-for-hardening",
+      "summary": "register() re-reads each input schema file inside the registration loop after tool_specs() validated them, leaving a time-of-check-to-time-of-use window where an interleaved file replacement could partially register the toolset.",
+      "paths": [
+        "__init__.py",
+        "registry.py"
+      ]
+    },
+    {
+      "id": "TASK-002-R2-F02",
+      "severity": "medium",
+      "disposition": "deferred-for-hardening",
+      "summary": "tool_specs() validates field presence but not field types: a non-string input_schema raises a raw TypeError outside the guarded loader, and value_bindings and optional_flags entries are stored without checking the keys resolve_argv indexes, deferring malformed-catalog failures past registration.",
+      "paths": [
+        "registry.py"
+      ]
+    },
+    {
+      "id": "TASK-002-R2-F03",
+      "severity": "low",
+      "disposition": "deferred-for-hardening",
+      "summary": "The manifest generator re-parses the catalog with json.loads outside the registry parse boundary instead of load_catalog(), splitting the parse contract across two modules.",
+      "paths": [
+        "scripts/manifest_parity.py"
+      ]
+    },
+    {
+      "id": "TASK-002-R2-F04",
+      "severity": "info",
+      "disposition": "deferred-for-hardening",
+      "summary": "build_manifest indexes catalog plugin-block keys directly and crashes with an unhandled KeyError on a missing or partial plugin block instead of the script's bounded failure report.",
+      "paths": [
+        "scripts/manifest_parity.py"
+      ]
+    },
+    {
+      "id": "TASK-002-R2-F05",
+      "severity": "info",
+      "disposition": "rejected-by-design",
+      "summary": "resolve_argv trusts that the caller validated parameters first; enforcement is owned by the EPIC-002 runner, which must validate against the frozen input schema before resolving argv.",
+      "paths": [
+        "registry.py",
+        "runner.py"
+      ]
+    }
+  ]
+}

@@ -50,6 +50,11 @@ frozen artifacts live in contracts/v0.1.0/ with the offline gate
   compatibility finding, not a contract change.
 - EPIC-002 runner tests should reuse contracts/v0.1.0 fixtures for envelope,
   wrapper, and error validation cases before writing new ones.
+- TASK-003: the uv project authority and its pinned dev toolchain
+  (jsonschema 4.26.0, referencing 0.37.0, PyYAML) exist since TASK-002; the
+  test contract should run checks through `uv run` in that environment
+  (`uv run contracts/validate.py`, `uv run scripts/manifest_parity.py`) and
+  add the baseline suite as a project dev dependency.
 
 ## Acceptance
 

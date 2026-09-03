@@ -3,6 +3,46 @@
   "product_version": "0.1.0",
   "authority": "docs/specs/PRD.md",
   "toolset": "agent_dispatch",
+  "plugin": {
+    "name": "agent-dispatch-plugin",
+    "version": "0.1.0",
+    "kind": "standalone",
+    "manifest_version": 2,
+    "api_version": 1,
+    "platforms": ["macos"],
+    "description": "Inspect Agent Dispatch through its public CLI.",
+    "author": "irootkernel",
+    "license": "MIT",
+    "homepage": "https://github.com/irootkernel/agent-dispatch-plugin",
+    "tags": ["agent-dispatch", "hermes", "kanban", "operations"],
+    "config_schema": {
+      "binary_path": {
+        "type": "str",
+        "required": true,
+        "description": "Absolute non-symlink Agent Dispatch executable path."
+      },
+      "binary_sha256": {
+        "type": "str",
+        "required": true,
+        "description": "Expected lowercase SHA-256 of the Agent Dispatch executable."
+      },
+      "config_path": {
+        "type": "str",
+        "required": true,
+        "description": "Absolute non-symlink trusted Agent Dispatch config path."
+      },
+      "timeout_seconds": {
+        "type": "int",
+        "default": 30,
+        "description": "Per-command timeout from 1 through 300 seconds."
+      },
+      "max_output_bytes": {
+        "type": "int",
+        "default": 1048576,
+        "description": "Combined bounded output ceiling; may tighten but never raise the frozen hard ceiling."
+      }
+    }
+  },
   "identifier_grammar": {
     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
     "max_length": 128,

@@ -1,0 +1,4 @@
+# Project-generated local state (uv environment and Python caches).
+.venv/
+__pycache__/
+*.pyc

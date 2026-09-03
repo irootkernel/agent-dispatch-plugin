@@ -19,7 +19,7 @@ evidence named by the Detailed SOT, not prose assertion.
 | Task | Epic | Work unit | Status | Completion evidence |
 |---|---|---|---|---|
 | TASK-001 | EPIC-001 | Freeze compatibility, tool, result, error, security, and fixture contracts | Completed | Reviewed schemas and fixtures traceable to the PRD |
-| TASK-002 | EPIC-001 | Create the Python package, manifest, and declarative registry skeleton | Planned | Python project authority, Plugin Doctor, and registry/manifest parity evidence |
+| TASK-002 | EPIC-001 | Create the Python package, manifest, and declarative registry skeleton | Completed | Python project authority, Plugin Doctor, and registry/manifest parity evidence |
 | TASK-003 | EPIC-001 | Run $aquarium:test-setup to establish aquarium-test-contract/v1 and baseline checks | Planned | Approved test contract and reachable baseline gate |
 | TASK-004 | EPIC-002 | Implement trusted configuration, platform, binary identity, and version checks | Planned | Positive and negative dependency checks |
 | TASK-005 | EPIC-002 | Implement the bounded process-group runner | Planned | Timeout, stream limit, termination, and argv tests |
