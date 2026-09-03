@@ -18,7 +18,6 @@ statement covers the real registration path, not a reimplementation.
 from __future__ import annotations
 
 import importlib.util
-import json
 import sys
 import types
 from pathlib import Path
@@ -87,7 +86,10 @@ def build_manifest(catalog: dict) -> dict:
 
 def main() -> int:
     module = load_plugin_module()
-    catalog = json.loads(module.registry.CATALOG_PATH.read_text(encoding="utf-8"))
+    catalog = module.registry.load_catalog()
+    if not isinstance(catalog.get("plugin"), dict):
+        print("parity error: the frozen catalog has no plugin block")
+        return 1
     expected_manifest = build_manifest(catalog)
 
     if "--write" in sys.argv[1:]:
