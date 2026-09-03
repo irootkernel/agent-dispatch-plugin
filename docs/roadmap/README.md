@@ -9,7 +9,7 @@ evidence named by the Detailed SOT, not prose assertion.
 | Epic | Outcome | Status | Detailed SOT |
 |---|---|---|---|
 | EPIC-001 | Establish canonical contracts and a testable plugin skeleton | Completed | Canonical Outcomes: contracts/v0.1.0/catalog.json, docs/specs/contracts.md, docs/architecture-decision-records/ADR-001-declarative-contract-registry.md, plugin.yaml, scripts/manifest_parity.py, TESTING.md, Makefile |
-| EPIC-002 | Build the single secure process and validation boundary | In Progress | docs/todo/TODO-SECURE-RUNNER.md |
+| EPIC-002 | Build the single secure process and validation boundary | Completed | Canonical Outcomes: runner.py, envelopes.py, docs/architecture-decision-records/ADR-004-runner-trust-gate.md, docs/architecture-decision-records/ADR-005-bounded-process-group-runner.md, docs/architecture-decision-records/ADR-006-closed-errors-diagnostics-redaction.md, TESTING.md |
 | EPIC-003 | Deliver the exact ten inspection tools and parity evidence | Planned | docs/todo/TODO-INSPECTION-TOOLS.md |
 | EPIC-004 | Prove security and compatibility release gates | Planned | docs/todo/TODO-SECURITY-COMPATIBILITY.md |
 | EPIC-005 | Prove clean-clone distribution, rollback, and release readiness | Planned | docs/todo/TODO-DISTRIBUTION-RELEASE.md |
