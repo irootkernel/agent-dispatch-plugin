@@ -93,7 +93,7 @@ def resolve_argv(action: dict, instance: dict) -> list[str]:
     the parameter is optional for that action.
     """
     argv: list[str] = list(action["argv_prefix"])
-    for binding in action["value_bindings"]:
+    for binding in action.get("value_bindings", ()):
         param = binding["param"]
         if param not in instance:
             continue
@@ -101,7 +101,7 @@ def resolve_argv(action: dict, instance: dict) -> list[str]:
             argv.append(str(instance[param]))
         else:
             argv.extend([binding["flag"], str(instance[param])])
-    for flag in action["optional_flags"]:
+    for flag in action.get("optional_flags", ()):
         if instance.get(flag["param"]) is True:
             argv.extend(flag["tokens"])
     argv.extend(action["argv_suffix"])
@@ -216,8 +216,8 @@ def check_catalog(catalog: dict) -> None:
         # every schema property must be consumed by some action binding
         bound_params: set[str] = set()
         for action in actions:
-            bound_params.update(b["param"] for b in action["value_bindings"])
-            bound_params.update(f["param"] for f in action["optional_flags"])
+            bound_params.update(b["param"] for b in action.get("value_bindings", ()))
+            bound_params.update(f["param"] for f in action.get("optional_flags", ()))
         if any("input_action_value" in a for a in actions):
             bound_params.add("action")
         unbound = set(props) - bound_params
@@ -391,12 +391,16 @@ def check_fixtures(registry: Registry, catalog: dict) -> None:
             validator = Draft202012Validator(schema, registry=registry)
             validators[schema_id] = validator
 
-        valid_count = sum(1 for c in cases_doc["cases"] if c["expect"] == "valid")
-        invalid_count = sum(1 for c in cases_doc["cases"] if c["expect"] == "invalid")
+        cases = cases_doc.get("cases")
+        if not isinstance(cases, list):
+            fail(f"fixtures: {subject['subject']} cases document has no cases array")
+            continue
+        valid_count = sum(1 for c in cases if c["expect"] == "valid")
+        invalid_count = sum(1 for c in cases if c["expect"] == "invalid")
         if valid_count < 1 or invalid_count < 1:
             fail(f"fixtures: {subject['subject']} needs at least one valid and one invalid case")
 
-        for case in cases_doc["cases"]:
+        for case in cases:
             case_id = case["id"]
             if case_id in case_ids:
                 fail(f"fixtures: duplicate case id {case_id}")
@@ -422,11 +426,15 @@ def check_fixtures(registry: Registry, catalog: dict) -> None:
         cases_doc = load_json(tool_cases)
         if cases_doc is None:
             continue
+        tool_case_list = cases_doc.get("cases")
+        if not isinstance(tool_case_list, list):
+            fail(f"argv: {tool['name']} fixture cases document has no cases array")
+            continue
         for action in tool["actions"]:
             wanted = action.get("input_action_value")
             candidates = [
                 c["instance"]
-                for c in cases_doc["cases"]
+                for c in tool_case_list
                 if c["expect"] == "valid"
                 and (wanted is None or c["instance"].get("action") == wanted)
             ]
@@ -454,9 +462,13 @@ def check_fixtures(registry: Registry, catalog: dict) -> None:
     error_cases = load_json(VERSION_DIR / "fixtures" / "error.cases.json")
     if error_cases is None:
         return  # the load failure is already recorded
+    error_case_list = error_cases.get("cases")
+    if not isinstance(error_case_list, list):
+        fail("fixtures: error cases document has no cases array")
+        return
     covered = {
         c["instance"]["code"]
-        for c in error_cases["cases"]
+        for c in error_case_list
         if c["expect"] == "valid" and "code" in c["instance"]
     }
     missing = set(PRD_ERROR_CODES) - covered
@@ -467,6 +479,7 @@ def check_fixtures(registry: Registry, catalog: dict) -> None:
 def main() -> int:
     catalog = load_json(VERSION_DIR / "catalog.json")
     required_sections = (
+        "tools",
         "identifier_grammar",
         "state_token_grammar",
         "closed_enums",

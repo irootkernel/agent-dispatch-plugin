@@ -61,6 +61,30 @@ def corrupt_missing_catalog_section(work: Path) -> None:
     )
 
 
+def corrupt_missing_tools_section(work: Path) -> None:
+    _set_json(
+        work / "contracts/v0.1.0/catalog.json",
+        lambda d: d.pop("tools"),
+    )
+
+
+def corrupt_action_without_bindings(work: Path) -> None:
+    def drop_bindings(catalog):
+        for tool in catalog["tools"]:
+            if tool["name"] == "agent_dispatch_dispatches":
+                for action in tool["actions"]:
+                    if action["id"] == "list":
+                        action.pop("value_bindings", None)
+
+    _set_json(work / "contracts/v0.1.0/catalog.json", drop_bindings)
+
+
+def corrupt_fixture_without_cases(work: Path) -> None:
+    (work / "contracts/v0.1.0/fixtures/error.cases.json").write_text(
+        '{"schema_version": "agent-dispatch-plugin.fixtures/v1"}', encoding="utf-8"
+    )
+
+
 def corrupt_stale_anchor(work: Path) -> None:
     schema = work / "contracts/v0.1.0/schemas/tools/agent_dispatch_routes.input.json"
     schema.write_text(
@@ -84,6 +108,9 @@ def corrupt_unregistered_enum(work: Path) -> None:
         (corrupt_unreadable_tool_schema, "unreadable tool schema"),
         (corrupt_unreadable_catalog, "unreadable catalog"),
         (corrupt_missing_catalog_section, "missing catalog section"),
+        (corrupt_missing_tools_section, "missing tools section"),
+        (corrupt_action_without_bindings, "action without value bindings"),
+        (corrupt_fixture_without_cases, "fixture document without cases"),
         (corrupt_stale_anchor, "stale grammar anchor"),
         (corrupt_unregistered_enum, "unregistered schema enum"),
     ],
