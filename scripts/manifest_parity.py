@@ -104,7 +104,11 @@ def main() -> int:
     if not MANIFEST_PATH.is_file():
         print("plugin.yaml is missing; run with --write to generate it")
         return 1
-    manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
+    try:
+        manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        print(f"parity error: plugin.yaml is not parseable YAML: {exc}")
+        return 1
     if not isinstance(manifest, dict):
         manifest = {}
         errors.append("plugin.yaml is empty or not a mapping")

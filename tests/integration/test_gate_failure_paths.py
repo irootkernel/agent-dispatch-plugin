@@ -54,6 +54,13 @@ def corrupt_unreadable_catalog(work: Path) -> None:
     (work / "contracts/v0.1.0/catalog.json").write_text("{ not json", encoding="utf-8")
 
 
+def corrupt_missing_catalog_section(work: Path) -> None:
+    _set_json(
+        work / "contracts/v0.1.0/catalog.json",
+        lambda d: d.pop("pagination"),
+    )
+
+
 def corrupt_stale_anchor(work: Path) -> None:
     schema = work / "contracts/v0.1.0/schemas/tools/agent_dispatch_routes.input.json"
     schema.write_text(
@@ -76,6 +83,7 @@ def corrupt_unregistered_enum(work: Path) -> None:
         (corrupt_unreadable_error_fixtures, "unreadable error fixtures"),
         (corrupt_unreadable_tool_schema, "unreadable tool schema"),
         (corrupt_unreadable_catalog, "unreadable catalog"),
+        (corrupt_missing_catalog_section, "missing catalog section"),
         (corrupt_stale_anchor, "stale grammar anchor"),
         (corrupt_unregistered_enum, "unregistered schema enum"),
     ],
@@ -94,4 +102,40 @@ def test_gate_reports_corruptions_boundedly(corruption, label):
         )
         assert result.returncode != 0, label
         assert "contracts validation FAILED" in result.stdout, label
+        assert "Traceback" not in result.stderr, label
+
+
+def corrupt_parity_unparseable_manifest(work: Path) -> None:
+    (work / "plugin.yaml").write_text("name: [unclosed", encoding="utf-8")
+
+
+def corrupt_parity_drifted_manifest(work: Path) -> None:
+    manifest = work / "plugin.yaml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace("version: 0.1.0", "version: 9.9.9"),
+        encoding="utf-8",
+    )
+
+
+@pytest.mark.parametrize(
+    ("corruption", "label"),
+    [
+        (corrupt_parity_unparseable_manifest, "unparseable plugin.yaml"),
+        (corrupt_parity_drifted_manifest, "drifted plugin.yaml"),
+    ],
+)
+def test_parity_gate_reports_corruptions_boundedly(corruption, label):
+    with tempfile.TemporaryDirectory() as td:
+        work = Path(td) / "repo"
+        shutil.copytree(ROOT, work, ignore=IGNORE)
+        corruption(work)
+        result = subprocess.run(
+            ["uv", "run", "--project", str(work), "scripts/manifest_parity.py"],
+            cwd=work,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        assert result.returncode != 0, label
+        assert "parity" in result.stdout.lower(), label
         assert "Traceback" not in result.stderr, label

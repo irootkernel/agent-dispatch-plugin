@@ -466,13 +466,41 @@ def check_fixtures(registry: Registry, catalog: dict) -> None:
 
 def main() -> int:
     catalog = load_json(VERSION_DIR / "catalog.json")
+    required_sections = (
+        "identifier_grammar",
+        "state_token_grammar",
+        "closed_enums",
+        "pagination",
+        "command_vocabulary",
+        "forbidden_input_properties",
+        "wrapper",
+        "envelope",
+        "errors",
+        "diagnostics_bounds",
+        "limits",
+        "compatibility",
+        "redaction_rules",
+    )
     if catalog is not None:
+        missing = [
+            section
+            for section in required_sections
+            if not isinstance(catalog.get(section), (dict, list))
+        ]
+        if missing:
+            fail(f"catalog: required sections missing or malformed: {missing}")
+            _report()
+            return 1
         check_catalog(catalog)
     registry, schemas = build_registry()
     check_closed_boundaries(schemas, catalog)
     if catalog is not None:
         check_fixtures(registry, catalog)
 
+    return _report()
+
+
+def _report() -> int:
     if ERRORS:
         print(f"contracts validation FAILED with {len(ERRORS)} error(s):")
         for message in ERRORS:
