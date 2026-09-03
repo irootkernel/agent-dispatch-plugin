@@ -9,12 +9,19 @@
     "kind": "standalone",
     "manifest_version": 2,
     "api_version": 1,
-    "platforms": ["macos"],
+    "platforms": [
+      "macos"
+    ],
     "description": "Inspect Agent Dispatch through its public CLI.",
     "author": "irootkernel",
     "license": "MIT",
     "homepage": "https://github.com/irootkernel/agent-dispatch-plugin",
-    "tags": ["agent-dispatch", "hermes", "kanban", "operations"],
+    "tags": [
+      "agent-dispatch",
+      "hermes",
+      "kanban",
+      "operations"
+    ],
     "config_schema": {
       "binary_path": {
         "type": "str",
@@ -44,14 +51,14 @@
     }
   },
   "identifier_grammar": {
-    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
+    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}(?![\\s\\S])",
     "max_length": 128,
     "preserved_literally": true,
     "rejects_before_process_creation": true,
     "rejects": [
       "empty values",
       "leading option prefixes such as -x or --flag",
-      "whitespace, shell metacharacters, NUL, and control bytes",
+      "whitespace, shell metacharacters, NUL, control bytes, and any trailing newline",
       "any path separator (/) and whole-value traversal tokens such as ..",
       "values longer than 128 characters"
     ],
@@ -68,7 +75,7 @@
     ]
   },
   "state_token_grammar": {
-    "pattern": "^[a-z][a-z0-9-]{0,63}$",
+    "pattern": "^[a-z][a-z0-9-]{0,63}(?![\\s\\S])",
     "max_length": 64,
     "applies_to": [
       "state on dispatches list (upstream does not enumerate these values)",
@@ -76,17 +83,53 @@
     ]
   },
   "closed_enums": {
-    "routes.action": ["list", "show", "preflight"],
-    "dispatches.action": ["list", "show"],
-    "receipts.action": ["list", "show"],
-    "receipts.kind": ["acceptance", "execution_projection", "work"],
-    "quarantine.action": ["list", "show"],
-    "quarantine.state": ["held", "released", "discarded", "superseded"],
-    "config.action": ["show", "validate"]
+    "routes.action": [
+      "list",
+      "show",
+      "preflight"
+    ],
+    "dispatches.action": [
+      "list",
+      "show"
+    ],
+    "receipts.action": [
+      "list",
+      "show"
+    ],
+    "receipts.kind": [
+      "acceptance",
+      "execution_projection",
+      "work"
+    ],
+    "quarantine.action": [
+      "list",
+      "show"
+    ],
+    "quarantine.state": [
+      "held",
+      "released",
+      "discarded",
+      "superseded"
+    ],
+    "config.action": [
+      "show",
+      "validate"
+    ]
   },
   "pagination": {
-    "limit": {"min": 1, "max": 100, "default": 25},
-    "offset": {"min": 0, "max": 1000000, "applies_to": ["dispatches list", "receipts list"]}
+    "limit": {
+      "min": 1,
+      "max": 100,
+      "default": 25
+    },
+    "offset": {
+      "min": 0,
+      "max": 1000000,
+      "applies_to": [
+        "dispatches",
+        "receipts"
+      ]
+    }
   },
   "tools": [
     {
@@ -96,10 +139,15 @@
       "actions": [
         {
           "id": "inspect",
-          "argv_prefix": ["status"],
+          "argv_prefix": [
+            "status"
+          ],
           "value_bindings": [],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "status"
         }
       ]
@@ -111,12 +159,22 @@
       "actions": [
         {
           "id": "inspect",
-          "argv_prefix": ["doctor"],
+          "argv_prefix": [
+            "doctor"
+          ],
           "value_bindings": [],
           "optional_flags": [
-            {"param": "probe_targets", "tokens": ["--probe-targets"]}
+            {
+              "param": "probe_targets",
+              "tokens": [
+                "--probe-targets"
+              ]
+            }
           ],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "doctor"
         }
       ]
@@ -129,28 +187,56 @@
         {
           "id": "list",
           "input_action_value": "list",
-          "argv_prefix": ["route", "list"],
+          "argv_prefix": [
+            "route",
+            "list"
+          ],
           "value_bindings": [],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "route list"
         },
         {
           "id": "show",
           "input_action_value": "show",
-          "argv_prefix": ["route", "show"],
-          "value_bindings": [{"param": "route_id", "flag": "--route"}],
+          "argv_prefix": [
+            "route",
+            "show"
+          ],
+          "value_bindings": [
+            {
+              "param": "route_id",
+              "flag": "--route"
+            }
+          ],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "route show"
         },
         {
           "id": "preflight",
           "input_action_value": "preflight",
-          "argv_prefix": ["route", "preflight"],
-          "value_bindings": [{"param": "route_id", "flag": "--route"}],
+          "argv_prefix": [
+            "route",
+            "preflight"
+          ],
+          "value_bindings": [
+            {
+              "param": "route_id",
+              "flag": "--route"
+            }
+          ],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "route preflight"
         }
       ]
@@ -163,24 +249,53 @@
         {
           "id": "list",
           "input_action_value": "list",
-          "argv_prefix": ["dispatches", "list"],
+          "argv_prefix": [
+            "dispatches",
+            "list"
+          ],
           "value_bindings": [
-            {"param": "route", "flag": "--route"},
-            {"param": "state", "flag": "--state"},
-            {"param": "limit", "flag": "--limit"},
-            {"param": "offset", "flag": "--offset"}
+            {
+              "param": "route",
+              "flag": "--route"
+            },
+            {
+              "param": "state",
+              "flag": "--state"
+            },
+            {
+              "param": "limit",
+              "flag": "--limit"
+            },
+            {
+              "param": "offset",
+              "flag": "--offset"
+            }
           ],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "dispatches list"
         },
         {
           "id": "show",
           "input_action_value": "show",
-          "argv_prefix": ["dispatches", "show"],
-          "value_bindings": [{"param": "dispatch_id", "positional": true}],
+          "argv_prefix": [
+            "dispatches",
+            "show"
+          ],
+          "value_bindings": [
+            {
+              "param": "dispatch_id",
+              "positional": true
+            }
+          ],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "dispatches show"
         }
       ]
@@ -193,25 +308,57 @@
         {
           "id": "list",
           "input_action_value": "list",
-          "argv_prefix": ["receipts", "list"],
+          "argv_prefix": [
+            "receipts",
+            "list"
+          ],
           "value_bindings": [
-            {"param": "route", "flag": "--route"},
-            {"param": "dispatch", "flag": "--dispatch"},
-            {"param": "kind", "flag": "--kind"},
-            {"param": "limit", "flag": "--limit"},
-            {"param": "offset", "flag": "--offset"}
+            {
+              "param": "route",
+              "flag": "--route"
+            },
+            {
+              "param": "dispatch",
+              "flag": "--dispatch"
+            },
+            {
+              "param": "kind",
+              "flag": "--kind"
+            },
+            {
+              "param": "limit",
+              "flag": "--limit"
+            },
+            {
+              "param": "offset",
+              "flag": "--offset"
+            }
           ],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "receipts list"
         },
         {
           "id": "show",
           "input_action_value": "show",
-          "argv_prefix": ["receipts", "show"],
-          "value_bindings": [{"param": "receipt_id", "positional": true}],
+          "argv_prefix": [
+            "receipts",
+            "show"
+          ],
+          "value_bindings": [
+            {
+              "param": "receipt_id",
+              "positional": true
+            }
+          ],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "receipts show"
         }
       ]
@@ -223,10 +370,21 @@
       "actions": [
         {
           "id": "show",
-          "argv_prefix": ["events", "show"],
-          "value_bindings": [{"param": "aggregate_id", "positional": true}],
+          "argv_prefix": [
+            "events",
+            "show"
+          ],
+          "value_bindings": [
+            {
+              "param": "aggregate_id",
+              "positional": true
+            }
+          ],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "events show"
         }
       ]
@@ -239,23 +397,49 @@
         {
           "id": "list",
           "input_action_value": "list",
-          "argv_prefix": ["quarantine", "list"],
+          "argv_prefix": [
+            "quarantine",
+            "list"
+          ],
           "value_bindings": [
-            {"param": "route", "flag": "--route"},
-            {"param": "state", "flag": "--state"},
-            {"param": "limit", "flag": "--limit"}
+            {
+              "param": "route",
+              "flag": "--route"
+            },
+            {
+              "param": "state",
+              "flag": "--state"
+            },
+            {
+              "param": "limit",
+              "flag": "--limit"
+            }
           ],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "quarantine list"
         },
         {
           "id": "show",
           "input_action_value": "show",
-          "argv_prefix": ["quarantine", "show"],
-          "value_bindings": [{"param": "quarantine_id", "positional": true}],
+          "argv_prefix": [
+            "quarantine",
+            "show"
+          ],
+          "value_bindings": [
+            {
+              "param": "quarantine_id",
+              "positional": true
+            }
+          ],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "quarantine show"
         }
       ]
@@ -267,15 +451,33 @@
       "actions": [
         {
           "id": "list",
-          "argv_prefix": ["notifications", "list"],
+          "argv_prefix": [
+            "notifications",
+            "list"
+          ],
           "value_bindings": [
-            {"param": "route", "flag": "--route"},
-            {"param": "state", "flag": "--state"},
-            {"param": "sink", "flag": "--sink"},
-            {"param": "limit", "flag": "--limit"}
+            {
+              "param": "route",
+              "flag": "--route"
+            },
+            {
+              "param": "state",
+              "flag": "--state"
+            },
+            {
+              "param": "sink",
+              "flag": "--sink"
+            },
+            {
+              "param": "limit",
+              "flag": "--limit"
+            }
           ],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "notifications list"
         }
       ]
@@ -287,10 +489,23 @@
       "actions": [
         {
           "id": "inspect",
-          "argv_prefix": ["schedule", "inspect"],
-          "value_bindings": [{"param": "route_id", "flag": "--route"}],
+          "argv_prefix": [
+            "schedule",
+            "inspect"
+          ],
+          "value_bindings": [
+            {
+              "param": "route_id",
+              "flag": "--route"
+            }
+          ],
           "optional_flags": [],
-          "argv_suffix": ["--platform", "launchd", "--output", "json"],
+          "argv_suffix": [
+            "--platform",
+            "launchd",
+            "--output",
+            "json"
+          ],
           "expected_command": "schedule inspect"
         }
       ]
@@ -303,21 +518,38 @@
         {
           "id": "show",
           "input_action_value": "show",
-          "argv_prefix": ["config", "show"],
+          "argv_prefix": [
+            "config",
+            "show"
+          ],
           "value_bindings": [],
           "optional_flags": [],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "config show"
         },
         {
           "id": "validate",
           "input_action_value": "validate",
-          "argv_prefix": ["config", "validate"],
+          "argv_prefix": [
+            "config",
+            "validate"
+          ],
           "value_bindings": [],
           "optional_flags": [
-            {"param": "probe_targets", "tokens": ["--probe-targets"]}
+            {
+              "param": "probe_targets",
+              "tokens": [
+                "--probe-targets"
+              ]
+            }
           ],
-          "argv_suffix": ["--output", "json"],
+          "argv_suffix": [
+            "--output",
+            "json"
+          ],
           "expected_command": "config validate"
         }
       ]
@@ -325,16 +557,42 @@
   ],
   "command_vocabulary": {
     "allowed": {
-      "status": ["status"],
-      "doctor": ["doctor"],
-      "route": ["list", "show", "preflight"],
-      "dispatches": ["list", "show"],
-      "receipts": ["list", "show"],
-      "events": ["show"],
-      "quarantine": ["list", "show"],
-      "notifications": ["list"],
-      "schedule": ["inspect"],
-      "config": ["show", "validate"]
+      "status": [
+        "status"
+      ],
+      "doctor": [
+        "doctor"
+      ],
+      "route": [
+        "list",
+        "show",
+        "preflight"
+      ],
+      "dispatches": [
+        "list",
+        "show"
+      ],
+      "receipts": [
+        "list",
+        "show"
+      ],
+      "events": [
+        "show"
+      ],
+      "quarantine": [
+        "list",
+        "show"
+      ],
+      "notifications": [
+        "list"
+      ],
+      "schedule": [
+        "inspect"
+      ],
+      "config": [
+        "show",
+        "validate"
+      ]
     },
     "denied_subcommands": [
       "plan",
@@ -391,7 +649,15 @@
   "wrapper": {
     "schema_version": "agent-dispatch-plugin.result/v1",
     "schema": "schemas/wrapper.schema.json",
-    "members": ["schema_version", "ok", "operation", "exit_code", "agent_dispatch", "error", "diagnostics"],
+    "members": [
+      "schema_version",
+      "ok",
+      "operation",
+      "exit_code",
+      "agent_dispatch",
+      "error",
+      "diagnostics"
+    ],
     "closed_boundary": true,
     "carrier_rule": "When ok is true the validated envelope (with its own ok true) is the sole evidence carrier. When ok is false exactly one carrier is present: the validated envelope (with its own ok false) for a domain rejection, or the plugin error object when no envelope exists.",
     "exit_code_semantics": {
@@ -403,11 +669,24 @@
   "envelope": {
     "api_version": "agent-dispatch.cli/v1",
     "schema": "schemas/envelope.schema.json",
-    "members": ["api_version", "command", "ok", "result", "error", "warnings", "trace_id"],
+    "members": [
+      "api_version",
+      "command",
+      "ok",
+      "result",
+      "error",
+      "warnings",
+      "trace_id"
+    ],
     "closed_boundary": true,
     "open_domain_member": "result",
     "error_member": {
-      "members": ["code", "category", "message", "retryable"],
+      "members": [
+        "code",
+        "category",
+        "message",
+        "retryable"
+      ],
       "closed_boundary": true
     },
     "forward_compatibility": "Additive fields inside the domain result member are unconstrained domain values and may be ignored. Every other structural boundary is closed and additive members there fail validation.",
@@ -437,7 +716,11 @@
     "max_length_per_item": 512
   },
   "limits": {
-    "timeout_seconds": {"default": 30, "min": 1, "max": 300},
+    "timeout_seconds": {
+      "default": 30,
+      "min": 1,
+      "max": 300
+    },
     "termination": {
       "deadline_covers": "spawn through normal completion",
       "signal": "TERM",
@@ -455,7 +738,11 @@
     "agent_dispatch_envelope": "agent-dispatch.cli/v1",
     "hermes": "0.20.5",
     "platform": "darwin/arm64",
-    "plugin_format": {"kind": "standalone", "manifest_version": 2, "api_version": 1},
+    "plugin_format": {
+      "kind": "standalone",
+      "manifest_version": 2,
+      "api_version": 1
+    },
     "qualification_policy": "Qualification records exact artifact identities on a disposable, isolated Darwin arm64 profile with synthetic Agent Dispatch state and controlled fake targets. The support matrix includes Agent Dispatch v0.1.6 and the selected highest available compatible release below 0.2.0.",
     "initial_verification_state": "unverified",
     "failed_assumption_policy": "Any failed compatibility assumption blocks v0.1.0. First distinguish a plugin defect from upstream incompatibility. The implementation may not silently narrow, widen, or adapt the baseline."

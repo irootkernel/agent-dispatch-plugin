@@ -10,31 +10,52 @@
       "id": "notifications-valid-all-filters",
       "description": "All documented filters at boundary values.",
       "expect": "valid",
-      "instance": {"route": "wiki", "state": "pending", "sink": "ops-webhook", "limit": 100}
+      "instance": {
+        "route": "wiki",
+        "state": "pending",
+        "sink": "ops-webhook",
+        "limit": 100
+      }
     },
     {
       "id": "notifications-invalid-sink-space",
       "description": "Whitespace in a sink name is rejected.",
       "expect": "invalid",
-      "instance": {"sink": "ops webhook"}
+      "instance": {
+        "sink": "ops webhook"
+      }
     },
     {
       "id": "notifications-invalid-limit-zero",
       "description": "Limit must be at least 1.",
       "expect": "invalid",
-      "instance": {"limit": 0}
+      "instance": {
+        "limit": 0
+      }
     },
     {
       "id": "notifications-invalid-offset-not-offered",
       "description": "Offset is not a documented notifications filter and is rejected.",
       "expect": "invalid",
-      "instance": {"offset": 0}
+      "instance": {
+        "offset": 0
+      }
     },
     {
       "id": "notifications-invalid-forbidden-cwd",
       "description": "A forbidden execution property is rejected before process creation.",
       "expect": "invalid",
-      "instance": {"cwd": "/tmp"}
+      "instance": {
+        "cwd": "/tmp"
+      }
+    },
+    {
+      "id": "notifications-invalid-state-trailing-newline",
+      "description": "A trailing newline in a state token is rejected by the true-end anchor.",
+      "expect": "invalid",
+      "instance": {
+        "state": "pending\n"
+      }
     }
   ]
 }

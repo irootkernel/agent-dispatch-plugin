@@ -32,7 +32,8 @@ views equal to the catalog.
 
 - Exactly one place changes when a contract changes; parity failures indicate
   a stale derived artifact.
-- The validation gate `uv run --with jsonschema contracts/validate.py` is the
+- The validation gate `uv run --with jsonschema==4.26.0 --with referencing==0.37.0
+  contracts/validate.py` is the
   deterministic offline oracle for the frozen contracts.
 - Generated views carry no independent authority; a mismatch between a
   generated view and the catalog is a defect in the derivation, never a reason

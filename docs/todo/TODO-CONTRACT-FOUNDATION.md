@@ -30,7 +30,8 @@ Hermes plugin skeleton without implementing business-domain behavior.
 
 All three groups are recorded as accepted ADR-001, ADR-002, and ADR-003; the
 frozen artifacts live in contracts/v0.1.0/ with the offline gate
-`uv run --with jsonschema contracts/validate.py` (docs/specs/contracts.md).
+`uv run --with jsonschema==4.26.0 --with referencing==0.37.0 contracts/validate.py`
+(docs/specs/contracts.md).
 
 ## Guidance for later tasks and epics
 

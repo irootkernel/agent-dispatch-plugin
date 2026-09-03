@@ -4,79 +4,130 @@
       "id": "dispatches-valid-list",
       "description": "A plain list action with defaults.",
       "expect": "valid",
-      "instance": {"action": "list"}
+      "instance": {
+        "action": "list"
+      }
     },
     {
       "id": "dispatches-valid-list-all-filters",
       "description": "All documented list filters at their boundary values.",
       "expect": "valid",
-      "instance": {"action": "list", "route": "wiki", "state": "unknown", "limit": 100, "offset": 1000000}
+      "instance": {
+        "action": "list",
+        "route": "wiki",
+        "state": "unknown",
+        "limit": 100,
+        "offset": 1000000
+      }
     },
     {
       "id": "dispatches-valid-list-lower-boundaries",
       "description": "Limit 1 and offset 0 are the lower pagination boundaries.",
       "expect": "valid",
-      "instance": {"action": "list", "limit": 1, "offset": 0}
+      "instance": {
+        "action": "list",
+        "limit": 1,
+        "offset": 0
+      }
     },
     {
       "id": "dispatches-valid-show",
       "description": "show requires dispatch_id and accepts no filters.",
       "expect": "valid",
-      "instance": {"action": "show", "dispatch_id": "d_7f3a2b"}
+      "instance": {
+        "action": "show",
+        "dispatch_id": "d_7f3a2b"
+      }
     },
     {
       "id": "dispatches-invalid-show-with-filter",
       "description": "Filters are list-only and rejected for show.",
       "expect": "invalid",
-      "instance": {"action": "show", "dispatch_id": "d_7f3a2b", "state": "unknown"}
+      "instance": {
+        "action": "show",
+        "dispatch_id": "d_7f3a2b",
+        "state": "unknown"
+      }
     },
     {
       "id": "dispatches-invalid-show-missing-id",
       "description": "show without dispatch_id violates the conditional requirement.",
       "expect": "invalid",
-      "instance": {"action": "show"}
+      "instance": {
+        "action": "show"
+      }
     },
     {
       "id": "dispatches-invalid-list-with-dispatch-id",
       "description": "dispatch_id is show-only and rejected for list.",
       "expect": "invalid",
-      "instance": {"action": "list", "dispatch_id": "d_7f3a2b"}
+      "instance": {
+        "action": "list",
+        "dispatch_id": "d_7f3a2b"
+      }
     },
     {
       "id": "dispatches-invalid-limit-zero",
       "description": "Limit must be at least 1.",
       "expect": "invalid",
-      "instance": {"action": "list", "limit": 0}
+      "instance": {
+        "action": "list",
+        "limit": 0
+      }
     },
     {
       "id": "dispatches-invalid-limit-over-max",
       "description": "Limit must be at most 100.",
       "expect": "invalid",
-      "instance": {"action": "list", "limit": 101}
+      "instance": {
+        "action": "list",
+        "limit": 101
+      }
     },
     {
       "id": "dispatches-invalid-offset-negative",
       "description": "Offsets are non-negative.",
       "expect": "invalid",
-      "instance": {"action": "list", "offset": -1}
+      "instance": {
+        "action": "list",
+        "offset": -1
+      }
     },
     {
       "id": "dispatches-invalid-offset-over-max",
       "description": "Offset must be at most 1000000.",
       "expect": "invalid",
-      "instance": {"action": "list", "offset": 1000001}
+      "instance": {
+        "action": "list",
+        "offset": 1000001
+      }
     },
     {
       "id": "dispatches-invalid-id-traversal",
       "description": "A traversal-like identifier is rejected by the grammar.",
       "expect": "invalid",
-      "instance": {"action": "show", "dispatch_id": "../state"}
+      "instance": {
+        "action": "show",
+        "dispatch_id": "../state"
+      }
     },
     {
       "id": "dispatches-invalid-state-uppercase",
       "description": "Uppercase state tokens are rejected.",
       "expect": "invalid",
-      "instance": {"action": "list", "state": "Unknown"}
+      "instance": {
+        "action": "list",
+        "state": "Unknown"
+      }
+    },
+    {
+      "id": "dispatches-invalid-id-trailing-newline",
+      "description": "A trailing newline in a positional identifier is rejected by the true-end anchor.",
+      "expect": "invalid",
+      "instance": {
+        "action": "show",
+        "dispatch_id": "d_7f3a2b\n"
+      }
     }
   ]
 }

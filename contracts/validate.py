@@ -174,9 +174,17 @@ def check_catalog(catalog: dict) -> None:
                 if spec.get("maxLength") != state_max:
                     fail(f"{tool_name}.{prop}: state token maxLength mismatch")
             enum_key = f"{short}.{prop}"
-            if prop in ("kind", "state") and "enum" in spec and enum_key in closed_enums:
-                if spec.get("enum") != closed_enums[enum_key]:
+            if "enum" in spec:
+                if enum_key not in closed_enums:
+                    fail(
+                        f"{tool_name}.{prop}: schema enum is not registered in catalog closed_enums"
+                    )
+                elif spec.get("enum") != closed_enums[enum_key]:
                     fail(f"{tool_name}.{prop}: enum mismatch with catalog closed_enums.{enum_key}")
+            if "pattern" in spec and prop not in (
+                set(catalog["identifier_grammar"]["applies_to"]) | {"state"}
+            ):
+                fail(f"{tool_name}.{prop}: schema pattern is not registered in a catalog grammar")
             if spec.get("type") == "integer" and prop == "limit":
                 if spec.get("minimum") != PRD_PAGINATION["limit_min"]:
                     fail(f"{tool_name}.{prop}: limit minimum mismatch")
@@ -254,6 +262,15 @@ def check_catalog(catalog: dict) -> None:
         if compatibility.get(key) != expected:
             fail(f"catalog: compatibility.{key} mismatch")
 
+    schema_properties: dict[str, set[str]] = {}
+    for tool in catalog["tools"]:
+        schema = json.loads((VERSION_DIR / tool["input_schema"]).read_text(encoding="utf-8"))
+        schema_properties[tool["name"]] = set(schema.get("properties", {}))
+    all_properties: set[str] = set().union(*schema_properties.values())
+    for registered in catalog["identifier_grammar"]["applies_to"]:
+        if registered not in all_properties:
+            fail(f"catalog grammar applies_to name {registered!r} matches no schema property")
+
     if catalog["wrapper"]["schema_version"] != PRD_WRAPPER_VERSION:
         fail("catalog: wrapper schema_version mismatch")
     if catalog["envelope"]["api_version"] != "agent-dispatch.cli/v1":
@@ -283,7 +300,9 @@ def build_registry() -> tuple[Registry, dict[str, dict]]:
     return registry, schemas
 
 
-def check_closed_boundaries(schemas: dict[str, dict], catalog: dict) -> None:
+def check_closed_boundaries(schemas: dict[str, dict], catalog: dict | None) -> None:
+    if catalog is None:
+        return  # the load failure is already recorded
     for subject in ("envelope", "wrapper", "error"):
         schema_id = f"urn:agent-dispatch-plugin:contracts:v0.1.0:{subject}"
         schema = schemas.get(schema_id)
@@ -311,6 +330,20 @@ def check_closed_boundaries(schemas: dict[str, dict], catalog: dict) -> None:
                 fail("schema: wrapper must declare both the envelope and plugin error carriers")
             if not schema.get("allOf"):
                 fail("schema: wrapper must declare its carrier rules")
+            diagnostics = props.get("diagnostics", {})
+            bounds = catalog["diagnostics_bounds"]
+            if diagnostics.get("maxItems") != bounds["max_items"]:
+                fail("schema: wrapper diagnostics maxItems mismatch with catalog bounds")
+            items = diagnostics.get("items", {})
+            if items.get("maxLength") != bounds["max_length_per_item"]:
+                fail("schema: wrapper diagnostics item bound mismatch with catalog bounds")
+        if subject == "error":
+            code_enum = schema.get("properties", {}).get("code", {}).get("enum")
+            if code_enum != PRD_ERROR_CODES:
+                fail("schema: error code enum must equal the closed PRD set in order")
+            message_bound = schema.get("properties", {}).get("message", {}).get("maxLength")
+            if message_bound != catalog["errors"]["message_max_length"]:
+                fail("schema: error message bound mismatch with catalog")
 
 
 def check_fixtures(registry: Registry, catalog: dict) -> None:

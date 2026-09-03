@@ -9,17 +9,17 @@
     "action": {"enum": ["list", "show"]},
     "dispatch_id": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}(?![\\s\\S])",
       "maxLength": 128
     },
     "route": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}(?![\\s\\S])",
       "maxLength": 128
     },
     "state": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9-]{0,63}$",
+      "pattern": "^[a-z][a-z0-9-]{0,63}(?![\\s\\S])",
       "maxLength": 64
     },
     "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25},

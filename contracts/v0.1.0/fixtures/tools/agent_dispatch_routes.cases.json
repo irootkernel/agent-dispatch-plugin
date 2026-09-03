@@ -4,61 +4,96 @@
       "id": "routes-valid-list",
       "description": "A plain list action with no parameters.",
       "expect": "valid",
-      "instance": {"action": "list"}
+      "instance": {
+        "action": "list"
+      }
     },
     {
       "id": "routes-valid-show",
       "description": "show requires route_id.",
       "expect": "valid",
-      "instance": {"action": "show", "route_id": "wiki"}
+      "instance": {
+        "action": "show",
+        "route_id": "wiki"
+      }
     },
     {
       "id": "routes-valid-preflight-long-id",
       "description": "preflight requires route_id; a 128-character identifier is the upper bound.",
       "expect": "valid",
-      "instance": {"action": "preflight", "route_id": "a1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567"}
+      "instance": {
+        "action": "preflight",
+        "route_id": "a1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567"
+      }
     },
     {
       "id": "routes-invalid-missing-action",
       "description": "action is required.",
       "expect": "invalid",
-      "instance": {"route_id": "wiki"}
+      "instance": {
+        "route_id": "wiki"
+      }
     },
     {
       "id": "routes-invalid-unknown-action",
       "description": "An unknown action value fails the closed enum.",
       "expect": "invalid",
-      "instance": {"action": "enable"}
+      "instance": {
+        "action": "enable"
+      }
     },
     {
       "id": "routes-invalid-show-without-route-id",
       "description": "show without route_id violates the conditional requirement.",
       "expect": "invalid",
-      "instance": {"action": "show"}
+      "instance": {
+        "action": "show"
+      }
     },
     {
       "id": "routes-invalid-list-with-route-id",
       "description": "route_id is not bound for list and is rejected there.",
       "expect": "invalid",
-      "instance": {"action": "list", "route_id": "wiki"}
+      "instance": {
+        "action": "list",
+        "route_id": "wiki"
+      }
     },
     {
       "id": "routes-invalid-route-id-option-prefix",
       "description": "A leading option prefix is rejected by the identifier grammar.",
       "expect": "invalid",
-      "instance": {"action": "show", "route_id": "--route"}
+      "instance": {
+        "action": "show",
+        "route_id": "--route"
+      }
     },
     {
       "id": "routes-invalid-route-id-space",
       "description": "Whitespace in an identifier is rejected.",
       "expect": "invalid",
-      "instance": {"action": "show", "route_id": "wiki maintenance"}
+      "instance": {
+        "action": "show",
+        "route_id": "wiki maintenance"
+      }
     },
     {
       "id": "routes-invalid-route-id-too-long",
       "description": "A 129-character identifier exceeds the 128-character bound.",
       "expect": "invalid",
-      "instance": {"action": "show", "route_id": "a12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678"}
+      "instance": {
+        "action": "show",
+        "route_id": "a12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678"
+      }
+    },
+    {
+      "id": "routes-invalid-route-id-trailing-newline",
+      "description": "A trailing newline passes the Python dollar anchor but is a control byte the grammar rejects.",
+      "expect": "invalid",
+      "instance": {
+        "action": "show",
+        "route_id": "wiki\n"
+      }
     }
   ]
 }
