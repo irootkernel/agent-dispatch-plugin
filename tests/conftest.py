@@ -80,3 +80,19 @@ def broken_catalog(plugin, pristine_registry, tmp_path, monkeypatch):
         return catalog_file
 
     return install
+
+
+@pytest.fixture
+def fresh_plugin_with_unreadable_schemas(monkeypatch):
+    """Load a fresh plugin instance whose schemas cannot be read.
+
+    Cache management rides in the fixture setup and teardown symmetrically
+    with pristine_registry, so tests never touch lru_cache internals.
+    """
+    module = load_plugin(PLUGIN_MODULE + "_atomicity")
+    module.registry.load_catalog.cache_clear()
+    module.registry.tool_specs.cache_clear()
+    monkeypatch.setattr(module.registry, "CONTRACTS_VERSION_DIR", ROOT / "contracts" / "nowhere")
+    yield module
+    module.registry.load_catalog.cache_clear()
+    module.registry.tool_specs.cache_clear()

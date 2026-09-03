@@ -5,6 +5,8 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from conftest import load_plugin
 
 ROOT = Path(__file__).resolve().parent.parent.parent
@@ -61,22 +63,12 @@ def test_manifest_parity_gate_runs_green():
     assert "manifest/registry parity passed" in result.stdout
 
 
-def test_register_registers_nothing_partial_when_a_schema_is_unreadable():
+def test_register_registers_nothing_partial_when_a_schema_is_unreadable(
+    fresh_plugin_with_unreadable_schemas,
+):
     """The registers-nothing-partial invariant holds through register() itself."""
-    module = load_plugin("hermes_plugins.agent_dispatch_plugin_atomicity")
+    module = fresh_plugin_with_unreadable_schemas
     ctx = RecordingContext()
-    broken_dir = ROOT / "contracts" / "nowhere"
-    original = module.registry.CONTRACTS_VERSION_DIR
-    module.registry.load_catalog.cache_clear()
-    module.registry.tool_specs.cache_clear()
-    module.registry.CONTRACTS_VERSION_DIR = broken_dir
-    try:
-        import pytest as _pytest
-
-        with _pytest.raises(module.registry.ContractSourceError):
-            module.register(ctx)
-    finally:
-        module.registry.CONTRACTS_VERSION_DIR = original
-        module.registry.load_catalog.cache_clear()
-        module.registry.tool_specs.cache_clear()
+    with pytest.raises(module.registry.ContractSourceError):
+        module.register(ctx)
     assert ctx.registered == {}, "a failed registration must not stay partial"
