@@ -39,7 +39,10 @@ The aggregate calls each stage handler exactly once through recursive
   against the frozen schemas over the complete fixture corpus
   (`test_input_validation.py`), the status and doctor tools through the
   full boundary with pre-process rejection evidence
-  (`test_tools_status_doctor.py`), the runner trust gate with
+  (`test_tools_status_doctor.py`), the routes, schedule inspection, and
+  config tools across every action branch with conditional-field,
+  grammar, enum, and probe-placement negatives
+  (`test_tools_routes_schedule_config.py`), the runner trust gate with
   deterministic fake Agent Dispatch executables (`test_runner.py`), the
   bounded process-group execution — argv, environment, deadline, stream
   limits, termination, and no-retry — against behavior-scripted fakes

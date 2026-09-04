@@ -27,6 +27,12 @@ while preserving Agent Dispatch as the domain authority.
   the runner boundary. TASK-008 and TASK-009 build their action-level
   positive and negative evidence on top of that layer; negative input cases
   prove no process is created by spying on `runner.run_inspection`.
+- TASK-008 delivered the routes, schedule inspection, and config evidence as
+  one parametrized action-branch matrix: each branch asserts its exact fixed
+  argv and two-token envelope command identity through the full boundary,
+  and the negative matrix covers route_id placement, the identifier grammar
+  (including traversal separators), closed action enums, and
+  probe_targets-is-validate-only.
 
 ## Acceptance
 

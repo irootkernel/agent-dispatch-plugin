@@ -25,7 +25,7 @@ evidence named by the Detailed SOT, not prose assertion.
 | TASK-005 | EPIC-002 | Implement the bounded process-group runner | Completed | Timeout, stream limit, termination, and argv tests |
 | TASK-006 | EPIC-002 | Implement closed errors, diagnostics, and defense-in-depth redaction | Completed | Seeded-secret and bounded-diagnostic tests |
 | TASK-007 | EPIC-003 | Implement status and doctor tools | Completed | Schema, mapping, success, and failure evidence |
-| TASK-008 | EPIC-003 | Implement routes, schedule inspection, and config tools | Planned | Action-level positive and negative evidence |
+| TASK-008 | EPIC-003 | Implement routes, schedule inspection, and config tools | Completed | Action-level positive and negative evidence |
 | TASK-009 | EPIC-003 | Implement dispatches, receipts, events, quarantine, and notifications | Planned | Action-level positive and negative evidence |
 | TASK-010 | EPIC-003 | Prove manifest, registry, command, and fresh-session inventory parity | Planned | Exact ten-tool parity and smoke transcript |
 | TASK-011 | EPIC-004 | Prove injection, traversal, secret, limit, malformed-output, and no-retry negatives | Planned | Deterministic security suite |
