@@ -15,3 +15,4 @@ Superseded, and Rejected. A superseding ADR links the record it replaces.
 | ADR-004 | Runner trust gate — path verification, time-of-check, and version probing | Accepted |
 | ADR-005 | Bounded process-group runner — execution environment, concurrent capture, and termination | Accepted |
 | ADR-006 | Closed errors, bounded diagnostics, and defense-in-depth redaction | Accepted |
+| ADR-007 | Derived input validation before process creation | Accepted |

@@ -301,7 +301,7 @@ def test_availability_probe_through_the_tools_layer(plugin, fake_agent_dispatch)
 
 def test_handler_fails_closed_without_configuration(plugin, unconfigured_ctx):
     spec = plugin.registry.tool_specs()[0]
-    result = plugin.tools.handler_for(spec, unconfigured_ctx)(action="list")
+    result = plugin.tools.handler_for(spec, unconfigured_ctx)()
     assert result["error"]["code"] == "binary_unavailable"
     assert result["error"]["message"] == plugin.runner.NOT_CONFIGURED_MESSAGE
 

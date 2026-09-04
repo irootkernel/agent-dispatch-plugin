@@ -35,10 +35,14 @@ The aggregate calls each stage handler exactly once through recursive
   the registry derivation from the frozen catalog (`test_registry.py`), the
   model-facing schema layer (`test_schemas.py`), the fail-closed handlers
   validated against the frozen wrapper and error schemas
-  (`test_tools.py`), the runner trust gate with deterministic fake
-  Agent Dispatch executables (`test_runner.py`), the bounded
-  process-group execution — argv, environment, deadline, stream limits,
-  termination, and no-retry — against behavior-scripted fakes
+  (`test_tools.py`), the derived input-validation layer cross-checked
+  against the frozen schemas over the complete fixture corpus
+  (`test_input_validation.py`), the status and doctor tools through the
+  full boundary with pre-process rejection evidence
+  (`test_tools_status_doctor.py`), the runner trust gate with
+  deterministic fake Agent Dispatch executables (`test_runner.py`), the
+  bounded process-group execution — argv, environment, deadline, stream
+  limits, termination, and no-retry — against behavior-scripted fakes
   (`test_execution.py`), and the closed output boundary — frozen-fixture
   envelope validation, carrier rules, diagnostic bounds, and seeded-secret
   redaction (`test_validation.py`).

@@ -203,6 +203,37 @@ def make_fake_binary(
     }
 
 
+def valid_params_for_action(spec, action) -> dict[str, Any]:
+    """The smallest schema-valid request that selects one action.
+
+    Derived from the tool's frozen input schema: top-level required members
+    plus the conditional members the ``allOf``/``if``/``then`` blocks require
+    for this action value. Used by handler tests that need a request the
+    derived validation layer will accept.
+    """
+    schema = spec.load_input_schema()
+    params: dict[str, Any] = {name: "x" for name in schema.get("required", ()) if name != "action"}
+    value = action.input_action_value
+    if value is None:
+        return params
+    params["action"] = value
+    for entry in schema.get("allOf", ()):
+        condition = entry.get("if") or {}
+        constraint = (condition.get("properties") or {}).get("action")
+        if constraint is None:
+            selects = True
+        elif "const" in constraint:
+            selects = constraint["const"] == value
+        elif "enum" in constraint:
+            selects = value in constraint["enum"]
+        else:
+            selects = True
+        if selects and "action" in params:
+            for name in (entry.get("then") or {}).get("required", ()):
+                params[name] = "x"
+    return params
+
+
 def load_plugin(module_name: str = PLUGIN_MODULE) -> types.ModuleType:
     """Import the plugin package the way the Hermes directory loader does."""
     if "hermes_plugins" not in sys.modules:

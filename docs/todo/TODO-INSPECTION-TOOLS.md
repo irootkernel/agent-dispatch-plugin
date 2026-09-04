@@ -19,6 +19,15 @@ while preserving Agent Dispatch as the domain authority.
 - Drive schemas, command descriptors, registration, and parity checks from the
   EPIC-001 registry.
 
+## Execution notes
+
+- TASK-007 added the derived input-validation layer (`tools/inputs.py`,
+  ADR-007): handlers validate every request against the tool's frozen input
+  schema and reject out-of-contract requests with `invalid_argument` before
+  the runner boundary. TASK-008 and TASK-009 build their action-level
+  positive and negative evidence on top of that layer; negative input cases
+  prove no process is created by spying on `runner.run_inspection`.
+
 ## Acceptance
 
 - Each tool and every action branch has valid-input success evidence.

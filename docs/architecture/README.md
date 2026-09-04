@@ -29,8 +29,15 @@ and calls `register(ctx)`.
 - `tools/__init__.py` builds the handlers over the runner boundary: the
   availability check exposes the toolset only when the configured
   executable, trusted configuration, and version verify (ADR-004), and
-  every handler resolves its one registered action and delegates to
-  `runner.run_inspection`.
+  every handler first validates its request against the tool's frozen
+  input schema (ADR-007), then resolves its one registered action and
+  delegates to `runner.run_inspection`.
+- `tools/inputs.py` is the derived input-validation layer: a stdlib-only
+  interpreter of the frozen input schemas' exact vocabulary (closed object
+  boundaries, types, enums, grammars, length and pagination bounds, and
+  the conditional per-action requirements) that rejects out-of-contract
+  requests with the closed `invalid_argument` error before any process is
+  created (ADR-007).
 - `runner.py` is the sole process boundary. Its trust gate resolves the
   immutable plugin configuration and verifies the platform, both trusted
   paths, the executable SHA-256, and the supported Agent Dispatch version

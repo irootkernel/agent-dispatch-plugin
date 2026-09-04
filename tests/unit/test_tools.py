@@ -12,6 +12,8 @@ from jsonschema import Draft202012Validator
 from referencing import Registry as RefRegistry
 from referencing import Resource
 
+from conftest import valid_params_for_action
+
 ROOT = Path(__file__).resolve().parent.parent.parent
 CONTRACTS = ROOT / "contracts" / "v0.1.0"
 
@@ -43,7 +45,7 @@ def test_every_handler_fails_closed_with_the_frozen_error_contract(plugin, uncon
     error_validator = _validators()["error"]
     for spec in plugin.registry.tool_specs():
         for action in spec.actions:
-            params = {"action": action.input_action_value} if action.input_action_value else {}
+            params = valid_params_for_action(spec, action)
             result = plugin.tools.handler_for(spec, unconfigured_ctx)(**params)
             assert result["ok"] is False
             assert result["exit_code"] == -1

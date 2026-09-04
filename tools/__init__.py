@@ -2,11 +2,14 @@
 
 Every declared tool registers one handler here. Handlers never create a
 process themselves and never touch the network, a database, or Agent
-Dispatch state: they resolve the immutable plugin configuration through the
-Hermes config API, select the registered action for the validated request,
-and delegate to the sole process boundary in runner.run_inspection. Every
-failure — trust, unknown action, or bounded execution — comes back as one
-closed fail-closed wrapper result; nothing raises into Hermes.
+Dispatch state: they validate the request against the tool's frozen input
+schema before anything else runs (ADR-007), resolve the immutable plugin
+configuration through the Hermes config API, select the registered action
+for the validated request, and delegate to the sole process boundary in
+runner.run_inspection. No caller-driven failure raises into Hermes — every
+one comes back as a closed fail-closed wrapper result. A frozen-contract
+defect raises loudly instead (ADR-007's ContractVocabularyError), because a
+silently under-validated contract is worse than a visible one.
 """
 
 from __future__ import annotations
@@ -22,6 +25,9 @@ elif "." in __package__:  # Normal path: imported as a namespaced plugin submodu
 else:  # Degenerate top-level import of the plugin root file.
     import runner
     from registry import ActionSpec, ToolSpec
+# inputs.py lives inside this package, so one relative import serves both
+# runtime paths: the namespaced plugin package and the degenerate tools package.
+from . import inputs
 
 # The five immutable settings from the frozen plugin config schema; nothing
 # else from the Hermes config tree is ever read.
@@ -82,6 +88,9 @@ def handler_for(spec: ToolSpec, ctx: Any) -> Callable[..., dict[str, Any]]:
     """Build the closed fail-closed handler for one declared tool."""
 
     def handler(**kwargs: Any) -> dict[str, Any]:
+        reason = inputs.validate_tool_input(spec, kwargs)
+        if reason is not None:
+            return runner.closed_error_result(spec.name, runner.INVALID_ARGUMENT, reason)
         action = resolve_action(spec, kwargs)
         if action is None:
             return runner.closed_error_result(

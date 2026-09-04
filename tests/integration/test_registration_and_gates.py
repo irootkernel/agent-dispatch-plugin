@@ -45,7 +45,7 @@ def test_registration_through_the_hermes_style_loader_registers_ten_tools():
 
 def test_registered_availability_and_handlers_route_through_the_trust_gate(tmp_path):
     """Registration wires every tool to the shared runner trust gate."""
-    from conftest import make_fake_binary
+    from conftest import make_fake_binary, valid_params_for_action
 
     module = load_plugin("hermes_plugins.agent_dispatch_plugin_trust")
     installation = make_fake_binary(tmp_path)
@@ -55,8 +55,7 @@ def test_registered_availability_and_handlers_route_through_the_trust_gate(tmp_p
     for name, kwargs in hidden_ctx.registered.items():
         spec = next(s for s in module.registry.tool_specs() if s.name == name)
         action = spec.actions[0]
-        params = {"action": action.input_action_value} if action.input_action_value else {}
-        result = kwargs["handler"](**params)
+        result = kwargs["handler"](**valid_params_for_action(spec, action))
         assert result["error"]["code"] == "binary_unavailable", name
 
     exposed_ctx = RecordingContext(installation["config"])

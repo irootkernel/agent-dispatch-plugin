@@ -379,7 +379,7 @@ def test_spawn_failure_fails_closed_without_output(
 def test_handler_routes_one_action_end_to_end(plugin, fake_agent_dispatch):
     ctx = HermesCtxStub(fake_agent_dispatch["config"])
     spec = _tool(plugin, "agent_dispatch_schedule_inspect")
-    result = plugin.tools.handler_for(spec, ctx)(action="inspect", route_id="wiki-maintenance")
+    result = plugin.tools.handler_for(spec, ctx)(route_id="wiki-maintenance")
     assert result["ok"] is True
     argv = result["agent_dispatch"]["result"]["argv"]
     assert argv[1:5] == ["schedule", "inspect", "--route", "wiki-maintenance"]
