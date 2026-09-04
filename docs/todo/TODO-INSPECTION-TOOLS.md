@@ -33,6 +33,13 @@ while preserving Agent Dispatch as the domain authority.
   and the negative matrix covers route_id placement, the identifier grammar
   (including traversal separators), closed action enums, and
   probe_targets-is-validate-only.
+- TASK-009 delivered the dispatch-family evidence the same way and added the
+  read-only proof: every action template token stays inside the frozen
+  command vocabulary (no denied mutation subcommand is reachable in a
+  command slot; validated values occupy only value slots), receipts maps
+  only to `receipts list` and `receipts show`, and grammar-validated values
+  can never start an option prefix, so nothing can smuggle a flag into
+  argv.
 
 ## Acceptance
 
