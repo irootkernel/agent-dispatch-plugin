@@ -6,7 +6,9 @@ property sets, types, enums, the identifier and state-token grammars,
 length and pagination bounds, and the conditional per-action parameter
 requirements. The frozen schemas remain the only authority (ADR-001); this
 module is a stdlib-only interpreter of the exact schema subset they use and
-composes no constraint of its own.
+composes no constraint of its own — including JSON Schema's mathematical
+integer semantics, under which a zero-fraction number such as 5.0 is the
+integer 5 and is canonicalized to that encoding before argv binding.
 
 Rejections return one bounded, redaction-safe reason string naming schema
 vocabulary only — never a caller-provided value — which the handler maps
@@ -146,7 +148,13 @@ def _check_vocabulary(schema: Mapping[str, Any], tool: str) -> None:
 
 def _is_integer(value: Any) -> bool:
     # JSON booleans are Python ints; the schemas mean integer exclusively.
-    return isinstance(value, int) and not isinstance(value, bool)
+    # JSON Schema defines "integer" mathematically, so a number with a zero
+    # fractional part (5.0) is an integer exactly like 5.
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, int):
+        return True
+    return isinstance(value, float) and value.is_integer()
 
 
 def _type_name(property_schema: Mapping[str, Any]) -> str:
@@ -244,3 +252,27 @@ def validate_input(schema: Mapping[str, Any], params: Mapping[str, Any], tool: s
 def validate_tool_input(spec: ToolSpec, params: Mapping[str, Any]) -> str | None:
     """Validate one request against its tool's frozen input schema."""
     return validate_input(spec.load_input_schema(), params, spec.name)
+
+
+def canonicalize_input(schema: Mapping[str, Any], params: Mapping[str, Any]) -> dict[str, Any]:
+    """Return validated params with integer-typed numbers in canonical form.
+
+    JSON Schema treats 5.0 as the integer 5, so a validated zero-fraction
+    float is converted to its canonical integer encoding before the request
+    reaches argv binding; every other value passes through unchanged. The
+    caller must validate first: a non-integral float is not canonicalized
+    here, it is rejected by validation.
+    """
+    canonical = dict(params)
+    for name, property_schema in (schema.get("properties") or {}).items():
+        if property_schema.get("type") != "integer" or name not in canonical:
+            continue
+        value = canonical[name]
+        if isinstance(value, float) and not isinstance(value, bool) and value.is_integer():
+            canonical[name] = int(value)
+    return canonical
+
+
+def canonicalize_tool_input(spec: ToolSpec, params: Mapping[str, Any]) -> dict[str, Any]:
+    """Canonicalize one validated request for its tool's fixed argv binding."""
+    return canonicalize_input(spec.load_input_schema(), params)

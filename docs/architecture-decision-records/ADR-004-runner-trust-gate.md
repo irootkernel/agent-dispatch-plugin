@@ -68,6 +68,15 @@ mechanism had to be established against the real binary.
 - Digest re-verification makes each inspection pay one file read of the
   executable; the executable is small, so this is accepted as the price of
   the time-of-check posture.
+- Residual risk (recorded during the EPIC-003 whole-epic review): a window
+  remains between the digest read and the exec by path, so a local process
+  with write permission on the operator-configured binary path or a parent
+  directory could swap the file in between. The threat model treats such a
+  process as operator-trusted (it could equally rewrite the Hermes config
+  or the plugin source), the digest read uses O_NOFOLLOW, and the full
+  ancestor symlink walk precedes it. Fd-passing execution is not portable
+  to Darwin and a verified-copy scheme is not warranted under the current
+  trust model; revisit only if that model widens.
 
 ## Alternatives
 

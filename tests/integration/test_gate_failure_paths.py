@@ -199,6 +199,21 @@ def corrupt_parity_merged_prefix(work: Path) -> None:
     _set_json(work / "contracts/v0.1.0/catalog.json", mutate)
 
 
+def corrupt_parity_empty_manifest(work: Path) -> None:
+    (work / "plugin.yaml").write_text("", encoding="utf-8")
+
+
+def corrupt_parity_missing_plugin_block(work: Path) -> None:
+    _set_json(work / "contracts/v0.1.0/catalog.json", lambda d: d.pop("plugin"))
+
+
+def corrupt_parity_roster_drift(work: Path) -> None:
+    _set_json(
+        work / "contracts/v0.1.0/catalog.json",
+        lambda d: d["tools"].append(json.loads(json.dumps(d["tools"][0]))),
+    )
+
+
 @pytest.mark.parametrize(
     ("corruption", "label", "needle"),
     [
@@ -207,6 +222,17 @@ def corrupt_parity_merged_prefix(work: Path) -> None:
             corrupt_parity_drifted_manifest,
             "drifted plugin.yaml",
             "does not equal the catalog-derived manifest",
+        ),
+        (corrupt_parity_empty_manifest, "empty plugin.yaml", "empty or not a mapping"),
+        (
+            corrupt_parity_missing_plugin_block,
+            "catalog without a plugin block",
+            "the frozen catalog has no plugin block",
+        ),
+        (
+            corrupt_parity_roster_drift,
+            "catalog roster drift",
+            "registration rejected the frozen contract source",
         ),
         (
             corrupt_parity_denied_argv_suffix,

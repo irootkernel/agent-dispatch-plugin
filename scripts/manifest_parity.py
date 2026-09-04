@@ -143,8 +143,12 @@ def command_vocabulary_errors(catalog: dict) -> list[str]:
 
 
 def main() -> int:
-    module = load_plugin_module()
-    catalog = module.registry.load_catalog()
+    try:
+        module = load_plugin_module()
+        catalog = module.registry.load_catalog()
+    except Exception as exc:  # a malformed contract source must fail boundedly
+        print(f"parity error: the frozen contract source is unreadable: {exc}")
+        return 1
     if not isinstance(catalog.get("plugin"), dict):
         print("parity error: the frozen catalog has no plugin block")
         return 1
@@ -174,7 +178,11 @@ def main() -> int:
         errors.append("plugin.yaml does not equal the catalog-derived manifest")
 
     ctx = RecordingContext()
-    module.register(ctx)
+    try:
+        module.register(ctx)
+    except module.registry.ContractSourceError as exc:
+        print(f"parity error: registration rejected the frozen contract source: {exc}")
+        return 1
 
     inventory = list(module.registry.expected_inventory())
     provides = manifest.get("provides_tools", [])

@@ -98,7 +98,10 @@ def handler_for(spec: ToolSpec, ctx: Any) -> Callable[..., dict[str, Any]]:
                 runner.INVALID_ARGUMENT,
                 f"{spec.name}: the request does not map to one registered action",
             )
-        return runner.run_inspection(action, spec.name, kwargs, runner_config(ctx))
+        # JSON Schema treats 5.0 as the integer 5; canonical validated
+        # numbers keep the bound argv identical to the equivalent request.
+        canonical = inputs.canonicalize_tool_input(spec, kwargs)
+        return runner.run_inspection(action, spec.name, canonical, runner_config(ctx))
 
     handler.__name__ = f"{spec.name}_handler"
     handler.__doc__ = f"Fail-closed handler for {spec.name} over the runner boundary."

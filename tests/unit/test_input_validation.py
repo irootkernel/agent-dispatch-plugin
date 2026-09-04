@@ -275,3 +275,39 @@ def test_minimal_valid_params_helper_is_honest(inputs, plugin):
     """The helper's requests must themselves validate for every tool."""
     for spec in plugin.registry.tool_specs():
         assert inputs.validate_tool_input(spec, _minimal_valid_params(spec)) is None
+
+
+def test_json_schema_integer_semantics_agree_with_the_oracle(inputs, validators):
+    """Zero-fraction numbers are integers per the frozen authority too."""
+    schema = _load_schema("agent_dispatch_dispatches")
+    tool = "agent_dispatch_dispatches"
+    for params in ({"action": "list", "limit": 5.0}, {"action": "list", "offset": 0.0}):
+        reason = inputs.validate_input(schema, params, tool)
+        errors = list(validators[tool].iter_errors(params))
+        assert reason is None, params
+        assert not errors, params
+    for params in ({"action": "list", "limit": 5.5}, {"action": "list", "offset": 0.5}):
+        reason = inputs.validate_input(schema, params, tool)
+        errors = list(validators[tool].iter_errors(params))
+        assert reason is not None, params
+        assert errors, params
+
+
+def test_canonicalization_converts_validated_zero_fraction_integers(inputs):
+    """Canonical form keeps the bound argv identical to the equivalent
+    integer request while leaving every other value untouched. The type
+    checks matter: dict equality alone treats 5.0 as 5."""
+    schema = _load_schema("agent_dispatch_dispatches")
+    canonical = inputs.canonicalize_input(
+        schema, {"action": "list", "limit": 5.0, "offset": 2.0, "route": "wiki"}
+    )
+    assert canonical == {"action": "list", "limit": 5, "offset": 2, "route": "wiki"}
+    assert type(canonical["limit"]) is int and type(canonical["offset"]) is int
+    unchanged = inputs.canonicalize_input(schema, {"action": "list", "limit": 25})
+    assert unchanged == {"action": "list", "limit": 25}
+    assert type(unchanged["limit"]) is int
+    strings = inputs.canonicalize_input(
+        _load_schema("agent_dispatch_routes"), {"action": "show", "route_id": "wiki"}
+    )
+    assert strings == {"action": "show", "route_id": "wiki"}
+    assert type(strings["route_id"]) is str

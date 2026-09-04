@@ -372,3 +372,15 @@ def test_valid_dispatch_requests_delegate_exactly_once(plugin, configured_ctx, m
     result = _handler(plugin, configured_ctx, "agent_dispatch_notifications")(route="wiki", limit=5)
     assert result["ok"] is True
     assert len(calls) == 1
+
+
+def test_zero_fraction_limits_bind_as_canonical_integers(plugin, configured_ctx):
+    """A validated JSON number with a zero fractional part binds exactly
+    like the equivalent integer request."""
+    result = _handler(plugin, configured_ctx, "agent_dispatch_dispatches")(
+        action="list", limit=5.0, offset=2.0
+    )
+    assert result["ok"] is True
+    argv = result["agent_dispatch"]["result"]["argv"]
+    assert argv[argv.index("--limit") + 1] == "5"
+    assert argv[argv.index("--offset") + 1] == "2"

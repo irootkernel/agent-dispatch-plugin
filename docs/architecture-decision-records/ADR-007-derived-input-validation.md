@@ -42,6 +42,11 @@ the pinned jsonschema toolchain cannot be used inside the plugin process.
 - Rejection reasons name schema vocabulary only — property names from the
   frozen schemas and constraint descriptions — never caller-provided
   values, so the message stays bounded and redaction-safe by construction.
+- Integer semantics follow the frozen authority exactly: JSON Schema
+  defines "integer" mathematically, so a zero-fraction number such as 5.0
+  validates as the integer 5 and is canonicalized to that encoding before
+  the fixed argv binding, keeping the plugin neither stricter nor looser
+  than the schema Hermes validates against.
 
 ## Consequences
 
