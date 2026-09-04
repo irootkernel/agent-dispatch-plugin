@@ -54,8 +54,12 @@ and calls `register(ctx)`.
   schema defines; the tests validate each produced shape against that
   schema.
 - `plugin.yaml` is generated and verified by `scripts/manifest_parity.py`,
-  which also proves catalog, manifest, registration, and expected-inventory
-  parity for exactly ten tools by driving the real registration path.
+  a build-time gate over the trusted catalog run by `make test-prepare`,
+  which also proves catalog, manifest, registration, expected-inventory,
+  tool-schema-file, and command-vocabulary parity — every action's
+  argv_prefix equals its expected_command, each resolves inside the frozen
+  allowed vocabulary, and no argv template token is a denied subcommand —
+  for exactly ten tools by driving the real registration path.
 - `pyproject.toml` is the uv project authority; the runtime is
   dependency-free and the dev group pins the validation toolchain
   (jsonschema 4.26.0, referencing 0.37.0, PyYAML).

@@ -3,8 +3,9 @@
 
 ADR-001: plugin.yaml is a derived view. Run with --write to regenerate it
 from contracts/v0.1.0/catalog.json after an approved contract change; run
-without arguments to verify manifest, registry, registration, and expected
-inventory parity for exactly the ten declared tools.
+without arguments to verify manifest, registry, registration, expected
+inventory, and command-vocabulary parity for exactly the ten declared
+tools.
 
     uv run scripts/manifest_parity.py           # verify (exit 1 on mismatch)
     uv run scripts/manifest_parity.py --write   # regenerate plugin.yaml
@@ -86,6 +87,61 @@ def build_manifest(catalog: dict) -> dict:
     return manifest
 
 
+def command_vocabulary_errors(catalog: dict) -> list[str]:
+    """Every action template token must stay inside the frozen vocabulary.
+
+    The registration path derives each action's argv from the catalog, so
+    the parity statement covers the command allowlist too: each action's
+    expected_command resolves inside command_vocabulary.allowed and no
+    template token — prefix, flag, optional flag, or suffix — appears in
+    the denied subcommand list. Bound values are grammar-validated request
+    content, not template tokens, and are outside this structural check.
+    """
+    vocabulary = catalog.get("command_vocabulary") or {}
+    allowed = vocabulary.get("allowed") or {}
+    denied = set(vocabulary.get("denied_subcommands") or ())
+    errors: list[str] = []
+    for tool in catalog["tools"]:
+        for action in tool["actions"]:
+            where = f"{tool['name']}/{action['id']}"
+            argv = list(action["argv_prefix"])
+            argv += [
+                binding["flag"]
+                for binding in action.get("value_bindings", ())
+                if not binding.get("positional")
+            ]
+            argv += [token for flag in action.get("optional_flags", ()) for token in flag["tokens"]]
+            argv += list(action["argv_suffix"])
+            leaked = sorted(token for token in argv if token in denied)
+            if leaked:
+                errors.append(f"{where}: argv template carries denied subcommands {leaked}")
+            expected = action["expected_command"]
+            # The executed argv starts from argv_prefix, so parity covers the
+            # command execution actually builds, not just the declared label:
+            # the prefix must be exactly the expected command's tokens (a
+            # merged single token like "route show" fails), and the label
+            # must resolve inside the vocabulary — a two-word command inside
+            # its head's subcommand list, a single-word command only where
+            # the vocabulary makes it a whole command rather than a bare
+            # head that requires a subcommand.
+            prefix = list(action["argv_prefix"])
+            if prefix != expected.split(" "):
+                errors.append(
+                    f"{where}: argv_prefix {prefix!r} does not equal expected_command {expected!r}"
+                )
+            if " " in expected:
+                head, sub = expected.split(" ", 1)
+                if head not in allowed or sub not in allowed.get(head, []):
+                    errors.append(
+                        f"{where}: expected_command {expected!r} is outside the allowed vocabulary"
+                    )
+            elif allowed.get(expected) != [expected]:
+                errors.append(
+                    f"{where}: expected_command {expected!r} is outside the allowed vocabulary"
+                )
+    return errors
+
+
 def main() -> int:
     module = load_plugin_module()
     catalog = module.registry.load_catalog()
@@ -124,6 +180,10 @@ def main() -> int:
     provides = manifest.get("provides_tools", [])
     registered = list(ctx.registered)
     roster = [tool["name"] for tool in catalog["tools"]]
+    schema_files = sorted(
+        path.name[: -len(".input.json")]
+        for path in (REPO_ROOT / "contracts" / "v0.1.0" / "schemas" / "tools").glob("*.input.json")
+    )
 
     if not (len(roster) == 10 and len(set(roster)) == 10):
         errors.append(f"catalog roster is not exactly ten unique tools: {roster}")
@@ -133,6 +193,8 @@ def main() -> int:
         errors.append(f"manifest provides_tools != catalog roster: {provides}")
     if sorted(registered) != sorted(roster):
         errors.append(f"registered tools != catalog roster: {registered}")
+    if schema_files != sorted(roster):
+        errors.append(f"tool schema files != catalog roster: {schema_files}")
 
     for name, kwargs in ctx.registered.items():
         if kwargs.get("toolset") != module.registry.toolset():
@@ -145,6 +207,8 @@ def main() -> int:
         if not callable(kwargs.get("handler")) or not callable(kwargs.get("check_fn")):
             errors.append(f"{name}: handler or check_fn missing")
 
+    errors.extend(command_vocabulary_errors(catalog))
+
     if errors:
         print(f"manifest/registry parity FAILED with {len(errors)} error(s):")
         for message in errors:
@@ -152,7 +216,7 @@ def main() -> int:
         return 1
     print(
         "manifest/registry parity passed: catalog, plugin.yaml, registration, "
-        "and expected inventory agree on exactly ten tools"
+        "expected inventory, and the command vocabulary agree on exactly ten tools"
     )
     return 0
 

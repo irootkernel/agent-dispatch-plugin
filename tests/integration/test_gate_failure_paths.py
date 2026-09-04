@@ -144,14 +144,103 @@ def corrupt_parity_drifted_manifest(work: Path) -> None:
     )
 
 
+def corrupt_parity_denied_argv_suffix(work: Path) -> None:
+    _set_json(
+        work / "contracts/v0.1.0/catalog.json",
+        lambda d: d["tools"][0]["actions"][0]["argv_suffix"].insert(0, "plan"),
+    )
+
+
+def corrupt_parity_out_of_vocabulary_command(work: Path) -> None:
+    def mutate(d):
+        action = d["tools"][2]["actions"][1]  # routes show
+        action["argv_prefix"] = ["route", "drain"]
+        action["expected_command"] = "route drain"
+
+    _set_json(work / "contracts/v0.1.0/catalog.json", mutate)
+
+
+def corrupt_parity_single_word_out_of_vocabulary(work: Path) -> None:
+    def mutate(d):
+        action = d["tools"][0]["actions"][0]  # status
+        action["argv_prefix"] = ["statusx"]
+        action["expected_command"] = "statusx"
+
+    _set_json(work / "contracts/v0.1.0/catalog.json", mutate)
+
+
+def corrupt_parity_extra_tool_schema(work: Path) -> None:
+    schema_dir = work / "contracts/v0.1.0/schemas/tools"
+    extra = schema_dir / "agent_dispatch_extra.input.json"
+    extra.write_text(
+        (schema_dir / "agent_dispatch_status.input.json").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+
+
+def corrupt_parity_label_drift(work: Path) -> None:
+    """Only expected_command drifts, to a vocabulary-allowed word: the
+    argv/equality branch is the only branch that can fail."""
+    _set_json(
+        work / "contracts/v0.1.0/catalog.json",
+        lambda d: d["tools"][0]["actions"][0].__setitem__("expected_command", "doctor"),
+    )
+
+
+def corrupt_parity_merged_prefix(work: Path) -> None:
+    """The command path is one merged token, so token structure diverges
+    even though the joined strings match."""
+
+    def mutate(d):
+        action = d["tools"][2]["actions"][1]  # routes show
+        action["argv_prefix"] = ["route show"]
+        action["expected_command"] = "route show"
+
+    _set_json(work / "contracts/v0.1.0/catalog.json", mutate)
+
+
 @pytest.mark.parametrize(
-    ("corruption", "label"),
+    ("corruption", "label", "needle"),
     [
-        (corrupt_parity_unparseable_manifest, "unparseable plugin.yaml"),
-        (corrupt_parity_drifted_manifest, "drifted plugin.yaml"),
+        (corrupt_parity_unparseable_manifest, "unparseable plugin.yaml", "parity"),
+        (
+            corrupt_parity_drifted_manifest,
+            "drifted plugin.yaml",
+            "does not equal the catalog-derived manifest",
+        ),
+        (
+            corrupt_parity_denied_argv_suffix,
+            "denied subcommand in an argv template",
+            "denied subcommands",
+        ),
+        (
+            corrupt_parity_out_of_vocabulary_command,
+            "out-of-vocabulary two-word command",
+            "outside the allowed vocabulary",
+        ),
+        (
+            corrupt_parity_single_word_out_of_vocabulary,
+            "out-of-vocabulary single-word command",
+            "outside the allowed vocabulary",
+        ),
+        (
+            corrupt_parity_extra_tool_schema,
+            "tool schema set diverging from the roster",
+            "schema files != catalog roster",
+        ),
+        (
+            corrupt_parity_label_drift,
+            "expected_command drifting from the argv prefix",
+            "does not equal expected_command",
+        ),
+        (
+            corrupt_parity_merged_prefix,
+            "merged argv prefix token",
+            "does not equal expected_command",
+        ),
     ],
 )
-def test_parity_gate_reports_corruptions_boundedly(corruption, label):
+def test_parity_gate_reports_corruptions_boundedly(corruption, label, needle):
     with tempfile.TemporaryDirectory() as td:
         work = Path(td) / "repo"
         shutil.copytree(ROOT, work, ignore=IGNORE)
@@ -165,4 +254,5 @@ def test_parity_gate_reports_corruptions_boundedly(corruption, label):
         )
         assert result.returncode != 0, label
         assert "parity" in result.stdout.lower(), label
+        assert needle in result.stdout, label
         assert "Traceback" not in result.stderr, label

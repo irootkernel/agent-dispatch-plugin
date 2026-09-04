@@ -40,6 +40,13 @@ while preserving Agent Dispatch as the domain authority.
   only to `receipts list` and `receipts show`, and grammar-validated values
   can never start an option prefix, so nothing can smuggle a flag into
   argv.
+- TASK-010 closed the parity loop: `scripts/manifest_parity.py` now also
+  proves the tool-schema-file set equals the roster and that every action's
+  expected_command resolves inside the frozen command vocabulary with no
+  denied subcommand in any argv template; a fresh-interpreter integration
+  test registers the ten tools over the real Hermes-style loader and
+  completes one trust-gated smoke inspection, and the e2e Plugin Doctor
+  validates the same inventory over the public CLI.
 
 ## Acceptance
 

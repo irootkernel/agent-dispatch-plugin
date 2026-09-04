@@ -54,8 +54,10 @@ The aggregate calls each stage handler exactly once through recursive
   envelope validation, carrier rules, diagnostic bounds, and seeded-secret
   redaction (`test_validation.py`).
 - `test-int`: `tests/integration` — cross-module cooperation: registering
-  the plugin through the Hermes-style directory loader, and running the two
-  repository gates as subprocesses.
+  the plugin through the Hermes-style directory loader, a fresh-interpreter
+  session registering the ten-tool inventory and completing one smoke
+  inspection through the full boundary (`test_fresh_session_inventory.py`),
+  and running the two repository gates as subprocesses.
 - `test-e2e`: `tests/e2e` — the Hermes Plugin Doctor validates the plugin
   directory through its public CLI on a real Hermes v0.20.5 installation.
 
