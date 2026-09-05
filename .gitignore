@@ -2,3 +2,8 @@
 .venv/
 __pycache__/
 *.pyc
+
+# Local agent-tool runtime state: only the shared review policy is tracked.
+.mulgae/*
+!.mulgae/config.yaml
+.zcode/
