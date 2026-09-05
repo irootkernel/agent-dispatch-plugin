@@ -16,7 +16,8 @@ runbooks as follows:
   runbook;
 - redaction-safe evidence capture — the security evidence-capture guide;
 - maintainer procedure and documentation review — the maintainer guide;
-- symptom-driven diagnosis — the troubleshooting runbook.
+- symptom-driven diagnosis — the troubleshooting runbook;
+- exact-commit release handoff — the release handoff runbook.
 
 Repository source, exact commit, release tag, plugin enablement, and
 toolset enablement are separate states (the maintainer guide records
@@ -53,3 +54,7 @@ or release has been authorized by the current project-design work.
 - [Troubleshooting Runbook](troubleshooting.md) — symptom-driven
   diagnosis for enablement, trust-gate, doctor-boundary, installer,
   clean-clone, and rollback failures (TASK-016).
+- [Release Handoff Runbook](release-handoff.md) — the immutable
+  review-target definition, the exact-candidate gate set, the release
+  checklist, and the separate authorization boundary for commit, push,
+  tag, publication, installation, and activation (TASK-017).
