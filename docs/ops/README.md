@@ -1,19 +1,27 @@
 # Operations
 
-Operational evidence for v0.1.0 must be reproducible from a clean clone and an
-immutable review target. Required runbooks will cover:
+Operational evidence for v0.1.0 is reproducible from a clean clone and
+an immutable review target. The required operational coverage maps to
+runbooks as follows:
 
-- exact Agent Dispatch and Hermes artifact identity;
-- disposable Darwin arm64 qualification;
-- Plugin Doctor and fresh-session tool inventory;
-- disabled-by-default installation and explicit toolset activation;
-- complete disablement and removal;
-- upgrade and rollback between pinned revisions;
-- redaction-safe evidence capture.
+- exact Agent Dispatch and Hermes artifact identity — the qualification
+  runbook;
+- disposable Darwin arm64 qualification — the qualification runbook;
+- Plugin Doctor and fresh-session tool inventory — the clean-clone
+  runbook;
+- disabled-by-default installation and explicit toolset activation —
+  the installation lifecycle runbook;
+- complete disablement and removal — the installation lifecycle runbook;
+- upgrade and rollback between pinned revisions — the upgrade/rollback
+  runbook;
+- redaction-safe evidence capture — the security evidence-capture guide;
+- maintainer procedure and documentation review — the maintainer guide;
+- symptom-driven diagnosis — the troubleshooting runbook.
 
-Repository source, exact commit, release tag, plugin enablement, and toolset
-enablement are separate states. No installation, activation, publication, or
-release has been authorized by the current project-design work.
+Repository source, exact commit, release tag, plugin enablement, and
+toolset enablement are separate states (the maintainer guide records
+their owners and commands). No installation, activation, publication,
+or release has been authorized by the current project-design work.
 
 ## Runbooks
 
@@ -31,3 +39,17 @@ release has been authorized by the current project-design work.
   explicit plugin and toolset enablement and disablement are separate
   states, complete removal leaves no registration or inventory residue,
   and the installer manifest-version boundary (TASK-015).
+- [Upgrade and Rollback Runbook](upgrade-rollback-darwin-arm64.md) —
+  the pinned-revision swap model, the recorded rollback and upgrade
+  reproduction between the first two documented pinned revisions, and
+  the frozen-settings invariance that makes swaps safe (TASK-016).
+- [Maintainer Guide](maintainer-guide.md) — the frozen surface and
+  change control, the distinct-state model, the every-change gates, the
+  documentation map, and the documentation review checklist (TASK-016).
+- [Security Evidence Capture Guide](security-evidence-capture.md) —
+  what the closed output boundary already guarantees and the
+  operator-side capture discipline for transcripts and evidence
+  packages (TASK-016).
+- [Troubleshooting Runbook](troubleshooting.md) — symptom-driven
+  diagnosis for enablement, trust-gate, doctor-boundary, installer,
+  clean-clone, and rollback failures (TASK-016).

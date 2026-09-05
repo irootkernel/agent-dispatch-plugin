@@ -33,7 +33,7 @@ evidence named by the Detailed SOT, not prose assertion.
 | TASK-013 | EPIC-004 | Obtain independent security and compatibility review | Completed | Adjudicated findings with no open release blocker |
 | TASK-014 | EPIC-005 | Prove clean-clone CI, Plugin Doctor, and tool inventory | Completed | Clean environment transcript |
 | TASK-015 | EPIC-005 | Prove pinned disabled installation, enablement, disablement, and removal | Completed | Disposable-profile lifecycle transcript |
-| TASK-016 | EPIC-005 | Complete maintainer, security, compatibility, upgrade, and rollback documentation | Planned | Documentation review checklist |
+| TASK-016 | EPIC-005 | Complete maintainer, security, compatibility, upgrade, and rollback documentation | Completed | Documentation review checklist |
 | TASK-017 | EPIC-005 | Prepare an exact-commit release handoff | Planned | Immutable review target and release checklist; tag and publication remain separately authorized |
 
 ## Sequencing
