@@ -41,8 +41,9 @@ git archive <previous-pinned-revision> | tar -x -C <plugin-directory>
 Rolling one disposable profile between the first two documented pinned
 revisions — the EPIC-004 closeout revision
 (`22bca58bccab6386c98275b913f7cc3bd0813361`) and the EPIC-005 candidate
-(`156ca591132efd6adc9b1e83553b3a2654f3f3b9`, the revision the release
-handoff names) — with the profile state untouched between swaps:
+(`156ca591132efd6adc9b1e83553b3a2654f3f3b9`, the commit that introduced
+the release handoff and its self-declared immutable review target) —
+with the profile state untouched between swaps:
 
 | Step | Revision | Fresh-session observation |
 |---|---|---|
