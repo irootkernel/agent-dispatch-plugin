@@ -6,10 +6,12 @@ dispatch over a disposable ``HERMES_HOME``) invoking the real pinned Agent
 Dispatch v0.1.6 executable on Darwin arm64, against synthetic state seeded
 through Agent Dispatch's own commands inside one disposable profile. The
 suite never touches the operator's live Agent Dispatch configuration,
-state database, or LaunchAgents: every path the real binary could resolve
-is pinned into the sandbox, and the downstream Hermes target is a
-controlled fake answering only the surfaces Agent Dispatch probes — the
-isolation model the PRD names for qualification.
+state database, or LaunchAgents: the state directory, configuration,
+resource root, and HOME that Agent Dispatch resolves are pinned into the
+sandbox (seeding commands otherwise run with an inherited environment),
+and the downstream Hermes target is a controlled fake answering only the
+surfaces Agent Dispatch probes — the isolation model the PRD names for
+qualification.
 
 One recorded boundary is asserted as a deterministic negative: ``doctor
 --probe-targets`` reports the watchman daemon unreachable under the
@@ -377,10 +379,6 @@ def _disposable_hermes_home(sandbox: Path, binary: Path, config: Path) -> Path:
         "config_path": str(config),
         "timeout_seconds": 30,
     }
-    lines = ["plugins:", "  enabled: [agent-dispatch-plugin]", "  entries:"]
-    for key, value in settings.items():
-        rendered = json.dumps(value)
-        lines.append(f"        {key}: {rendered}")
     # Write through the entries block with correct indentation.
     config_text = (
         "plugins:\n"
