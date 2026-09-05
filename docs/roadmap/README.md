@@ -11,7 +11,7 @@ evidence named by the Detailed SOT, not prose assertion.
 | EPIC-001 | Establish canonical contracts and a testable plugin skeleton | Completed | Canonical Outcomes: contracts/v0.1.0/catalog.json, docs/specs/contracts.md, docs/architecture-decision-records/ADR-001-declarative-contract-registry.md, plugin.yaml, scripts/manifest_parity.py, TESTING.md, Makefile |
 | EPIC-002 | Build the single secure process and validation boundary | Completed | Canonical Outcomes: runner.py, envelopes.py, docs/architecture-decision-records/ADR-004-runner-trust-gate.md, docs/architecture-decision-records/ADR-005-bounded-process-group-runner.md, docs/architecture-decision-records/ADR-006-closed-errors-diagnostics-redaction.md, TESTING.md |
 | EPIC-003 | Deliver the exact ten inspection tools and parity evidence | Completed | Canonical Outcomes: tools/__init__.py, tools/inputs.py, docs/architecture-decision-records/ADR-007-derived-input-validation.md, scripts/manifest_parity.py, tests/unit/test_input_validation.py, tests/unit/test_tools_status_doctor.py, tests/unit/test_tools_routes_schedule_config.py, tests/unit/test_tools_dispatch_family.py, tests/integration/test_fresh_session_inventory.py, TESTING.md |
-| EPIC-004 | Prove security and compatibility release gates | Planned | docs/todo/TODO-SECURITY-COMPATIBILITY.md |
+| EPIC-004 | Prove security and compatibility release gates | In Progress | docs/todo/TODO-SECURITY-COMPATIBILITY.md |
 | EPIC-005 | Prove clean-clone distribution, rollback, and release readiness | Planned | docs/todo/TODO-DISTRIBUTION-RELEASE.md |
 
 ## Work units
@@ -28,7 +28,7 @@ evidence named by the Detailed SOT, not prose assertion.
 | TASK-008 | EPIC-003 | Implement routes, schedule inspection, and config tools | Completed | Action-level positive and negative evidence |
 | TASK-009 | EPIC-003 | Implement dispatches, receipts, events, quarantine, and notifications | Completed | Action-level positive and negative evidence |
 | TASK-010 | EPIC-003 | Prove manifest, registry, command, and fresh-session inventory parity | Completed | Exact ten-tool parity and smoke transcript |
-| TASK-011 | EPIC-004 | Prove injection, traversal, secret, limit, malformed-output, and no-retry negatives | Planned | Deterministic security suite |
+| TASK-011 | EPIC-004 | Prove injection, traversal, secret, limit, malformed-output, and no-retry negatives | Completed | Deterministic security suite |
 | TASK-012 | EPIC-004 | Run the disposable action-level compatibility matrix | Planned | Exact-artifact Darwin arm64 qualification transcript |
 | TASK-013 | EPIC-004 | Obtain independent security and compatibility review | Planned | Adjudicated findings with no open release blocker |
 | TASK-014 | EPIC-005 | Prove clean-clone CI, Plugin Doctor, and tool inventory | Planned | Clean environment transcript |
