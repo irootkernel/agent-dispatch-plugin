@@ -23,6 +23,13 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+# pytest 9 collects a root directory whose name is a valid Python
+# identifier as a package and then never puts the repository root on
+# sys.path, so the guarded modules' degenerate top-level imports
+# (`import registry`) fail in any identifier-named clean clone. The
+# hyphen-named working directory only passed by accident. Pin the root
+# explicitly so every clone location imports identically.
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 100

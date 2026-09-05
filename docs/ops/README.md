@@ -21,3 +21,8 @@ release has been authorized by the current project-design work.
   the exact artifact identities, the disposable-profile reproduction
   procedure, the single-entry support-matrix rationale, and the adjudicated
   qualification boundaries (TASK-012).
+- [Clean-Clone Verification Runbook](clean-clone-verification.md) — the
+  clean-clone reproduction procedure for the complete deterministic gate
+  set, the recorded directory-name import defect with its remediation, and
+  the clean-environment transcript including Plugin Doctor and the
+  fresh-session tool inventory (TASK-014).
