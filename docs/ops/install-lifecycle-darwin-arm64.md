@@ -61,7 +61,13 @@ the profile.
 | Toolset re-enabled | `hermes tools enable agent_dispatch` | `tools list` reports `✓ enabled`; the toolset rejoins `platform_toolsets.cli` |
 | Plugin disabled | `hermes plugins disable agent-dispatch-plugin` | fresh session registers 0 tools |
 | Plugin removed | `hermes plugins remove agent-dispatch-plugin` | plugin directory deleted; `plugins list` shows no entry; fresh session registers 0 tools with no inventory entry |
-| Profile bookkeeping cleaned | `hermes config unset plugins.entries.agent-dispatch-plugin` and `plugins.disabled` | no `agent-dispatch-plugin` reference remains in the profile config; fresh session registers 0 tools |
+| Profile bookkeeping cleaned | `hermes config unset plugins.entries.agent-dispatch-plugin`, then the plugin's entry removed from the `plugins.disabled` list | no `agent-dispatch-plugin` reference remains in the profile config; fresh session registers 0 tools |
+
+The `plugins.disabled` list is a whole-list key: in this disposable profile it
+holds only `agent-dispatch-plugin`, so the qualification removes the list
+entirely. A shared operator profile must instead edit the list to drop only
+this plugin's entry — unsetting the whole key there would erase other
+plugins' disablement state.
 
 Plugin enablement (`plugins.enabled`) and toolset enablement
 (`platform_toolsets.cli`) are recorded by separate commands into separate

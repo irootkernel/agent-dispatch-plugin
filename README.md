@@ -22,9 +22,10 @@ cp -R agent-dispatch-plugin <HERMES_HOME>/plugins/agent-dispatch-plugin
 hermes plugins enable agent-dispatch-plugin --no-allow-tool-override
 hermes tools enable agent_dispatch
 
-# 3. Seed the five frozen settings (binary_path, binary_sha256,
-#    config_path, timeout_seconds) — see the installation lifecycle
-#    runbook; the plugin's trust gate validates them every session.
+# 3. Seed the five frozen settings — binary_path, binary_sha256,
+#    config_path, timeout_seconds, and the optional max_output_bytes
+#    (defaults to 1048576, tighten-only); see the installation lifecycle
+#    runbook — the plugin's trust gate validates them every session.
 ```
 
 Removal is the exact reverse and leaves no registration or tool

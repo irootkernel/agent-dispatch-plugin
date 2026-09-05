@@ -39,15 +39,16 @@ git archive <previous-pinned-revision> | tar -x -C <plugin-directory>
 ## Transcript (recorded reproduction)
 
 Rolling one disposable profile between the first two documented pinned
-revisions — the EPIC-004 closeout revision and the EPIC-005 candidate
-that adds the lifecycle qualification — with the profile state untouched
-between swaps:
+revisions — the EPIC-004 closeout revision
+(`22bca58bccab6386c98275b913f7cc3bd0813361`) and the EPIC-005 candidate
+(`156ca591132efd6adc9b1e83553b3a2654f3f3b9`, the revision the release
+handoff names) — with the profile state untouched between swaps:
 
 | Step | Revision | Fresh-session observation |
 |---|---|---|
-| Install current candidate | EPIC-005 candidate | 10 tools registered, toolset available, smoke inspection `ok: true` |
-| Rollback | EPIC-004 closeout revision | 10 tools registered, toolset available, smoke inspection `ok: true` |
-| Upgrade forward | EPIC-005 candidate | 10 tools registered, toolset available, smoke inspection `ok: true` |
+| Install current candidate | `156ca591132efd6adc9b1e83553b3a2654f3f3b9` | 10 tools registered, toolset available, smoke inspection `ok: true` |
+| Rollback | `22bca58bccab6386c98275b913f7cc3bd0813361` | 10 tools registered, toolset available, smoke inspection `ok: true` |
+| Upgrade forward | `156ca591132efd6adc9b1e83553b3a2654f3f3b9` | 10 tools registered, toolset available, smoke inspection `ok: true` |
 
 The revision history a rollback may target is exactly the committed
 history of this repository; a release handoff (see the release handoff
