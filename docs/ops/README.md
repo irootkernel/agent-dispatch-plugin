@@ -26,3 +26,8 @@ release has been authorized by the current project-design work.
   set, the recorded directory-name import defect with its remediation, and
   the clean-environment transcript including Plugin Doctor and the
   fresh-session tool inventory (TASK-014).
+- [Installation Lifecycle Runbook](install-lifecycle-darwin-arm64.md) —
+  the disposable-profile proof that pinned installation starts disabled,
+  explicit plugin and toolset enablement and disablement are separate
+  states, complete removal leaves no registration or inventory residue,
+  and the installer manifest-version boundary (TASK-015).

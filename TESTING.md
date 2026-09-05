@@ -128,8 +128,13 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   (plugin discovery plus `model_tools.handle_function_call` over a
   disposable `HERMES_HOME`) invoking the real pinned Agent Dispatch
   v0.1.6 release artifact against synthetic state seeded through Agent
-  Dispatch's own commands. The stage is deliberately outside `make test`,
-  which stays hermetic on the deterministic fake executable.
+  Dispatch's own commands; and the disposable installation lifecycle
+  (TASK-015): disabled-by-default pinned installation, explicit plugin
+  and toolset enablement and disablement as separate states, and complete
+  removal with no registration or inventory residue, driven through the
+  real Hermes CLI and a fresh-session runtime observer in one disposable
+  profile. The stage is deliberately outside `make test`, which stays
+  hermetic on the deterministic fake executable.
 - Type checking: `mypy` (pinned `mypy==2.3.1` with the matching
   `types-jsonschema` and `types-pyyaml` stubs) over the runtime modules.
   The repository root is a hyphen-named Hermes plugin package, so the
