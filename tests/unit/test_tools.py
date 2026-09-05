@@ -37,7 +37,7 @@ def test_availability_check_hides_the_unconfigured_toolset(plugin, unconfigured_
 def test_every_handler_result_validates_against_the_frozen_wrapper(plugin, unconfigured_ctx):
     wrapper = _validators()["wrapper"]
     for spec in plugin.registry.tool_specs():
-        wrapper.validate(plugin.tools.handler_for(spec, unconfigured_ctx)())
+        wrapper.validate(json.loads(plugin.tools.handler_for(spec, unconfigured_ctx)({})))
 
 
 def test_every_handler_fails_closed_with_the_frozen_error_contract(plugin, unconfigured_ctx):
@@ -46,7 +46,7 @@ def test_every_handler_fails_closed_with_the_frozen_error_contract(plugin, uncon
     for spec in plugin.registry.tool_specs():
         for action in spec.actions:
             params = valid_params_for_action(spec, action)
-            result = plugin.tools.handler_for(spec, unconfigured_ctx)(**params)
+            result = json.loads(plugin.tools.handler_for(spec, unconfigured_ctx)(dict(params)))
             assert result["ok"] is False
             assert result["exit_code"] == -1
             assert result["operation"] == spec.name
@@ -57,8 +57,10 @@ def test_every_handler_fails_closed_with_the_frozen_error_contract(plugin, uncon
 
 def test_handlers_never_reflect_caller_arguments(plugin, unconfigured_ctx):
     for spec in plugin.registry.tool_specs():
-        result = plugin.tools.handler_for(spec, unconfigured_ctx)(
-            anything="ignored", flags=["--evil"], binary="/bin/sh", cwd="/tmp"
+        result = json.loads(
+            plugin.tools.handler_for(spec, unconfigured_ctx)(
+                {"anything": "ignored", "flags": ["--evil"], "binary": "/bin/sh", "cwd": "/tmp"}
+            )
         )
         assert result["diagnostics"] == []
         dumped = json.dumps(result)

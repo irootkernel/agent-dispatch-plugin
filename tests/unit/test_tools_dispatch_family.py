@@ -54,7 +54,8 @@ def configured_ctx(plugin, fake_agent_dispatch):
 
 
 def _handler(plugin, ctx, name):
-    return plugin.tools.handler_for(_tool(plugin, name), ctx)
+    handler = plugin.tools.handler_for(_tool(plugin, name), ctx)
+    return lambda args: json.loads(handler(dict(args)))
 
 
 @pytest.mark.parametrize(
@@ -202,7 +203,7 @@ def _handler(plugin, ctx, name):
 def test_every_dispatch_family_action_branch_succeeds_with_its_exact_fixed_mapping(
     plugin, configured_ctx, wrapper, tool, params, expected_argv_tail
 ):
-    result = _handler(plugin, configured_ctx, tool)(**params)
+    result = _handler(plugin, configured_ctx, tool)(dict(params))
     wrapper.validate(result)
     assert result["ok"] is True, (tool, params, result.get("error"))
     assert result["exit_code"] == 0
@@ -275,7 +276,7 @@ def test_invalid_requests_are_rejected_before_the_runner(
         raise AssertionError("the runner boundary must not be reached by an invalid request")
 
     monkeypatch.setattr(plugin.runner, "run_inspection", spy)
-    result = _handler(plugin, HermesCtxStub(settings={"binary_path": "/nope"}), tool)(**params)
+    result = _handler(plugin, HermesCtxStub(settings={"binary_path": "/nope"}), tool)(dict(params))
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["exit_code"] == -1
@@ -326,7 +327,7 @@ def test_option_prefixed_values_reject_before_the_runner(plugin, monkeypatch):
     )
     handler = _handler(plugin, HermesCtxStub(), "agent_dispatch_receipts")
     for value in ("--retry", "submit ", "complete\n", "-", "-x", "--"):
-        result = handler(action="show", receipt_id=value)
+        result = handler({"action": "show", "receipt_id": value})
         assert result["error"]["code"] == "invalid_argument", value
     assert calls == []
 
@@ -336,7 +337,9 @@ def test_domain_rejection_carries_the_envelope_for_receipts(plugin, tmp_path, wr
         tmp_path, behavior={"kind": "reject", "exit": 5, "command": "receipts show"}
     )
     ctx = HermesCtxStub(settings=installation["config"])
-    result = _handler(plugin, ctx, "agent_dispatch_receipts")(action="show", receipt_id="r.9")
+    result = _handler(plugin, ctx, "agent_dispatch_receipts")(
+        {"action": "show", "receipt_id": "r.9"}
+    )
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["exit_code"] == 5
@@ -351,7 +354,9 @@ def test_malformed_output_closes_with_bounded_stderr_tail(plugin, tmp_path, wrap
         tmp_path, behavior={"kind": "raw", "stdout": "not json\n", "stderr_lines": ["bad-dispatch"]}
     )
     ctx = HermesCtxStub(settings=installation["config"])
-    result = _handler(plugin, ctx, "agent_dispatch_dispatches")(action="show", dispatch_id="d-1")
+    result = _handler(plugin, ctx, "agent_dispatch_dispatches")(
+        {"action": "show", "dispatch_id": "d-1"}
+    )
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["error"]["code"] == "malformed_json"
@@ -369,7 +374,9 @@ def test_valid_dispatch_requests_delegate_exactly_once(plugin, configured_ctx, m
         return real(*args, **kwargs)
 
     monkeypatch.setattr(plugin.runner, "run_inspection", recording)
-    result = _handler(plugin, configured_ctx, "agent_dispatch_notifications")(route="wiki", limit=5)
+    result = _handler(plugin, configured_ctx, "agent_dispatch_notifications")(
+        {"route": "wiki", "limit": 5}
+    )
     assert result["ok"] is True
     assert len(calls) == 1
 
@@ -378,7 +385,7 @@ def test_zero_fraction_limits_bind_as_canonical_integers(plugin, configured_ctx)
     """A validated JSON number with a zero fractional part binds exactly
     like the equivalent integer request."""
     result = _handler(plugin, configured_ctx, "agent_dispatch_dispatches")(
-        action="list", limit=5.0, offset=2.0
+        {"action": "list", "limit": 5.0, "offset": 2.0}
     )
     assert result["ok"] is True
     argv = result["agent_dispatch"]["result"]["argv"]

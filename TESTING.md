@@ -16,6 +16,7 @@ make test-prepare   # format, lint, type checking, byte-compilation, contracts g
 make test-unit      # uv run pytest tests/unit
 make test-int       # uv run pytest tests/integration
 make test-e2e       # uv run pytest tests/e2e
+make test-qualify   # uv run pytest tests/qualification (real pinned artifacts; see below)
 ```
 
 The aggregate calls each stage handler exactly once through recursive
@@ -68,6 +69,7 @@ The aggregate calls each stage handler exactly once through recursive
 | Python | unit | pytest (canonical) | pyproject.toml + uv.lock (pytest==9.0.2) | `uv run pytest tests/unit` |
 | Python | integration | pytest (canonical) | same | `uv run pytest tests/integration` |
 | Python | e2e | pytest (canonical) | same | `uv run pytest tests/e2e` |
+| Python | qualification | pytest (canonical) | same | `uv run pytest tests/qualification` |
 
 No framework waivers apply: every layer is newly established on pytest.
 
@@ -91,6 +93,24 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   when the Hermes CLI is absent from `PATH`; there is no skip path.
 - Credentials: none.
 
+## Qualification Environment
+
+- Artifact identities: Hermes exactly v0.20.5 on `PATH` (the stage also
+  locates the install's venv interpreter for the in-process dispatch
+  driver) and the pinned Agent Dispatch v0.1.6 darwin/arm64 release
+  artifact, supplied through `AGENT_DISPATCH_QUALIFY_BINARY` or found on
+  `PATH` and verified byte-exactly against the pinned SHA-256 before
+  anything runs.
+- Public interface: the qualification matrix seeds a disposable profile
+  (temporary `HERMES_HOME`, temporary Agent Dispatch configuration and
+  state, controlled fake downstream Hermes target) and dispatches every
+  advertised action through the real Hermes runtime deterministically —
+  no model, no network, no live state.
+- Prerequisite refusal: the stage fails with the exact missing
+  prerequisite when the host platform, Hermes version, or pinned
+  artifact is absent; there is no skip path.
+- Credentials: none.
+
 ## Language Diagnostics
 
 - Static analysis: `ruff check` (pinned `ruff==0.14.7`).
@@ -98,6 +118,18 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
 - Runtime/race diagnostics: not applicable — Python has no native race
   detector; the runner uses threads only for bounded concurrent stream
   draining, which the execution tests exercise deterministically.
+- `test-unit` addition: `test_security_negatives.py` — the consolidated
+  deterministic security suite (TASK-011) walking every dossier negative
+  class through the public handler boundary with a mechanically complete
+  injection sweep over every catalog string binding.
+- `test-qualify`: `tests/qualification` — the disposable action-level
+  compatibility matrix (TASK-012): every advertised public action of all
+  ten tools dispatched through the real Hermes v0.20.5 runtime
+  (plugin discovery plus `model_tools.handle_function_call` over a
+  disposable `HERMES_HOME`) invoking the real pinned Agent Dispatch
+  v0.1.6 release artifact against synthetic state seeded through Agent
+  Dispatch's own commands. The stage is deliberately outside `make test`,
+  which stays hermetic on the deterministic fake executable.
 - Type checking: `mypy` (pinned `mypy==2.3.1` with the matching
   `types-jsonschema` and `types-pyyaml` stubs) over the runtime modules.
   The repository root is a hyphen-named Hermes plugin package, so the

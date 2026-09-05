@@ -14,6 +14,7 @@ silently under-validated contract is worse than a visible one.
 
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:  # The static view matches the degenerate top-level import.
@@ -84,24 +85,35 @@ def resolve_action(spec: ToolSpec, params: dict[str, Any]) -> ActionSpec | None:
     return None
 
 
-def handler_for(spec: ToolSpec, ctx: Any) -> Callable[..., dict[str, Any]]:
-    """Build the closed fail-closed handler for one declared tool."""
+def handler_for(spec: ToolSpec, ctx: Any) -> Callable[..., str]:
+    """Build the closed fail-closed handler for one declared tool.
 
-    def handler(**kwargs: Any) -> dict[str, Any]:
-        reason = inputs.validate_tool_input(spec, kwargs)
+    The Hermes v0.20.5 dispatcher invokes every tool handler with the
+    request object as one positional argument (plus internal context
+    keywords the handler ignores) and accepts only a string result, so
+    the handler returns the closed wrapper result as its JSON encoding.
+    """
+
+    def handler(args: dict[str, Any] | None = None, **_context: Any) -> str:
+        params = dict(args or {})
+        reason = inputs.validate_tool_input(spec, params)
         if reason is not None:
-            return runner.closed_error_result(spec.name, runner.INVALID_ARGUMENT, reason)
-        action = resolve_action(spec, kwargs)
+            return json.dumps(
+                runner.closed_error_result(spec.name, runner.INVALID_ARGUMENT, reason)
+            )
+        action = resolve_action(spec, params)
         if action is None:
-            return runner.closed_error_result(
-                spec.name,
-                runner.INVALID_ARGUMENT,
-                f"{spec.name}: the request does not map to one registered action",
+            return json.dumps(
+                runner.closed_error_result(
+                    spec.name,
+                    runner.INVALID_ARGUMENT,
+                    f"{spec.name}: the request does not map to one registered action",
+                )
             )
         # JSON Schema treats 5.0 as the integer 5; canonical validated
         # numbers keep the bound argv identical to the equivalent request.
-        canonical = inputs.canonicalize_tool_input(spec, kwargs)
-        return runner.run_inspection(action, spec.name, canonical, runner_config(ctx))
+        canonical = inputs.canonicalize_tool_input(spec, params)
+        return json.dumps(runner.run_inspection(action, spec.name, canonical, runner_config(ctx)))
 
     handler.__name__ = f"{spec.name}_handler"
     handler.__doc__ = f"Fail-closed handler for {spec.name} over the runner boundary."

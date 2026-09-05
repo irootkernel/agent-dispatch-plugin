@@ -52,7 +52,8 @@ def configured_ctx(plugin, fake_agent_dispatch):
 
 
 def _handler(plugin, ctx, name):
-    return plugin.tools.handler_for(_tool(plugin, name), ctx)
+    handler = plugin.tools.handler_for(_tool(plugin, name), ctx)
+    return lambda args: json.loads(handler(dict(args)))
 
 
 @pytest.mark.parametrize(
@@ -117,7 +118,7 @@ def _handler(plugin, ctx, name):
 def test_every_action_branch_succeeds_with_its_exact_fixed_mapping(
     plugin, configured_ctx, wrapper, tool, params, expected_argv_tail
 ):
-    result = _handler(plugin, configured_ctx, tool)(**params)
+    result = _handler(plugin, configured_ctx, tool)(dict(params))
     wrapper.validate(result)
     assert result["ok"] is True, (tool, params, result.get("error"))
     assert result["exit_code"] == 0
@@ -135,7 +136,7 @@ def test_domain_rejection_carries_the_envelope_for_a_route_action(plugin, tmp_pa
         tmp_path, behavior={"kind": "reject", "exit": 4, "command": "route show"}
     )
     ctx = HermesCtxStub(settings=installation["config"])
-    result = _handler(plugin, ctx, "agent_dispatch_routes")(action="show", route_id="wiki")
+    result = _handler(plugin, ctx, "agent_dispatch_routes")({"action": "show", "route_id": "wiki"})
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["exit_code"] == 4
@@ -150,7 +151,7 @@ def test_malformed_output_closes_with_bounded_stderr_tail(plugin, tmp_path, wrap
         tmp_path, behavior={"kind": "raw", "stdout": "not json\n", "stderr_lines": ["bad-route"]}
     )
     ctx = HermesCtxStub(settings=installation["config"])
-    result = _handler(plugin, ctx, "agent_dispatch_config")(action="show")
+    result = _handler(plugin, ctx, "agent_dispatch_config")({"action": "show"})
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["error"]["code"] == "malformed_json"
@@ -201,7 +202,7 @@ def test_invalid_requests_are_rejected_before_the_runner(
 ):
     """Schema violations close as invalid_argument with no process creation."""
     calls = _spy_never_reaches_the_runner(plugin, monkeypatch)
-    result = _handler(plugin, HermesCtxStub(settings={"binary_path": "/nope"}), tool)(**params)
+    result = _handler(plugin, HermesCtxStub(settings={"binary_path": "/nope"}), tool)(dict(params))
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["exit_code"] == -1
@@ -216,7 +217,7 @@ def test_identifier_values_never_reach_the_error_message(plugin, monkeypatch):
     _spy_never_reaches_the_runner(plugin, monkeypatch)
     marker = "../etc/passwd"
     result = _handler(plugin, HermesCtxStub(), "agent_dispatch_routes")(
-        action="show", route_id=marker
+        {"action": "show", "route_id": marker}
     )
     assert marker not in json.dumps(result)
 
@@ -232,7 +233,7 @@ def test_valid_requests_still_delegate_through_the_spy(plugin, configured_ctx, m
 
     monkeypatch.setattr(plugin.runner, "run_inspection", recording)
     result = _handler(plugin, configured_ctx, "agent_dispatch_routes")(
-        action="preflight", route_id="wiki"
+        {"action": "preflight", "route_id": "wiki"}
     )
     assert result["ok"] is True
     assert len(calls) == 1

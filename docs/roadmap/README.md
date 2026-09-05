@@ -29,7 +29,7 @@ evidence named by the Detailed SOT, not prose assertion.
 | TASK-009 | EPIC-003 | Implement dispatches, receipts, events, quarantine, and notifications | Completed | Action-level positive and negative evidence |
 | TASK-010 | EPIC-003 | Prove manifest, registry, command, and fresh-session inventory parity | Completed | Exact ten-tool parity and smoke transcript |
 | TASK-011 | EPIC-004 | Prove injection, traversal, secret, limit, malformed-output, and no-retry negatives | Completed | Deterministic security suite |
-| TASK-012 | EPIC-004 | Run the disposable action-level compatibility matrix | Planned | Exact-artifact Darwin arm64 qualification transcript |
+| TASK-012 | EPIC-004 | Run the disposable action-level compatibility matrix | Completed | Exact-artifact Darwin arm64 qualification transcript |
 | TASK-013 | EPIC-004 | Obtain independent security and compatibility review | Planned | Adjudicated findings with no open release blocker |
 | TASK-014 | EPIC-005 | Prove clean-clone CI, Plugin Doctor, and tool inventory | Planned | Clean environment transcript |
 | TASK-015 | EPIC-005 | Prove pinned disabled installation, enablement, disablement, and removal | Planned | Disposable-profile lifecycle transcript |

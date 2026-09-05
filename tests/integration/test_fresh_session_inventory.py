@@ -69,7 +69,7 @@ ctx = RecordingContext()
 module.register(ctx)
 
 status = ctx.registered["agent_dispatch_status"]
-smoke = status["handler"]()
+smoke = json.loads(status["handler"]({}))
 transcript = {
     "inventory": list(module.registry.expected_inventory()),
     "registered": list(ctx.registered),

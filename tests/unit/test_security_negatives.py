@@ -103,7 +103,8 @@ def _tool(plugin, name):
 
 
 def _handler(plugin, ctx, name):
-    return plugin.tools.handler_for(_tool(plugin, name), ctx)
+    handler = plugin.tools.handler_for(_tool(plugin, name), ctx)
+    return lambda args: json.loads(handler(dict(args)))
 
 
 def _configured(plugin, tmp_path, behavior=None, **settings):
@@ -144,7 +145,7 @@ def test_injection_and_traversal_values_reject_before_the_runner(
         "run_inspection",
         lambda *args, **kwargs: calls.append(args),
     )
-    result = _handler(plugin, HermesCtxStub(), tool)(**{**base, param: hostile})
+    result = _handler(plugin, HermesCtxStub(), tool)({**base, param: hostile})
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["exit_code"] == -1
@@ -194,7 +195,7 @@ def test_denied_mutation_subcommands_stay_unreachable(plugin, monkeypatch, tool,
         "run_inspection",
         lambda *args, **kwargs: calls.append(args),
     )
-    result = _handler(plugin, HermesCtxStub(), tool)(**params)
+    result = _handler(plugin, HermesCtxStub(), tool)(dict(params))
     assert result["error"]["code"] == "invalid_argument"
     assert calls == []
 
@@ -223,7 +224,7 @@ def test_symlinked_trust_paths_reject_at_the_gate(plugin, tmp_path, wrapper):
         },
     ]
     for config in linked:
-        result = _handler(plugin, HermesCtxStub(settings=config), "agent_dispatch_status")()
+        result = _handler(plugin, HermesCtxStub(settings=config), "agent_dispatch_status")({})
         wrapper.validate(result)
         assert result["ok"] is False
         assert result["error"]["code"] == "binary_unavailable"
@@ -240,7 +241,7 @@ def test_pinned_digest_negatives(plugin, tmp_path, wrapper):
     pinned = wrong["config"]["binary_sha256"]
     flipped = ("0" if pinned[0] != "0" else "1") + pinned[1:]
     mismatched = {**wrong["config"], "binary_sha256": flipped}
-    result = _handler(plugin, HermesCtxStub(settings=mismatched), "agent_dispatch_status")()
+    result = _handler(plugin, HermesCtxStub(settings=mismatched), "agent_dispatch_status")({})
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["error"]["code"] == "binary_unavailable"
@@ -248,12 +249,12 @@ def test_pinned_digest_negatives(plugin, tmp_path, wrapper):
 
     ctx, installation = _configured(plugin, tmp_path / "swapped")
     handler = _handler(plugin, ctx, "agent_dispatch_status")
-    first = handler()
+    first = handler({})
     assert first["ok"] is True
     installation["binary"].write_bytes(
         installation["binary"].read_bytes() + b"\n# swapped after trust was established\n"
     )
-    second = handler()
+    second = handler({})
     wrapper.validate(second)
     assert second["ok"] is False
     assert second["error"]["code"] == "binary_unavailable"
@@ -267,7 +268,7 @@ def test_the_execution_environment_is_the_fixed_allowlist(plugin, tmp_path, monk
     monkeypatch.setenv("EP004_POISON", "must-not-cross")
     monkeypatch.setenv("HOME", "/definitely/not/the/users/home")
     ctx, _ = _configured(plugin, tmp_path, behavior={"kind": "echo"})
-    result = _handler(plugin, ctx, "agent_dispatch_status")()
+    result = _handler(plugin, ctx, "agent_dispatch_status")({})
     assert result["ok"] is True
     env = result["agent_dispatch"]["result"]["env"]
     shim_injected = {
@@ -305,7 +306,7 @@ def test_seeded_secrets_never_survive_any_boundary(plugin, tmp_path, wrapper):
             },
         },
     )
-    result = _handler(plugin, ctx, "agent_dispatch_status")()
+    result = _handler(plugin, ctx, "agent_dispatch_status")({})
     wrapper.validate(result)
     assert result["ok"] is True
     serialized = json.dumps(result)
@@ -325,7 +326,7 @@ def test_seeded_secrets_never_survive_any_boundary(plugin, tmp_path, wrapper):
             ],
         },
     )
-    result = _handler(plugin, HermesCtxStub(settings=leaky["config"]), "agent_dispatch_status")()
+    result = _handler(plugin, HermesCtxStub(settings=leaky["config"]), "agent_dispatch_status")({})
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["error"]["code"] == "malformed_json"
@@ -392,7 +393,7 @@ def test_malformed_envelope_negatives_close_closed(
     plugin, tmp_path, wrapper, behavior, expected_code
 ):
     ctx, _ = _configured(plugin, tmp_path, behavior=behavior)
-    result = _handler(plugin, ctx, "agent_dispatch_status")()
+    result = _handler(plugin, ctx, "agent_dispatch_status")({})
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["error"]["code"] == expected_code
@@ -418,7 +419,7 @@ def test_command_identity_mismatch_closes_as_contract_mismatch(plugin, tmp_path,
             },
         },
     )
-    result = _handler(plugin, ctx, "agent_dispatch_routes")(action="show", route_id="wiki")
+    result = _handler(plugin, ctx, "agent_dispatch_routes")({"action": "show", "route_id": "wiki"})
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["error"]["code"] == "contract_mismatch"
@@ -437,7 +438,7 @@ def test_output_limit_negatives(plugin, tmp_path, wrapper, behavior):
     """Any stream or combined ceiling violation terminates the process group
     and discards every captured byte: the flood never reaches the caller."""
     ctx, _ = _configured(plugin, tmp_path, behavior=behavior)
-    result = _handler(plugin, ctx, "agent_dispatch_status")()
+    result = _handler(plugin, ctx, "agent_dispatch_status")({})
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["error"]["code"] == "output_too_large"
@@ -455,7 +456,7 @@ def test_timeout_negative_discards_partial_output(plugin, tmp_path, wrapper):
         timeout_seconds=1,
     )
     started = time.monotonic()
-    result = _handler(plugin, ctx, "agent_dispatch_status")()
+    result = _handler(plugin, ctx, "agent_dispatch_status")({})
     elapsed = time.monotonic() - started
     assert elapsed < 10.0
     wrapper.validate(result)
@@ -476,7 +477,7 @@ def test_termination_negative_kills_the_whole_group(plugin, tmp_path):
         timeout_seconds=1,
     )
     started = time.monotonic()
-    result = _handler(plugin, ctx, "agent_dispatch_status")()
+    result = _handler(plugin, ctx, "agent_dispatch_status")({})
     elapsed = time.monotonic() - started
     assert result["error"]["code"] == "timeout"
     assert elapsed >= 3.0 and elapsed < 10.0
@@ -511,7 +512,7 @@ def test_no_retry_under_every_failure_mode(plugin, tmp_path):
     ]
     codes = []
     for ctx, expected in cases:
-        result = _handler(plugin, ctx, "agent_dispatch_status")()
+        result = _handler(plugin, ctx, "agent_dispatch_status")({})
         if expected == "success":
             assert result["ok"] is True
             codes.append(expected)

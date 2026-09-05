@@ -4,7 +4,7 @@ PY_SOURCES := registry.py schemas.py envelopes.py runner.py __init__.py tools co
 # tree (TESTING.md documents the same split).
 MYPY_SOURCES := $(filter-out __init__.py tests,$(PY_SOURCES))
 
-.PHONY: test test-prepare test-unit test-int test-e2e
+.PHONY: test test-prepare test-unit test-int test-e2e test-qualify
 
 test:
 	$(MAKE) test-prepare
@@ -28,3 +28,11 @@ test-int:
 
 test-e2e:
 	uv run pytest tests/e2e
+
+# The real-artifact compatibility qualification (TASK-012): every public
+# action through the real Hermes v0.20.5 runtime and the pinned Agent
+# Dispatch v0.1.6 release artifact. Not part of `make test`, which stays
+# hermetic on the deterministic fake executable; this stage fails hard
+# when the pinned prerequisites are absent (TESTING.md owns the contract).
+test-qualify:
+	uv run pytest tests/qualification

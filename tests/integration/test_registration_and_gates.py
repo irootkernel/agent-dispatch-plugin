@@ -5,6 +5,8 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
+import json
+
 import pytest
 
 from conftest import load_plugin
@@ -55,7 +57,7 @@ def test_registered_availability_and_handlers_route_through_the_trust_gate(tmp_p
     for name, kwargs in hidden_ctx.registered.items():
         spec = next(s for s in module.registry.tool_specs() if s.name == name)
         action = spec.actions[0]
-        result = kwargs["handler"](**valid_params_for_action(spec, action))
+        result = json.loads(kwargs["handler"](dict(valid_params_for_action(spec, action))))
         assert result["error"]["code"] == "binary_unavailable", name
 
     exposed_ctx = RecordingContext(installation["config"])

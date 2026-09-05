@@ -379,7 +379,7 @@ def test_spawn_failure_fails_closed_without_output(
 def test_handler_routes_one_action_end_to_end(plugin, fake_agent_dispatch):
     ctx = HermesCtxStub(fake_agent_dispatch["config"])
     spec = _tool(plugin, "agent_dispatch_schedule_inspect")
-    result = plugin.tools.handler_for(spec, ctx)(route_id="wiki-maintenance")
+    result = json.loads(plugin.tools.handler_for(spec, ctx)({"route_id": "wiki-maintenance"}))
     assert result["ok"] is True
     argv = result["agent_dispatch"]["result"]["argv"]
     assert argv[1:5] == ["schedule", "inspect", "--route", "wiki-maintenance"]
@@ -389,7 +389,7 @@ def test_handler_routes_one_action_end_to_end(plugin, fake_agent_dispatch):
 def test_handler_rejects_unregistered_actions(plugin, fake_agent_dispatch):
     ctx = HermesCtxStub(fake_agent_dispatch["config"])
     spec = _tool(plugin, "agent_dispatch_routes")
-    result = plugin.tools.handler_for(spec, ctx)(action="destroy")
+    result = json.loads(plugin.tools.handler_for(spec, ctx)({"action": "destroy"}))
     assert result["error"]["code"] == "invalid_argument"
     assert result["exit_code"] == -1
 
@@ -397,6 +397,6 @@ def test_handler_rejects_unregistered_actions(plugin, fake_agent_dispatch):
 def test_single_action_tool_resolves_without_an_action_parameter(plugin, fake_agent_dispatch):
     ctx = HermesCtxStub(fake_agent_dispatch["config"])
     spec = _tool(plugin, "agent_dispatch_status")
-    result = plugin.tools.handler_for(spec, ctx)()
+    result = json.loads(plugin.tools.handler_for(spec, ctx)({}))
     assert result["ok"] is True
     assert result["operation"] == "agent_dispatch_status"

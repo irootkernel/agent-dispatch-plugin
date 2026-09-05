@@ -14,3 +14,10 @@ immutable review target. Required runbooks will cover:
 Repository source, exact commit, release tag, plugin enablement, and toolset
 enablement are separate states. No installation, activation, publication, or
 release has been authorized by the current project-design work.
+
+## Runbooks
+
+- [Qualification Runbook: Darwin arm64 Compatibility Matrix](qualification-darwin-arm64.md) —
+  the exact artifact identities, the disposable-profile reproduction
+  procedure, the single-entry support-matrix rationale, and the adjudicated
+  qualification boundaries (TASK-012).

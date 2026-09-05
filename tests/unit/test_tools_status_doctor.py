@@ -50,13 +50,14 @@ def configured_ctx(plugin, fake_agent_dispatch):
 
 
 def _handler(plugin, ctx, name):
-    return plugin.tools.handler_for(_tool(plugin, name), ctx)
+    handler = plugin.tools.handler_for(_tool(plugin, name), ctx)
+    return lambda args: json.loads(handler(dict(args)))
 
 
 def test_status_success_through_the_full_boundary(
     plugin, configured_ctx, fake_agent_dispatch, wrapper
 ):
-    result = _handler(plugin, configured_ctx, "agent_dispatch_status")()
+    result = _handler(plugin, configured_ctx, "agent_dispatch_status")({})
     wrapper.validate(result)
     assert result["ok"] is True
     assert result["operation"] == "agent_dispatch_status"
@@ -78,7 +79,7 @@ def test_status_success_through_the_full_boundary(
 
 def test_doctor_success_with_and_without_target_probing(plugin, configured_ctx, wrapper):
     for params in ({}, {"probe_targets": False}, {"probe_targets": True}):
-        result = _handler(plugin, configured_ctx, "agent_dispatch_doctor")(**params)
+        result = _handler(plugin, configured_ctx, "agent_dispatch_doctor")(dict(params))
         wrapper.validate(result)
         assert result["ok"] is True
         assert result["operation"] == "agent_dispatch_doctor"
@@ -99,7 +100,7 @@ def test_domain_rejection_carries_the_envelope_not_a_plugin_error(
         tmp_path, behavior={"kind": "reject", "exit": 3, "command": "doctor"}
     )
     ctx = HermesCtxStub(settings=installation["config"])
-    result = _handler(plugin, ctx, "agent_dispatch_doctor")()
+    result = _handler(plugin, ctx, "agent_dispatch_doctor")({})
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["exit_code"] == 3
@@ -114,7 +115,7 @@ def test_malformed_output_closes_with_bounded_stderr_tail(plugin, tmp_path, wrap
         tmp_path, behavior={"kind": "raw", "stdout": "not json\n", "stderr_lines": ["boom"]}
     )
     ctx = HermesCtxStub(settings=installation["config"])
-    result = _handler(plugin, ctx, "agent_dispatch_status")()
+    result = _handler(plugin, ctx, "agent_dispatch_status")({})
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["error"]["code"] == "malformed_json"
@@ -149,7 +150,7 @@ def test_invalid_requests_are_rejected_before_the_runner(
 ):
     """Schema violations close as invalid_argument with no process creation."""
     calls = _spy_never_reaches_the_runner(plugin, monkeypatch)
-    result = _handler(plugin, HermesCtxStub(settings={"binary_path": "/nope"}), name)(**params)
+    result = _handler(plugin, HermesCtxStub(settings={"binary_path": "/nope"}), name)(dict(params))
     wrapper.validate(result)
     assert result["ok"] is False
     assert result["exit_code"] == -1
@@ -162,7 +163,7 @@ def test_invalid_requests_are_rejected_before_the_runner(
 
 def test_invalid_requests_never_reflect_caller_values(plugin, monkeypatch):
     _spy_never_reaches_the_runner(plugin, monkeypatch)
-    result = _handler(plugin, HermesCtxStub(), "agent_dispatch_status")(anything="ignored")
+    result = _handler(plugin, HermesCtxStub(), "agent_dispatch_status")({"anything": "ignored"})
     assert "ignored" not in json.dumps(result)
 
 
@@ -176,6 +177,6 @@ def test_valid_requests_still_reach_the_runner_after_the_spy(plugin, configured_
         return real(*args, **kwargs)
 
     monkeypatch.setattr(plugin.runner, "run_inspection", recording)
-    result = _handler(plugin, configured_ctx, "agent_dispatch_status")()
+    result = _handler(plugin, configured_ctx, "agent_dispatch_status")({})
     assert result["ok"] is True
     assert len(calls) == 1

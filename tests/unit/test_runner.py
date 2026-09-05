@@ -13,6 +13,8 @@ import os
 import time
 from pathlib import Path
 
+import json
+
 import pytest
 
 from conftest import HermesCtxStub, make_fake_binary
@@ -301,7 +303,7 @@ def test_availability_probe_through_the_tools_layer(plugin, fake_agent_dispatch)
 
 def test_handler_fails_closed_without_configuration(plugin, unconfigured_ctx):
     spec = plugin.registry.tool_specs()[0]
-    result = plugin.tools.handler_for(spec, unconfigured_ctx)()
+    result = json.loads(plugin.tools.handler_for(spec, unconfigured_ctx)({}))
     assert result["error"]["code"] == "binary_unavailable"
     assert result["error"]["message"] == plugin.runner.NOT_CONFIGURED_MESSAGE
 
@@ -313,7 +315,7 @@ def test_handler_executes_through_the_boundary_after_a_passing_trust_gate(
     boundary; the detailed execution behavior is proven in test_execution."""
     ctx = HermesCtxStub(fake_agent_dispatch["config"])
     spec = plugin.registry.tool_specs()[0]
-    result = plugin.tools.handler_for(spec, ctx)()
+    result = json.loads(plugin.tools.handler_for(spec, ctx)({}))
     assert result["ok"] is True
     assert result["exit_code"] == 0
     assert result["operation"] == spec.name
