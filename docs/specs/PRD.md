@@ -110,7 +110,7 @@ The mandatory, initially unverified targets are:
 
 - Agent Dispatch >=0.1.6,<0.2.0
 - envelope agent-dispatch.cli/v1
-- Hermes exactly v0.20.5
+- Hermes >=0.20.5
 - Darwin arm64
 
 Qualification must record exact artifact identities and use a disposable,
@@ -119,7 +119,7 @@ targets. The support matrix must include Agent Dispatch v0.1.6 and the selected
 highest available compatible release below v0.2.0.
 
 Every advertised public action must complete a successful end-to-end path
-through Hermes v0.20.5 invoking the real pinned Agent Dispatch executable on
+through Hermes v0.20.5 or newer invoking the real pinned Agent Dispatch executable on
 Darwin arm64. Contract fixtures supplement this evidence for malformed
 envelopes, unknown versions, truncation, resource limits, redaction, unavailable
 dependencies, and unsafe or nondeterministic failure branches. Fixtures never
@@ -157,7 +157,7 @@ Release acceptance requires:
 - Direct Agent Dispatch database access or duplicated domain logic.
 - Generic CLI pass-through, arbitrary command execution, plugin hooks, custom
   Hermes commands, LLM override, or Desktop plugin APIs.
-- Linux, Windows, Hermes versions other than v0.20.5, or Agent Dispatch 0.2.x.
+- Linux, Windows, Hermes versions below v0.20.5, or Agent Dispatch 0.2.x.
 - Automatic installation, activation, publication, tagging, or release.
 
 Worker receipt mutations and administrative mutations are post-v0.1.0

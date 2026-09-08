@@ -48,7 +48,7 @@ oracle, and manifest/registry parity), the deterministic unit and
 integration suites, and the Plugin Doctor e2e stage. Changes that touch
 the pinned runtime surface additionally run `make test-qualify`
 (disposable compatibility matrix and installation lifecycle; requires
-Hermes v0.20.5 and the pinned Agent Dispatch artifact — see TESTING.md).
+Hermes v0.20.5 or newer and the pinned Agent Dispatch artifact — see TESTING.md).
 A clean clone of the exact candidate revision must pass the same gates
 (the clean-clone runbook records the procedure and the recorded
 directory-name defect with its remediation).

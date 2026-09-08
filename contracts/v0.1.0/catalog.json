@@ -736,7 +736,7 @@
   "compatibility": {
     "agent_dispatch": ">=0.1.6,<0.2.0",
     "agent_dispatch_envelope": "agent-dispatch.cli/v1",
-    "hermes": "0.20.5",
+    "hermes": ">=0.20.5",
     "platform": "darwin/arm64",
     "plugin_format": {
       "kind": "standalone",

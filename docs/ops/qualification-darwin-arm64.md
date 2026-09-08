@@ -9,7 +9,7 @@ state database, or LaunchAgents).
 
 | Component | Identity |
 |---|---|
-| Hermes | v0.20.5 (build 2026.8.19), on `PATH`; the stage resolves the install's venv interpreter for the deterministic dispatch driver |
+| Hermes | >=0.20.5 on `PATH` (qualified reference: v0.20.5, build 2026.8.19); the stage resolves the install's venv interpreter for the deterministic dispatch driver |
 | Agent Dispatch | tag `v0.1.6`, commit `fc67cf540383e51cdcf4a1aff6c9f2a1b7d252a5` |
 | Agent Dispatch binary | release build `dist/agent-dispatch-v0.1.6-darwin-arm64`, SHA-256 `ee1de77d3d4aa67cc1dcc6d7d1510024e4ce793c440b3f3d5c14debc1f424479` |
 | Envelope | `agent-dispatch.cli/v1` (verified per action by the matrix) |
@@ -31,7 +31,7 @@ artifact digest as a second qualification identity.
 #    v0.1.6 darwin/arm64 release build (verified by SHA-256 before use).
 export AGENT_DISPATCH_QUALIFY_BINARY=/path/to/agent-dispatch-v0.1.6-darwin-arm64
 
-# 2. Ensure hermes on PATH is exactly v0.20.5, then run the matrix.
+# 2. Ensure hermes on PATH is v0.20.5 or newer, then run the matrix.
 make test-qualify
 ```
 
@@ -43,7 +43,7 @@ two-key `route enable`, `dispatch --input watchman --no-submit`, `work
 begin`/`work complete`, and a protected-path fixture for quarantine), and
 a controlled fake downstream Hermes target answering only the probe
 surfaces. Every advertised action is then dispatched through the real
-Hermes v0.20.5 runtime (`model_tools.handle_function_call` — the same
+Hermes runtime (v0.20.5 or newer) (`model_tools.handle_function_call` — the same
 dispatcher the agent loop and the Hermes tools MCP server use), with no
 model and no network. Seeding commands run with `HOME` inside the sandbox
 so home-resolved state (including the hermes capability cache) stays

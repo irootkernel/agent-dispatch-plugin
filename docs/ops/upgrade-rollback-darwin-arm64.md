@@ -2,7 +2,7 @@
 
 Target: moving an installed `agent-dispatch-plugin` between documented
 pinned revisions inside one Hermes profile.
-Environment: Hermes v0.20.5 on `PATH`, the pinned Agent Dispatch v0.1.6
+Environment: Hermes (v0.20.5 or newer) on `PATH`, the pinned Agent Dispatch v0.1.6
 darwin/arm64 release artifact (SHA-256
 `ee1de77d3d4aa67cc1dcc6d7d1510024e4ce793c440b3f3d5c14debc1f424479`),
 Darwin arm64. The procedure is identical for an operator profile and a

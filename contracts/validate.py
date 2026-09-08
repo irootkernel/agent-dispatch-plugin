@@ -64,7 +64,7 @@ PRD_PAGINATION = {"limit_min": 1, "limit_max": 100, "limit_default": 25}
 PRD_COMPATIBILITY = {
     "agent_dispatch": ">=0.1.6,<0.2.0",
     "agent_dispatch_envelope": "agent-dispatch.cli/v1",
-    "hermes": "0.20.5",
+    "hermes": ">=0.20.5",
     "platform": "darwin/arm64",
 }
 PRD_WRAPPER_VERSION = "agent-dispatch-plugin.result/v1"

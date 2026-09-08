@@ -1,7 +1,7 @@
 # Troubleshooting Runbook
 
-Target: `agent-dispatch-plugin` v0.1.0 installations in a Hermes v0.20.5
-profile. Symptom → diagnosis → resolution, each verifiable without
+Target: `agent-dispatch-plugin` v0.1.0 installations in a Hermes
+v0.20.5-or-newer profile. Symptom → diagnosis → resolution, each verifiable without
 touching live state. All commands run against the profile under
 diagnosis (`HERMES_HOME=<profile>` for CLI commands).
 

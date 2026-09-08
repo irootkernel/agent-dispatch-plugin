@@ -88,7 +88,7 @@ def resolve_action(spec: ToolSpec, params: dict[str, Any]) -> ActionSpec | None:
 def handler_for(spec: ToolSpec, ctx: Any) -> Callable[..., str]:
     """Build the closed fail-closed handler for one declared tool.
 
-    The Hermes v0.20.5 dispatcher invokes every tool handler with the
+    The Hermes dispatcher invokes every tool handler with the
     request object as one positional argument (plus internal context
     keywords the handler ignores) and accepts only a string result, so
     the handler returns the closed wrapper result as its JSON encoding.

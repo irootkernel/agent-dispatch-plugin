@@ -60,7 +60,8 @@ The aggregate calls each stage handler exactly once through recursive
   inspection through the full boundary (`test_fresh_session_inventory.py`),
   and running the two repository gates as subprocesses.
 - `test-e2e`: `tests/e2e` — the Hermes Plugin Doctor validates the plugin
-  directory through its public CLI on a real Hermes v0.20.5 installation.
+  directory through its public CLI on a real Hermes installation (v0.20.5 or
+  newer).
 
 ## Test Frameworks
 
@@ -95,7 +96,7 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
 
 ## Qualification Environment
 
-- Artifact identities: Hermes exactly v0.20.5 on `PATH` (the stage also
+- Artifact identities: Hermes v0.20.5 or newer on `PATH` (the stage also
   locates the install's venv interpreter for the in-process dispatch
   driver) and the pinned Agent Dispatch v0.1.6 darwin/arm64 release
   artifact, supplied through `AGENT_DISPATCH_QUALIFY_BINARY` or found on
@@ -124,7 +125,7 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   injection sweep over every catalog string binding.
 - `test-qualify`: `tests/qualification` — the disposable action-level
   compatibility matrix (TASK-012): every advertised public action of all
-  ten tools dispatched through the real Hermes v0.20.5 runtime
+  ten tools dispatched through the real Hermes runtime (v0.20.5 or newer)
   (plugin discovery plus `model_tools.handle_function_call` over a
   disposable `HERMES_HOME`) invoking the real pinned Agent Dispatch
   v0.1.6 release artifact against synthetic state seeded through Agent

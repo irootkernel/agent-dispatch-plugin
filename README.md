@@ -10,7 +10,7 @@ bounded process-group runner, and closed redacted errors.
 ## Installation and enablement
 
 The plugin installs as a source-only Hermes plugin directory at an exact
-pinned revision and starts disabled. In a Hermes v0.20.5 profile:
+pinned revision and starts disabled. In a Hermes v0.20.5-or-newer profile:
 
 ```bash
 # 1. Place the plugin at the pinned revision (source-only; the release
@@ -37,7 +37,7 @@ in the operations runbooks and asserted by the qualification suite.
 ## Requirements
 
 Agent Dispatch `>=0.1.6,<0.2.0` (darwin/arm64 release artifact verified
-by SHA-256), Hermes exactly v0.20.5, Darwin arm64.
+by SHA-256), Hermes `>=0.20.5`, Darwin arm64.
 
 ## Repository authority
 

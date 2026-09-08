@@ -22,7 +22,7 @@ contested: false
 
 > Status: development-ready proposal, not approved implementation
 > Target repository: `github.com/<owner>/agent-dispatch-plugin`
-> Baseline: Agent Dispatch v0.1.6, Hermes Agent v0.20.5, macOS darwin/arm64
+> Baseline: Agent Dispatch v0.1.6, Hermes Agent v0.20.5 or newer, macOS darwin/arm64
 > Primary audience: engineering lead, plugin developer, security reviewer, release owner
 
 ## 1. Executive decision
@@ -113,7 +113,7 @@ The following are fixed for v0.1.0 and are not open to implementation-team reint
 - production configuration requires absolute, non-symlink binary and config paths plus an expected binary SHA-256;
 - supported host is exactly `darwin/arm64`;
 - supported Agent Dispatch range is `>=0.1.6,<0.2.0` with exact `agent-dispatch.cli/v1` compatibility;
-- supported Hermes release for v0.1.0 is exactly the tested v0.20.5 build; additional releases require a compatibility update;
+- supported Hermes range for v0.1.0 is `>=0.20.5`, with v0.20.5 as the tested reference build;
 - the GitHub repository is source-only; no wheel, daemon, service, or bundled executable is distributed.
 
 ## 6. Supported compatibility
@@ -123,7 +123,7 @@ The following are fixed for v0.1.0 and are not open to implementation-team reint
 | Component | Required |
 |---|---|
 | Agent Dispatch | `>=0.1.6,<0.2.0`, plus exact machine API v1 |
-| Hermes Agent | exactly tested v0.20.5 for plugin v0.1.0 |
+| Hermes Agent | `>=0.20.5`; v0.20.5 is the tested reference build for plugin v0.1.0 |
 | OS/architecture | exactly Darwin arm64 |
 | Plugin format | native directory plugin |
 | Manifest | v2 |
@@ -794,7 +794,7 @@ Entry criteria:
 
 Do:
 
-- pin Agent Dispatch v0.1.6 commit and Hermes v0.20.5 reference;
+- pin Agent Dispatch v0.1.6 commit and Hermes v0.20.5-or-newer reference;
 - copy representative redacted JSON fixtures into tests;
 - document command classification and side effects;
 - define plugin result and error schemas;

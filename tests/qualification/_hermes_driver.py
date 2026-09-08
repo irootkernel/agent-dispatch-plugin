@@ -1,6 +1,6 @@
 """Dispatch plugin tools through the real Hermes runtime, deterministically.
 
-Runs under the Hermes v0.20.5 venv interpreter with ``HERMES_HOME`` pointed
+Runs under the Hermes venv interpreter with ``HERMES_HOME`` pointed
 at a disposable profile: importing :mod:`model_tools` performs the real
 built-in tool discovery and the real plugin discovery over the enabled
 plugin, and every case is dispatched through

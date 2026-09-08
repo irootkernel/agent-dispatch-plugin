@@ -2,8 +2,8 @@
 
 Target: the `agent-dispatch-plugin` v0.1.0 distribution lifecycle in a
 disposable Hermes profile.
-Environment: disposable `HERMES_HOME` on Darwin arm64 with Hermes v0.20.5
-on `PATH` and the pinned Agent Dispatch v0.1.6 darwin/arm64 release
+Environment: disposable `HERMES_HOME` on Darwin arm64 with Hermes
+(v0.20.5 or newer) on `PATH` and the pinned Agent Dispatch v0.1.6 darwin/arm64 release
 artifact. The procedure never touches the operator's live Hermes profile,
 Agent Dispatch configuration, state database, or LaunchAgents.
 
@@ -11,7 +11,7 @@ Agent Dispatch configuration, state database, or LaunchAgents.
 
 | Component | Identity |
 |---|---|
-| Hermes | v0.20.5 (build 2026.8.19), on `PATH` |
+| Hermes | >=0.20.5 on `PATH` (qualified reference: v0.20.5, build 2026.8.19) |
 | Agent Dispatch binary | v0.1.6 release build, SHA-256 `ee1de77d3d4aa67cc1dcc6d7d1510024e4ce793c440b3f3d5c14debc1f424479` |
 | Plugin installation | source-only plugin directory at an exact pinned revision of this repository |
 | Host | darwin/arm64 |
@@ -33,7 +33,7 @@ compatibility matrix qualify.
 
 ```bash
 # 1. Provide the pinned artifact (SHA-256 verified before use) and ensure
-#    hermes on PATH is exactly v0.20.5.
+#    hermes on PATH is v0.20.5 or newer.
 export AGENT_DISPATCH_QUALIFY_BINARY=/path/to/agent-dispatch-v0.1.6-darwin-arm64
 
 # 2. Run the lifecycle qualification (with the compatibility matrix).

@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 def test_plugin_doctor_validates_the_skeleton_over_the_public_cli():
     hermes = shutil.which("hermes")
     assert hermes is not None, (
-        "missing prerequisite: the Hermes Agent CLI (v0.20.5) must be on PATH "
+        "missing prerequisite: the Hermes Agent CLI (v0.20.5 or newer) must be on PATH "
         "for the Plugin Doctor end-to-end check"
     )
     result = subprocess.run(

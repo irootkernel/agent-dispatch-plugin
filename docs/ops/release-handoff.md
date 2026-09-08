@@ -2,7 +2,7 @@
 
 Target: declaring and verifying an immutable release candidate for
 `agent-dispatch-plugin` v0.1.0.
-Environment: Darwin arm64 with Hermes v0.20.5 on `PATH` and the pinned
+Environment: Darwin arm64 with Hermes (v0.20.5 or newer) on `PATH` and the pinned
 Agent Dispatch v0.1.6 darwin/arm64 release artifact (SHA-256
 `ee1de77d3d4aa67cc1dcc6d7d1510024e4ce793c440b3f3d5c14debc1f424479`).
 

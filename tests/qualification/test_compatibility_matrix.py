@@ -1,7 +1,7 @@
 """The disposable action-level compatibility matrix (TASK-012, EPIC-004).
 
 Qualifies every advertised public action of all ten tools through the real
-Hermes v0.20.5 runtime (plugin discovery plus ``handle_function_call``
+Hermes runtime, v0.20.5 or newer (plugin discovery plus ``handle_function_call``
 dispatch over a disposable ``HERMES_HOME``) invoking the real pinned Agent
 Dispatch v0.1.6 executable on Darwin arm64, against synthetic state seeded
 through Agent Dispatch's own commands inside one disposable profile. The
@@ -49,7 +49,7 @@ CONTRACTS = ROOT / "contracts" / "v0.1.0"
 # digest the tag's SHA256SUMS carries.
 PINNED_AGENT_DISPATCH_SHA256 = "ee1de77d3d4aa67cc1dcc6d7d1510024e4ce793c440b3f3d5c14debc1f424479"
 PINNED_AGENT_DISPATCH_VERSION = "v0.1.6"
-REQUIRED_HERMES_LINE = "Hermes Agent v0.20.5"
+MINIMUM_HERMES_VERSION = (0, 20, 5)
 
 ROUTE_ID = "wiki-maintenance"
 PROFILE = "wiki-maintainer"
@@ -75,14 +75,22 @@ def _require_qualification_prerequisites():
     )
     hermes = shutil.which("hermes")
     assert hermes is not None, (
-        "missing prerequisite: the Hermes Agent CLI (v0.20.5) must be on PATH "
+        "missing prerequisite: the Hermes Agent CLI (v0.20.5 or newer) must be on PATH "
         "for the compatibility qualification"
     )
     version_output = _run([hermes, "--version"]).stdout
     first_line = version_output.splitlines()[0].strip()
-    assert re.fullmatch(re.escape(REQUIRED_HERMES_LINE) + r" \(\d{4}\.\d+\.\d+\)", first_line), (
-        f"missing prerequisite: Hermes must be exactly v0.20.5, got "
+    # v0.21.0+ appends upstream/local commit trailers after the build date,
+    # so the identity check anchors the prefix rather than the whole line.
+    version_match = re.match(r"Hermes Agent v(\d+)\.(\d+)\.(\d+) \(\d{4}\.\d+\.\d+\)", first_line)
+    assert version_match, (
+        f"missing prerequisite: unrecognized hermes --version line, got "
         f"{version_output.splitlines()[:1]}"
+    )
+    hermes_version = tuple(int(part) for part in version_match.groups())
+    assert hermes_version >= MINIMUM_HERMES_VERSION, (
+        f"missing prerequisite: Hermes must be v0.20.5 or newer, got "
+        f"v{'.'.join(str(part) for part in hermes_version)}"
     )
     install_dir = None
     for line in version_output.splitlines():
@@ -91,7 +99,7 @@ def _require_qualification_prerequisites():
     assert install_dir, "missing prerequisite: hermes --version names no install directory"
     venv_python = Path(install_dir) / "venv" / "bin" / "python"
     assert venv_python.is_file(), (
-        f"missing prerequisite: the Hermes v0.20.5 venv interpreter is expected at {venv_python}"
+        f"missing prerequisite: the Hermes venv interpreter is expected at {venv_python}"
     )
     return hermes, venv_python
 
