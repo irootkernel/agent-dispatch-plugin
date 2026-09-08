@@ -7,3 +7,6 @@ __pycache__/
 .mulgae/*
 !.mulgae/config.yaml
 .zcode/
+
+# Local Gaori execution evidence.
+/.gaori/runs/

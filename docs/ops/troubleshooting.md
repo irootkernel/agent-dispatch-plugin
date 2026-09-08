@@ -17,12 +17,11 @@ directory is missing from `<profile>/plugins/agent-dispatch-plugin`.
 ## Tools register but the toolset is unavailable
 
 Diagnosis: the trust gate closed. The five settings under
-`plugins.entries.agent-dispatch-plugin.settings` must be present and
-consistent: `binary_path` and `config_path` must exist as regular files
+`plugins.entries.agent-dispatch-plugin.settings` must resolve consistently (three required values and two bounded defaults): `binary_path` and `config_path` must exist as regular files
 with no symlinked path segment, `binary_sha256` must match the
 installed executable's digest exactly, and the executable's
-`version --json` probe must report v0.1.6 (the supported range is
-`>=0.1.6,<0.2.0`).
+`version --json` probe must report a version in
+`>=0.1.6,<0.2.0`; v0.1.6 is the recorded reference artifact.
 Resolution: restore the documented settings — never loosen the gate.
 A swapped executable with a changed digest is rejected by design;
 update `binary_sha256` only after verifying the new artifact's identity.
@@ -70,3 +69,14 @@ Anything not resolved above is a contract question: check
 unit. A confirmed contract violation is a blocking defect — it goes to
 the maintainers with the transcript captured under the security
 evidence-capture guide.
+
+## Verification and recovery
+
+Owner: plugin maintainers; diagnosis and configuration changes require the
+operator's access to the selected Hermes profile. After resolving a problem,
+start a fresh session, confirm plugin and toolset enablement separately, and
+run one status inspection. If it still fails, keep the plugin disabled while
+investigating; restore a previous verified revision using the
+[rollback procedure](upgrade-rollback-darwin-arm64.md) when appropriate.
+Preserve Agent Dispatch data and unrelated profile settings. A doctor error
+alone does not authorize remediation or changing the runner's fixed PATH.

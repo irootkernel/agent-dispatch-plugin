@@ -79,3 +79,19 @@ config states; neither step implies the other.
 deterministically: removal leaves no plugin registration or tool
 inventory residue in a fresh session, and the cleaned profile contains no
 reference to the plugin.
+
+## Ownership and failure recovery
+
+The plugin maintainer owns this qualification procedure; the profile operator
+owns installation and activation. For normal installation and the three required
+settings plus two defaults, use the [public guide](../../README.md#install).
+Diagnosis starts with `hermes plugins show agent-dispatch-plugin` and
+`hermes tools list` in the intended profile. These observe separate states.
+
+If an operator installation fails verification, leave its toolset and plugin
+disabled while diagnosing. Remove only this plugin through the lifecycle above
+when abandoning the installation; preserve other plugin settings and all Agent
+Dispatch data. A failed disposable test is evidence for the maintainer to inspect,
+not a reason to repeat it against a live profile. Success requires the documented
+fresh-session observations, not directory creation alone. Escalate unresolved
+failures through [troubleshooting](troubleshooting.md#escalation).

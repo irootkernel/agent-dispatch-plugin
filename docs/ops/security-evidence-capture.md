@@ -12,9 +12,9 @@ Every tool result passes the frozen wrapper contract
 (`agent-dispatch-plugin.result/v1`) with bounded, redacted diagnostics
 (`docs/specs/contracts.md` names the five redaction rules; the unit
 suite proves seeded secrets never survive the boundary in any position,
-including object keys and base64url encodings). Captured tool output is
-therefore safe to record as evidence, provided the capture itself adds
-nothing.
+including object keys and base64url encodings). Review captured output before sharing: the frozen redaction vocabulary
+is bounded, and the [deferred filename limitation](../deferred-feedback/README.md)
+remains. A passing redaction test does not authorize publishing private data.
 
 ## Capture rules
 
@@ -51,3 +51,18 @@ tests that assert the same facts mechanically. Promoted evidence
 packages under `evidence/aquarium/` carry only bounded structured
 projections with verified digests; raw logs, provider reports, and
 transcripts never enter the repository.
+
+## Review and recovery
+
+Owner: plugin maintainers. The operator needs permission to inspect the target
+profile and share the resulting evidence. Before capture, confirm the target is
+disposable for any seeded procedure and choose an artifact identity rather than
+a live path. Before sharing, inspect the bounded output for sensitive values,
+confirm the identities and commands are sufficient to reproduce the issue, and
+exclude raw logs. No credentials are needed for the documented qualification.
+
+If the capture includes sensitive data, stop sharing and discard the local
+capture; reproduce with sanitized synthetic data. If already disclosed, notify
+the responsible maintainer through the appropriate private channel and follow
+the owning secret authority's recovery procedure. Do not copy the sensitive
+value into an issue or this documentation.
