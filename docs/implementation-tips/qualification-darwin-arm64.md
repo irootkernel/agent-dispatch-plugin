@@ -15,21 +15,27 @@ state database, or LaunchAgents).
 | Envelope | `agent-dispatch.cli/v1` (verified per action by the matrix) |
 | Host | darwin/arm64 |
 
-Support matrix rationale: the mandatory range is `>=0.1.6,<0.2.0`. The
-tag inventory recorded during TASK-012 below 0.2.0 was `v0.1.5` and
-`v0.1.6`; `v0.1.5` is below the floor, so **v0.1.6 was both the minimum
-and the highest available compatible release in that inventory** and the matrix is a single
-entry. Out-of-range rejection (including versions below the floor) is
-proven deterministically by the unit suite's fake-binary version-gate
-tests; a future tag inside the range widens the matrix by adding its
-artifact digest as a second qualification identity.
+The mandatory range is `>=0.1.6,<0.2.0`. The release matrix runs both the
+minimum v0.1.6 and the latest compatible published version v0.1.7; it never
+substitutes an arbitrary binary found on PATH for a missing pinned identity.
+The qualification fixture verifies the digest before the version probe.
+
+| Additional release | Identity |
+|---|---|
+| Agent Dispatch v0.1.7 | commit `b10ad22b25e13e3793598cec98f1fd6116f19d17` |
+| v0.1.7 Darwin arm64 SHA-256 | `c949e5c56929332cc102c228bfd9415fee0dbdd0b21c296ac136b9d114efbccf` |
+| v0.1.0 Hermes qualification target | v0.21.0, build 2026.8.31; upstream `d9833c56`, local `29112bef` |
+
+Historical reference identities above remain historical. The published plugin
+release's validation attachment records the actual final candidate and tool
+identities. Recheck the compatible release inventory before the next release.
 
 ## Reproduction
 
 ```bash
-# 1. Provide the pinned artifact: any byte-identical copy of the
-#    v0.1.6 darwin/arm64 release build (verified by SHA-256 before use).
+# 1. Provide both pinned Darwin arm64 release builds (verified by SHA-256).
 export AGENT_DISPATCH_QUALIFY_BINARY=/path/to/agent-dispatch-v0.1.6-darwin-arm64
+export AGENT_DISPATCH_QUALIFY_BINARY_V017=/path/to/agent-dispatch-v0.1.7-darwin-arm64
 
 # 2. Ensure hermes on PATH is v0.20.5 or newer, then run the matrix.
 make test-qualify
@@ -53,8 +59,9 @@ per-user temp directory under the sandbox's unique target identity.
 
 ## Recorded boundaries (historical adjudication)
 
-See the [release acceptance gap](release-handoff.md#compatibility-acceptance-gap)
-before using these recorded dispositions to assess a new candidate.
+The previous doctor disposition below is superseded by
+[ADR-008](../architecture-decision-records/ADR-008-doctor-findings-exit-status.md).
+It is retained to explain the original gap, not to waive current acceptance.
 
 1. **doctor and the watchman dependency.** Upstream `doctor` probes the
    watchman daemon whenever the configuration loads and reports
@@ -62,12 +69,12 @@ before using these recorded dispositions to assess a new candidate.
    not reachable, exiting 3 with an `ok:true` findings envelope on
    stdout. Under the plugin's frozen PATH allowlist
    (`/usr/bin:/bin:/usr/sbin:/sbin`) a Homebrew-installed watchman is
-   unreachable, so both `agent_dispatch_doctor` variants close as the
-   frozen `contract_mismatch` error on this host class. The PRD's fixture
-   clause supplements their success evidence (the unit suite proves the
-   success mapping with the deterministic fake); the matrix asserts the
-   closed negative deterministically. A future canonical amendment could
-   make the PATH allowlist operator-extensible.
+   unreachable, so both doctor variants historically closed as
+   `contract_mismatch`. The old matrix asserted this negative and cited
+   fake-executable success fixtures, leaving real retrieval unproven.
+   The accepted first-release amendment preserves doctor findings at exit 3
+   without changing PATH. Both real variants now must return the
+   validated findings envelope in every pinned matrix entry.
 2. **Upstream receipt-id quirk (v0.1.6).** `work complete`'s envelope
    reports a receipt id that `receipts list`/`receipts show` never serve;
    the durable receipt is the begin-time row. The qualification resolves
@@ -85,8 +92,8 @@ before using these recorded dispositions to assess a new candidate.
 ## Success verification
 
 `make test-qualify` exits 0 with every success case asserting the frozen
-wrapper schema, `ok`, exit code 0, the action's expected command
-identity, and the seeded synthetic state surfacing through the qualified
+wrapper schema, `ok`, exit code 0 (or the documented doctor findings exit 3),
+the action's expected command identity, and the seeded synthetic state surfacing through the qualified
 actions (`schedule inspect` proving the absent-schedule successful
 inspection with `present=false`).
 

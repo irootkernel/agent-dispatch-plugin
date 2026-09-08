@@ -52,9 +52,8 @@ make test
 `make test` runs, in order and fail-fast: `test-prepare` (ruff format,
 ruff check, mypy, byte-compilation, the frozen contract oracle
 `contracts/validate.py`, and the manifest/registry parity gate
-`scripts/manifest_parity.py`), `test-unit` (508 deterministic unit
-tests), `test-int` (28 integration tests, including the fresh-session
-tool inventory), and `test-e2e` (`hermes plugins doctor <root> --ci` over
+`scripts/manifest_parity.py`), `test-unit` (the deterministic unit
+suite), `test-int` (including the fresh-session tool inventory), and `test-e2e` (`hermes plugins doctor <root> --ci` over
 a temporary `HERMES_HOME` with outbound sockets blocked).
 
 ## Historical clean-environment transcript

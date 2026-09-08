@@ -25,6 +25,7 @@ The plugin does not submit jobs, retry or discard dispatches, change routes, or 
 - [Troubleshooting](#troubleshooting)
 - [Update or roll back](#update-or-roll-back)
 - [Disable or remove](#disable-or-remove)
+- [Release history](CHANGELOG.md)
 - [Contribute](#contribute)
 
 ## Requirements
@@ -36,8 +37,8 @@ The plugin does not submit jobs, retry or discard dispatches, change routes, or 
 | Agent Dispatch | `>=0.1.6,<0.2.0`, with `agent-dispatch.cli/v1` |
 | Distribution | Source directory; no wheel or bundled Agent Dispatch binary |
 
-The recorded qualification uses Hermes v0.20.5 (build 2026.8.19) and the
-Agent Dispatch v0.1.6 Darwin arm64 artifact. Version requirements do not mean
+The v0.1.0 qualification targets Hermes v0.21.0 and both Agent Dispatch
+v0.1.6 and v0.1.7 Darwin arm64 release artifacts. Version requirements do not mean
 that every newer combination has been tested; see the
 [qualification matrix](docs/implementation-tips/qualification-darwin-arm64.md).
 
@@ -68,6 +69,13 @@ Have these values ready before proceeding:
 The Hermes profile configuration and the Agent Dispatch configuration are different files. The plugin's settings go in the Hermes profile; `config_path` points to the Agent Dispatch configuration. Installing the plugin does not initialize Agent Dispatch or create routes for you.
 
 ### 2. Download the selected plugin revision
+
+The [v0.1.0 release](https://github.com/irootkernel/agent-dispatch-plugin/releases/tag/v0.1.0)
+provides a source archive and `SHA256SUMS`. Verify the checksum before
+extracting it. The archive contains a top-level `agent-dispatch-plugin-v0.1.0/`
+directory; copy that directory's contents into a new profile plugin directory,
+then follow the configuration steps below. Install Agent Dispatch separately.
+The release also records the exact source commit for the Git-based procedure:
 
 Choose a full commit ID for the plugin revision you intend to install. Replace
 the example values below, including the Hermes profile directory. Use the same
@@ -219,6 +227,12 @@ You can also ask for diagnostics with `agent_dispatch_doctor`. Target probing is
 
 Hermes receives validated Agent Dispatch evidence, not unrestricted terminal output. Configuration and diagnostics are redacted, so values may be intentionally hidden. Ask Hermes to distinguish the fields reported by a tool from its interpretation of them.
 
+For doctor, a successful response can retain exit code 3: it means diagnostic
+findings were retrieved, including error-severity findings. Read those findings
+and their remediation guidance; the plugin does not execute remediation.
+Watchman installed through Homebrew is outside the plugin's fixed PATH, so
+an unavailable-Watchman finding can describe this inspection environment.
+
 A successful tool call means the inspection completed through the plugin. It does not mean that a dispatch succeeded or that every diagnostic finding is healthy: those conclusions depend on the returned domain values. Likewise, an empty list means the request returned no matching records; check the route and filters before drawing a broader conclusion.
 
 If the plugin cannot validate a response, reaches its time or output limit, or cannot trust the configured executable, it returns an error or keeps the tools unavailable. An inspection error does not establish the state of the dispatch you were investigating. The plugin does not automatically retry failed calls.
@@ -232,7 +246,8 @@ If the plugin cannot validate a response, reaches its time or output limit, or c
 | Tools remain unavailable after enablement | Check the supported host and executable version, the three required settings, and whether either configured path contains a symlink. Compare the executable digest with the trusted artifact identity. |
 | A binary replacement stops working | Confirm the replacement artifact's identity before updating `binary_sha256`; a different executable is rejected until its expected digest matches. |
 | `hermes plugins install` rejects manifest v2 | Use the source-directory installation above. This is a recorded installer limitation in Hermes v0.20.5. |
-| Doctor returns `contract_mismatch` | The recorded v0.1.6 qualification has a Watchman lookup boundary under the runner's fixed PATH. This response alone does not establish that your routes are broken. See the detailed diagnosis linked below. |
+| Doctor reports unavailable Watchman | Exit code 3 with a successful response preserves the diagnostic findings. Homebrew Watchman is outside the fixed PATH; read the findings and the detailed diagnosis below. |
+| Doctor returns `contract_mismatch` | The response violated the expected contract. Verify the executable identity and version, then capture redacted evidence for the maintainer. |
 | A request times out | Narrow the request. If appropriate, increase `timeout_seconds` within its 1–300 second range and start a fresh session before retrying. |
 | A response exceeds the output limit | Request fewer items or inspect one record. `max_output_bytes` cannot exceed 1048576. |
 | An identifier or argument is rejected | Use an exact ID returned by a previous inspection. Avoid adding shell flags or command text to an ID. |

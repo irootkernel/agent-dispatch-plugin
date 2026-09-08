@@ -528,7 +528,12 @@ def _map_completed_process(
         )
     try:
         envelope = envelopes.validate_envelope(parsed, spec.expected_command)
-        if envelope["ok"] and exit_code != 0:
+        doctor_findings = (
+            operation == "agent_dispatch_doctor"
+            and spec.expected_command == "doctor"
+            and exit_code == 3
+        )
+        if envelope["ok"] and exit_code != 0 and not doctor_findings:
             raise envelopes.EnvelopeViolation(
                 CONTRACT_MISMATCH,
                 "the envelope reports success while the process exited with a failure status",

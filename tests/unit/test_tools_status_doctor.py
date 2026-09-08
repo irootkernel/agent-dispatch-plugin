@@ -180,3 +180,84 @@ def test_valid_requests_still_reach_the_runner_after_the_spy(plugin, configured_
     result = _handler(plugin, configured_ctx, "agent_dispatch_status")({})
     assert result["ok"] is True
     assert len(calls) == 1
+
+
+@pytest.mark.parametrize("params", [{}, {"probe_targets": False}, {"probe_targets": True}])
+@pytest.mark.parametrize("exit_code", [0, 3])
+def test_doctor_findings_preserve_exit_and_redact(plugin, tmp_path, wrapper, params, exit_code):
+    envelope = {
+        "api_version": "agent-dispatch.cli/v1",
+        "command": "doctor",
+        "ok": True,
+        "result": {
+            "findings": [
+                {
+                    "code": "watchman_unavailable",
+                    "severity": "error",
+                    "summary": "Bearer super-secret-value",
+                }
+            ],
+            "findings_count": 1,
+        },
+    }
+    installation = make_fake_binary(
+        tmp_path,
+        behavior={
+            "kind": "raw",
+            "stdout": json.dumps(envelope),
+            "exit": exit_code,
+            "stderr_lines": ["private stderr must not be returned"],
+        },
+    )
+    result = _handler(
+        plugin, HermesCtxStub(settings=installation["config"]), "agent_dispatch_doctor"
+    )(params)
+    wrapper.validate(result)
+    assert result["ok"] is True
+    assert result["exit_code"] == exit_code
+    assert result["agent_dispatch"]["result"]["findings_count"] == 1
+    assert result["agent_dispatch"]["result"]["findings"][0]["severity"] == "error"
+    assert "super-secret-value" not in json.dumps(result)
+    assert "private stderr" not in json.dumps(result)
+    assert "error" not in result
+
+
+@pytest.mark.parametrize(
+    ("command", "exit_code", "stdout"),
+    [
+        ("doctor", 4, None),
+        ("doctor", 2, None),
+        ("status", 3, None),
+        ("doctor", 3, "not json"),
+    ],
+)
+def test_doctor_exception_does_not_admit_other_failures(
+    plugin, tmp_path, wrapper, command, exit_code, stdout
+):
+    payload = (
+        stdout
+        if stdout is not None
+        else json.dumps(
+            {
+                "api_version": "agent-dispatch.cli/v1",
+                "command": command,
+                "ok": True,
+                "result": {"findings": []},
+            }
+        )
+    )
+    installation = make_fake_binary(
+        tmp_path,
+        behavior={
+            "kind": "raw",
+            "stdout": payload,
+            "exit": exit_code,
+        },
+    )
+    result = _handler(
+        plugin, HermesCtxStub(settings=installation["config"]), "agent_dispatch_doctor"
+    )({})
+    wrapper.validate(result)
+    assert result["ok"] is False
+    assert result["error"]["code"] == ("malformed_json" if stdout else "contract_mismatch")
+    assert "agent_dispatch" not in result

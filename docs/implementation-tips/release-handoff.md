@@ -2,9 +2,9 @@
 
 Target: declaring and verifying an immutable release candidate for
 `agent-dispatch-plugin` v0.1.0.
-Environment: Darwin arm64 with Hermes (v0.20.5 or newer) on `PATH` and the pinned
-Agent Dispatch v0.1.6 darwin/arm64 release artifact (SHA-256
-`ee1de77d3d4aa67cc1dcc6d7d1510024e4ce793c440b3f3d5c14debc1f424479`).
+Environment: Darwin arm64 with Hermes (v0.20.5 or newer) on `PATH` and both
+pinned Agent Dispatch v0.1.6 and v0.1.7 release artifacts from the
+[qualification matrix](qualification-darwin-arm64.md).
 
 ## The immutable review target
 
@@ -28,7 +28,7 @@ candidate and intended destination before preparing any publication.
 
 ## Candidate gate set
 
-Every candidate must pass, from a clean clone of the exact revision
+Every candidate must pass, from a full-history clean clone of the exact revision
 ([clean-clone verification](clean-clone-verification.md) records the procedure):
 
 1. `uv sync` — the pinned environment resolves from `uv.lock`.
@@ -39,9 +39,9 @@ Every candidate must pass, from a clean clone of the exact revision
    Doctor e2e stage.
 3. `make test-qualify` — the disposable action-level compatibility
    matrix (every advertised public action through the real Hermes
-   runtime against the pinned artifact) and the disposable installation
+   runtime against both pinned artifacts) and the disposable installation
    lifecycle (disabled default, explicit plugin and toolset enablement,
-   disablement, residue-free removal).
+   disablement, rollback/restoration, residue-free removal).
 
 Together these are exactly the EPIC-004 release gates plus the EPIC-005
 distribution gates; the qualification runbook records the artifact
@@ -57,25 +57,49 @@ identities and adjudicated boundaries they carry.
       with complete coverage, a passing CI decision, and every finding
       dispositioned.
 - [ ] The compatibility matrix is current for the pinned artifacts
-      (single-entry until a second in-range Agent Dispatch release
-      exists).
+      (minimum v0.1.6 and latest compatible v0.1.7).
 - [ ] The doctor acceptance gap below has an explicit resolution.
 - [ ] The operations runbooks form the complete index
       ([operations index](../ops/README.md)) with no required topic unmapped.
 
 ## Compatibility acceptance gap
 
-The [PRD](../specs/PRD.md) requires successful real execution of every advertised
-action. The [historical qualification](qualification-darwin-arm64.md) instead
-asserts `contract_mismatch` for both doctor variants at the documented Watchman
-PATH boundary, supplemented by successful fake-executable tests. Its historical
-non-blocking disposition does not amend the PRD.
+The original doctor gap is resolved by the approved
+[ADR-008](../architecture-decision-records/ADR-008-doctor-findings-exit-status.md)
+contract amendment: retrieving doctor findings at exit 3 is a successful
+inspection, not a claim of system health. The previous fake-only success
+and real `contract_mismatch` expectation are no longer acceptable evidence.
+Every new candidate must deliver the findings through real Hermes for both
+doctor variants against v0.1.6 and v0.1.7. A passing historical transcript
+does not establish this requirement.
 
-Before declaring a new candidate ready, plugin maintainers and the release
-owner must reconcile this difference through successful evidence, a fix, or an
-explicit canonical amendment. Passing the existing qualification suite alone
-does not resolve it. This documentation migration changes neither the gate nor
-the historical disposition.
+## Changelog, publication, and the next cycle
+
+Root [CHANGELOG.md](../../CHANGELOG.md) is the sole product release-history
+source. Use concise `Added`, `Changed`, and `Fixed` outcomes, newest first;
+keep test counts and detailed evidence outside it. A selected pending release
+uses `## vX.Y.Z - Unreleased`; date it with the actual publication day before
+freezing the final candidate. The hosted release copies those outcomes and
+adds requirements, installation links, and its exact-artifact validation summary.
+
+Generate the source tarball from `git archive` of the verified candidate,
+with one top-level versioned directory. Publish it with `SHA256SUMS` and a
+bounded validation summary. Verify the extracted plugin using Plugin Doctor
+before publication and verify downloaded asset digests afterward. The plugin
+never bundles the separately released Agent Dispatch executable.
+
+Commit review adjudication before choosing the final candidate. Attach the
+final clean-clone validation summary to the release rather than making a
+self-referential evidence commit. Any later source change creates a new
+candidate and requires applicable checks again.
+
+After v0.1.0 publication is verified, the approved successor is v0.1.1.
+In a separate commit, add its empty `Unreleased` section and update catalog
+`plugin.version`, the derived manifest, Python project, and lockfile to 0.1.1.
+Catalog `product_version`, the contract directory, and schema URNs remain the
+v0.1.0 API baseline. Validate release-version parity, contracts, and `make test`
+then push main. Do not tag or publish the development version. Preserve the
+v0.1.0 tag and release assets exactly.
 
 ## Separate authorization boundary
 

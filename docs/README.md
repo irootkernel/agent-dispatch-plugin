@@ -79,3 +79,7 @@ not repository CI or runtime proof; its v2 parser does not recognize the
 existing epic register/work-unit table layout, so audit those rows separately.
 The full test and release gates remain in the testing contract and release
 handoff. `make test` includes a formatter that can modify Python sources.
+
+Product release history lives in root [CHANGELOG.md](../CHANGELOG.md).
+The release handoff owns candidate verification, publication, and opening the
+next development version; release notes summarize user-visible outcomes.

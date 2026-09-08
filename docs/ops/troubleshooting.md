@@ -26,16 +26,19 @@ Resolution: restore the documented settings — never loosen the gate.
 A swapped executable with a changed digest is rejected by design;
 update `binary_sha256` only after verifying the new artifact's identity.
 
-## A dispatch returns `contract_mismatch` for doctor
+## Doctor reports unavailable Watchman
 
-This is the recorded watchman boundary: upstream `doctor` probes the
-watchman daemon under the plugin's frozen PATH allowlist and reports it
-unreachable on hosts where watchman lives outside
-`/usr/bin:/bin:/usr/sbin:/sbin`; the plugin closes this as the frozen
-`contract_mismatch` error deterministically. The success mapping is
-proven by the unit suite's deterministic fake. A canonical amendment
-could make the allowlist operator-extensible; until then this response
-is expected on such hosts.
+An `ok: true` response with exit code 3 means doctor findings were retrieved
+successfully. Read their codes and remediation guidance. Under the plugin's
+fixed PATH (`/usr/bin:/bin:/usr/sbin:/sbin`), Homebrew Watchman is unavailable;
+that finding describes the inspection environment, not necessarily broken
+routes. The plugin preserves the findings and does not execute remediation.
+See [ADR-008](../architecture-decision-records/ADR-008-doctor-findings-exit-status.md).
+
+A doctor `contract_mismatch` instead indicates a response contract violation,
+including an unexpected command identity or exit status. Verify the executable
+identity and supported version, then capture bounded redacted evidence for the
+maintainer. Do not dismiss it as the expected Watchman finding.
 
 ## `hermes plugins install` rejects the repository
 

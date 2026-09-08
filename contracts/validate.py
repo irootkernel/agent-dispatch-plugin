@@ -85,6 +85,8 @@ def load_json(path: Path):
         return None
 
 
+# Independent fixture oracle for registry.ActionSpec.resolve_argv. Keep their
+# binding semantics aligned when amending the command contract.
 def resolve_argv(action: dict, instance: dict) -> list[str]:
     """Resolve an action's argv against an instance.
 
@@ -113,6 +115,13 @@ def check_catalog(catalog: dict) -> None:
         fail("catalog: schema_version must be agent-dispatch-plugin.contracts/v1")
     if catalog.get("product_version") != "0.1.0":
         fail("catalog: product_version must be 0.1.0")
+    if catalog.get("wrapper", {}).get("exit_code_semantics") != {
+        "validated_success": 0,
+        "domain_rejection": "the Agent Dispatch exit status",
+        "plugin_failure_without_completed_process": -1,
+        "doctor_findings": 3,
+    }:
+        fail("catalog: exit semantics must preserve the doctor-only findings exception")
     if catalog.get("toolset") != "agent_dispatch":
         fail("catalog: toolset must be agent_dispatch")
 

@@ -15,6 +15,7 @@ silently under-validated contract is worse than a visible one.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:  # The static view matches the degenerate top-level import.
@@ -95,7 +96,13 @@ def handler_for(spec: ToolSpec, ctx: Any) -> Callable[..., str]:
     """
 
     def handler(args: dict[str, Any] | None = None, **_context: Any) -> str:
-        params = dict(args or {})
+        if args is not None and not isinstance(args, Mapping):
+            return json.dumps(
+                runner.closed_error_result(
+                    spec.name, runner.INVALID_ARGUMENT, "the request must be an object"
+                )
+            )
+        params = dict(args) if args is not None else {}
         reason = inputs.validate_tool_input(spec, params)
         if reason is not None:
             return json.dumps(

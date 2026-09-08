@@ -408,6 +408,146 @@
         },
         "diagnostics": []
       }
+    },
+    {
+      "id": "wrapper-doctor-findings",
+      "description": "doctor-findings",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_doctor",
+        "exit_code": 3,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "doctor",
+          "ok": true,
+          "result": {
+            "findings": [
+              {
+                "code": "watchman_unavailable",
+                "severity": "error"
+              }
+            ],
+            "findings_count": 1
+          },
+          "warnings": [],
+          "trace_id": ""
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-doctor-clean",
+      "description": "doctor-clean",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_doctor",
+        "exit_code": 0,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "doctor",
+          "ok": true,
+          "result": {
+            "findings": [
+              {
+                "code": "watchman_unavailable",
+                "severity": "error"
+              }
+            ],
+            "findings_count": 1
+          },
+          "warnings": [],
+          "trace_id": ""
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-doctor-other-exit",
+      "description": "doctor-other-exit",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_doctor",
+        "exit_code": 4,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "doctor",
+          "ok": true,
+          "result": {
+            "findings": [
+              {
+                "code": "watchman_unavailable",
+                "severity": "error"
+              }
+            ],
+            "findings_count": 1
+          },
+          "warnings": [],
+          "trace_id": ""
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-status-exit-three",
+      "description": "status-exit-three",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_status",
+        "exit_code": 3,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "status",
+          "ok": true,
+          "result": {
+            "findings": [
+              {
+                "code": "watchman_unavailable",
+                "severity": "error"
+              }
+            ],
+            "findings_count": 1
+          },
+          "warnings": [],
+          "trace_id": ""
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wrapper-doctor-command-mismatch",
+      "description": "doctor-command-mismatch",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch-plugin.result/v1",
+        "ok": true,
+        "operation": "agent_dispatch_doctor",
+        "exit_code": 3,
+        "agent_dispatch": {
+          "api_version": "agent-dispatch.cli/v1",
+          "command": "status",
+          "ok": true,
+          "result": {
+            "findings": [
+              {
+                "code": "watchman_unavailable",
+                "severity": "error"
+              }
+            ],
+            "findings_count": 1
+          },
+          "warnings": [],
+          "trace_id": ""
+        },
+        "diagnostics": []
+      }
     }
   ]
 }

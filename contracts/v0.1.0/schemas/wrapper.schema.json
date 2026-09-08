@@ -13,8 +13,12 @@
     "diagnostics"
   ],
   "properties": {
-    "schema_version": {"const": "agent-dispatch-plugin.result/v1"},
-    "ok": {"type": "boolean"},
+    "schema_version": {
+      "const": "agent-dispatch-plugin.result/v1"
+    },
+    "ok": {
+      "type": "boolean"
+    },
     "operation": {
       "enum": [
         "agent_dispatch_status",
@@ -31,41 +35,131 @@
     },
     "exit_code": {
       "type": "integer",
-      "description": "0 on validated success, the Agent Dispatch exit status on domain rejection, and -1 when no process completed (plugin failure)."
+      "description": "0 on validated success, also 3 for successfully retrieved doctor findings; otherwise the Agent Dispatch exit status on domain rejection, or -1 when no process completed."
     },
-    "agent_dispatch": {"$ref": "urn:agent-dispatch-plugin:contracts:v0.1.0:envelope"},
-    "error": {"$ref": "urn:agent-dispatch-plugin:contracts:v0.1.0:error"},
+    "agent_dispatch": {
+      "$ref": "urn:agent-dispatch-plugin:contracts:v0.1.0:envelope"
+    },
+    "error": {
+      "$ref": "urn:agent-dispatch-plugin:contracts:v0.1.0:error"
+    },
     "diagnostics": {
       "type": "array",
       "maxItems": 16,
-      "items": {"type": "string", "maxLength": 512}
+      "items": {
+        "type": "string",
+        "maxLength": 512
+      }
     }
   },
   "allOf": [
     {
-      "if": {"properties": {"ok": {"const": true}}, "required": ["ok"]},
-      "then": {
-        "required": ["agent_dispatch"],
-        "not": {"required": ["error"]},
+      "if": {
         "properties": {
-          "agent_dispatch": {"properties": {"ok": {"const": true}}}
-        }
+          "ok": {
+            "const": true
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "then": {
+        "required": [
+          "agent_dispatch"
+        ],
+        "not": {
+          "required": [
+            "error"
+          ]
+        },
+        "properties": {
+          "agent_dispatch": {
+            "properties": {
+              "ok": {
+                "const": true
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "operation": {
+                  "const": "agent_dispatch_doctor"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "exit_code": {
+                  "enum": [
+                    0,
+                    3
+                  ]
+                },
+                "agent_dispatch": {
+                  "properties": {
+                    "command": {
+                      "const": "doctor"
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "exit_code": {
+                  "const": 0
+                }
+              }
+            }
+          }
+        ]
       }
     },
     {
-      "if": {"properties": {"ok": {"const": false}}, "required": ["ok"]},
+      "if": {
+        "properties": {
+          "ok": {
+            "const": false
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
       "then": {
         "oneOf": [
           {
-            "required": ["agent_dispatch"],
-            "not": {"required": ["error"]},
+            "required": [
+              "agent_dispatch"
+            ],
+            "not": {
+              "required": [
+                "error"
+              ]
+            },
             "properties": {
-              "agent_dispatch": {"properties": {"ok": {"const": false}}}
+              "agent_dispatch": {
+                "properties": {
+                  "ok": {
+                    "const": false
+                  }
+                }
+              }
             }
           },
           {
-            "required": ["error"],
-            "not": {"required": ["agent_dispatch"]}
+            "required": [
+              "error"
+            ],
+            "not": {
+              "required": [
+                "agent_dispatch"
+              ]
+            }
           }
         ]
       }

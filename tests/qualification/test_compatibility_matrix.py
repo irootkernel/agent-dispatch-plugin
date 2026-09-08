@@ -3,7 +3,7 @@
 Qualifies every advertised public action of all ten tools through the real
 Hermes runtime, v0.20.5 or newer (plugin discovery plus ``handle_function_call``
 dispatch over a disposable ``HERMES_HOME``) invoking the real pinned Agent
-Dispatch v0.1.6 executable on Darwin arm64, against synthetic state seeded
+Dispatch v0.1.6 and v0.1.7 executables on Darwin arm64, against synthetic state seeded
 through Agent Dispatch's own commands inside one disposable profile. The
 suite never touches the operator's live Agent Dispatch configuration,
 state database, or LaunchAgents: the state directory, configuration,
@@ -13,15 +13,10 @@ and the downstream Hermes target is a controlled fake answering only the
 surfaces Agent Dispatch probes — the isolation model the PRD names for
 qualification.
 
-One recorded boundary is asserted as a deterministic negative: ``doctor
---probe-targets`` reports the watchman daemon unreachable under the
-plugin's frozen PATH allowlist and therefore exits 3 with an ok:true
-findings envelope, which the plugin's frozen exit-consistency rule closes
-as ``contract_mismatch``. The PRD's fixture clause supplements this
-variant's success evidence (the deterministic fake in the unit suite
-proves the mapping); the runbook records the boundary. This stage is not
-part of ``make test``: it requires the pinned artifacts and runs through
-``make test-qualify`` (TESTING.md owns the contract).
+Both doctor variants must deliver the real findings envelope, including
+exit 3 when Watchman is unavailable under the fixed PATH. Fixtures supplement
+malformed-output and other nondeterministic branches, never this success path.
+The two pinned releases are supplied by the shared qualification fixture.
 """
 
 from __future__ import annotations
@@ -42,13 +37,6 @@ from referencing import Resource
 ROOT = Path(__file__).resolve().parent.parent.parent
 CONTRACTS = ROOT / "contracts" / "v0.1.0"
 
-# The pinned release artifact identities (docs/ops/qualification runbook
-# records the full provenance): Agent Dispatch v0.1.6, tag v0.1.6 at commit
-# fc67cf540383e51cdcf4a1aff6c9f2a1b7d252a5, built by `make release
-# VERSION=v0.1.6` — the byte-reproducible darwin/arm64 release build whose
-# digest the tag's SHA256SUMS carries.
-PINNED_AGENT_DISPATCH_SHA256 = "ee1de77d3d4aa67cc1dcc6d7d1510024e4ce793c440b3f3d5c14debc1f424479"
-PINNED_AGENT_DISPATCH_VERSION = "v0.1.6"
 MINIMUM_HERMES_VERSION = (0, 20, 5)
 
 ROUTE_ID = "wiki-maintenance"
@@ -102,29 +90,6 @@ def _require_qualification_prerequisites():
         f"missing prerequisite: the Hermes venv interpreter is expected at {venv_python}"
     )
     return hermes, venv_python
-
-
-def _pinned_executable(sandbox: Path) -> Path:
-    source = os.environ.get("AGENT_DISPATCH_QUALIFY_BINARY") or shutil.which("agent-dispatch")
-    assert source, (
-        "missing prerequisite: set AGENT_DISPATCH_QUALIFY_BINARY to a copy of "
-        "the pinned agent-dispatch v0.1.6 darwin/arm64 release artifact (or "
-        "have it on PATH); its SHA-256 is verified against the pinned identity"
-    )
-    binary = sandbox / "agent-dispatch"
-    shutil.copy2(source, binary)
-    binary.chmod(0o755)
-    digest = hashlib.sha256(binary.read_bytes()).hexdigest()
-    assert digest == PINNED_AGENT_DISPATCH_SHA256, (
-        "the provided Agent Dispatch executable does not match the pinned "
-        f"v0.1.6 release digest (got {digest})"
-    )
-    probe = _run([str(binary), "version", "--json"])
-    assert probe.returncode == 0 and json.loads(probe.stdout) == {
-        "name": "agent-dispatch",
-        "version": PINNED_AGENT_DISPATCH_VERSION,
-    }, f"the pinned executable failed its version probe: {probe.stdout}{probe.stderr}"
-    return binary
 
 
 def _fake_hermes_target(sandbox: Path) -> Path:
@@ -213,14 +178,16 @@ def _seed_disposable_state(binary: Path, sandbox: Path) -> dict[str, str]:
     assert init.returncode == 0, init.stderr
 
     text = config.read_text(encoding="utf-8")
-    text = text.replace(
-        "      sinks: []", "      sinks:\n        - id: ops-log\n          type: log"
+    replacements = (
+        ("      sinks: []", "      sinks:\n        - id: ops-log\n          type: log"),
+        ("      drain:\n        mode: after-command", "      drain:\n        mode: manual"),
+        ("    executable: hermes\n", f"    executable: {sandbox / 'fake-hermes'}\n"),
+        (f"  {ROUTE_ID}:\n    enabled: false", f"  {ROUTE_ID}:\n    enabled: true"),
     )
-    text = text.replace(
-        "      drain:\n        mode: after-command", "      drain:\n        mode: manual"
-    )
-    text = text.replace("    executable: hermes\n", f"    executable: {sandbox / 'fake-hermes'}\n")
-    text = text.replace(f"  {ROUTE_ID}:\n    enabled: false", f"  {ROUTE_ID}:\n    enabled: true")
+    for before, after in replacements:
+        assert text.count(before) == 1, f"init template drift at replacement: {before!r}"
+        text = text.replace(before, after, 1)
+        assert after in text
     config.write_text(text, encoding="utf-8")
 
     validated = agent_dispatch("config", "validate", "--config", str(config), "--output", "json")
@@ -383,7 +350,7 @@ def _disposable_hermes_home(sandbox: Path, binary: Path, config: Path) -> Path:
     )
     settings = {
         "binary_path": str(binary),
-        "binary_sha256": PINNED_AGENT_DISPATCH_SHA256,
+        "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
         "config_path": str(config),
         "timeout_seconds": 30,
     }
@@ -422,12 +389,12 @@ def _wrapper_validator() -> Draft202012Validator:
     return Draft202012Validator(schema, registry=ref_registry)
 
 
-def test_compatibility_matrix_qualifies_every_public_action(tmp_path):
+def test_compatibility_matrix_qualifies_every_public_action(tmp_path, qualified_binary):
     hermes, venv_python = _require_qualification_prerequisites()
     sandbox = tmp_path / "qualification"
     sandbox.mkdir()
 
-    binary = _pinned_executable(sandbox)
+    binary = qualified_binary
     _fake_hermes_target(sandbox)
     ids = _seed_disposable_state(binary, sandbox)
     home = _disposable_hermes_home(sandbox, binary, sandbox / "config.yaml")
@@ -456,24 +423,14 @@ def test_compatibility_matrix_qualifies_every_public_action(tmp_path):
         ("agent_dispatch_config", {"action": "validate"}),
         ("agent_dispatch_config", {"action": "validate", "probe_targets": True}),
     ]
-    # The recorded boundary: doctor probes the watchman daemon whenever the
-    # configuration loads, and under the plugin's frozen PATH allowlist the
-    # watchman binary is unreachable, so both doctor variants report the
-    # error-severity finding, exit 3 with an ok:true findings envelope, and
-    # the frozen exit-consistency rule closes them as contract_mismatch.
-    # The PRD's fixture clause supplements their success evidence; the
-    # runbook records the boundary and its remediation options.
-    boundary_cases = [
+    success_cases += [
         ("agent_dispatch_doctor", {"probe_targets": True}),
         ("agent_dispatch_doctor", {}),
     ]
 
     manifest = sandbox / "manifest.json"
     manifest.write_text(
-        json.dumps(
-            [{"tool": tool, "args": args} for tool, args in success_cases]
-            + [{"tool": tool, "args": args} for tool, args in boundary_cases]
-        ),
+        json.dumps([{"tool": tool, "args": args} for tool, args in success_cases]),
         encoding="utf-8",
     )
     driver = Path(__file__).resolve().parent / "_hermes_driver.py"
@@ -495,7 +452,7 @@ def test_compatibility_matrix_qualifies_every_public_action(tmp_path):
         (entry["tool"], json.dumps(entry["args"], sort_keys=True)): json.loads(entry["raw"])
         for entry in json.loads(driven.stdout)["results"]
     }
-    assert len(results) == len(success_cases) + len(boundary_cases)
+    assert len(results) == len(success_cases)
 
     wrapper = _wrapper_validator()
     commands = _expected_commands()
@@ -503,7 +460,13 @@ def test_compatibility_matrix_qualifies_every_public_action(tmp_path):
         result = results[(tool, json.dumps(args, sort_keys=True))]
         wrapper.validate(result)
         assert result["ok"] is True, (tool, args, result.get("error"))
-        assert result["exit_code"] == 0, (tool, args)
+        if tool == "agent_dispatch_doctor":
+            assert result["exit_code"] == 3, (tool, args)
+            findings = result["agent_dispatch"]["result"]["findings"]
+            assert any(f["code"] == "watchman_unavailable" for f in findings)
+            assert result["agent_dispatch"]["result"]["findings_count"] == len(findings)
+        else:
+            assert result["exit_code"] == 0, (tool, args)
         assert result["operation"] == tool
         envelope = result["agent_dispatch"]
         assert envelope["ok"] is True, (tool, args)
@@ -553,10 +516,3 @@ def test_compatibility_matrix_qualifies_every_public_action(tmp_path):
         ("agent_dispatch_schedule_inspect", json.dumps({"route_id": ROUTE_ID}, sort_keys=True))
     ]
     assert schedule["agent_dispatch"]["result"]["present"] is False
-
-    for tool, args in boundary_cases:
-        boundary = results[(tool, json.dumps(args, sort_keys=True))]
-        wrapper.validate(boundary)
-        assert boundary["ok"] is False, (tool, args)
-        assert boundary["error"]["code"] == "contract_mismatch", (tool, args)
-        assert boundary["error"]["retryable"] is False

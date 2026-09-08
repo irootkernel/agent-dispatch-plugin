@@ -663,7 +663,8 @@
     "exit_code_semantics": {
       "validated_success": 0,
       "domain_rejection": "the Agent Dispatch exit status",
-      "plugin_failure_without_completed_process": -1
+      "plugin_failure_without_completed_process": -1,
+      "doctor_findings": 3
     }
   },
   "envelope": {

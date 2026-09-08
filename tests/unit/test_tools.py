@@ -134,3 +134,21 @@ def test_tools_package_imports_on_the_degenerate_top_level_path():
         for k in wanted:
             sys.modules.pop(k, None)
         sys.modules.update(saved)
+
+
+def test_non_object_requests_fail_closed_before_configuration_or_execution(plugin, monkeypatch):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("invalid input reached configuration or execution")
+
+    monkeypatch.setattr(plugin.tools, "runner_config", forbidden)
+    monkeypatch.setattr(plugin.runner, "run_inspection", forbidden)
+    wrapper = _validators()["wrapper"]
+    for spec in plugin.registry.tool_specs():
+        handler = plugin.tools.handler_for(spec, None)
+        for malformed in ("private-input", 1, 0, True, False, [], [1], [["action", "list"]]):
+            result = json.loads(handler(malformed))
+            wrapper.validate(result)
+            assert result["ok"] is False
+            assert result["error"]["code"] == "invalid_argument"
+            assert result["exit_code"] == -1
+            assert "private-input" not in json.dumps(result)

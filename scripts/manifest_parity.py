@@ -21,6 +21,7 @@ from __future__ import annotations
 import importlib.util
 import sys
 import types
+import tomllib
 from pathlib import Path
 
 import yaml
@@ -176,6 +177,15 @@ def main() -> int:
         errors.append("plugin.yaml is empty or not a mapping")
     elif manifest != expected_manifest:
         errors.append("plugin.yaml does not equal the catalog-derived manifest")
+
+    project = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text())
+    lock = tomllib.loads((REPO_ROOT / "uv.lock").read_text())
+    version = catalog["plugin"]["version"]
+    if project["project"]["version"] != version:
+        errors.append("Python project version does not match catalog plugin.version")
+    package = [p for p in lock["package"] if p["name"] == catalog["plugin"]["name"]]
+    if len(package) != 1 or package[0]["version"] != version:
+        errors.append("lockfile project version does not match catalog plugin.version")
 
     ctx = RecordingContext()
     try:

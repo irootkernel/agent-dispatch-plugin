@@ -1,7 +1,7 @@
 [project]
 name = "agent-dispatch-plugin"
 version = "0.1.0"
-description = "Inspection-only Hermes plugin over the Agent Dispatch public CLI (skeleton)."
+description = "Inspection-only Hermes plugin over the Agent Dispatch public CLI."
 requires-python = ">=3.11"
 license = "MIT"
 # Runtime is dependency-free: the plugin reads only the frozen contract files

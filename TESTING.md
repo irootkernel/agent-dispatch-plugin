@@ -98,10 +98,11 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
 
 - Artifact identities: Hermes v0.20.5 or newer on `PATH` (the stage also
   locates the install's venv interpreter for the in-process dispatch
-  driver) and the pinned Agent Dispatch v0.1.6 darwin/arm64 release
-  artifact, supplied through `AGENT_DISPATCH_QUALIFY_BINARY` or found on
-  `PATH` and verified byte-exactly against the pinned SHA-256 before
-  anything runs.
+  driver) and both Agent Dispatch v0.1.6 and v0.1.7 darwin/arm64 release
+  artifacts, supplied through `AGENT_DISPATCH_QUALIFY_BINARY` and
+  `AGENT_DISPATCH_QUALIFY_BINARY_V017`. Each case verifies its pinned SHA-256
+  before its version probe. PATH is a fallback only when its binary matches
+  that exact case; missing or mismatching prerequisites fail, never skip.
 - Public interface: the qualification matrix seeds a disposable profile
   (temporary `HERMES_HOME`, temporary Agent Dispatch configuration and
   state, controlled fake downstream Hermes target) and dispatches every
@@ -128,7 +129,7 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   ten tools dispatched through the real Hermes runtime (v0.20.5 or newer)
   (plugin discovery plus `model_tools.handle_function_call` over a
   disposable `HERMES_HOME`) invoking the real pinned Agent Dispatch
-  v0.1.6 release artifact against synthetic state seeded through Agent
+  v0.1.6 and v0.1.7 release artifacts against synthetic state seeded through Agent
   Dispatch's own commands; and the disposable installation lifecycle
   (TASK-015): disabled-by-default pinned installation, explicit plugin
   and toolset enablement and disablement as separate states, and complete
@@ -146,3 +147,17 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
 ## Legacy Waivers
 
 None.
+
+## First-release acceptance amendment
+
+Both doctor variants must return the real validated findings envelope at
+exit 3 when Watchman is unavailable in the fixed child environment. They
+are successful diagnostic retrievals, not expected `contract_mismatch`
+negatives. Unit fixtures cover exit 0, other exits, wrong command identity,
+malformed output, and redaction. Both pinned releases run the complete
+matrix and lifecycle, including a source rollback to pre-release commit
+`0c4e70e384bc9891bc15820c4e0b6a42ba700d5a` and restoration of the candidate.
+The lifecycle requires a full Git clone containing that commit; it preserves
+profile settings and proves fresh-session registration and smoke inspection
+after each swap. Archive installation itself is checked separately by Plugin
+Doctor before release publication.

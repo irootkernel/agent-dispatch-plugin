@@ -46,6 +46,8 @@ class ActionSpec:
     def resolve_argv(self, params: Mapping[str, Any]) -> tuple[str, ...]:
         """Resolve the concrete argv for this action from validated params.
 
+        The independent fixture oracle in contracts/validate.py implements
+        the same binding semantics; amendments must update both resolvers.
         Bindings whose parameter is absent are skipped; the caller is
         responsible for having validated params against the tool's input
         schema first, which is what makes absence equal optionality.

@@ -3,8 +3,8 @@
 Target: the `agent-dispatch-plugin` v0.1.0 distribution lifecycle in a
 disposable Hermes profile.
 Environment: disposable `HERMES_HOME` on Darwin arm64 with Hermes
-(v0.20.5 or newer) on `PATH` and the pinned Agent Dispatch v0.1.6 darwin/arm64 release
-artifact. The procedure never touches the operator's live Hermes profile,
+(v0.20.5 or newer) on `PATH` and both pinned Agent Dispatch v0.1.6 and
+v0.1.7 darwin/arm64 release artifacts. The procedure never touches the operator's live Hermes profile,
 Agent Dispatch configuration, state database, or LaunchAgents.
 
 ## Exact identities
@@ -35,6 +35,7 @@ compatibility matrix qualify.
 # 1. Provide the pinned artifact (SHA-256 verified before use) and ensure
 #    hermes on PATH is v0.20.5 or newer.
 export AGENT_DISPATCH_QUALIFY_BINARY=/path/to/agent-dispatch-v0.1.6-darwin-arm64
+export AGENT_DISPATCH_QUALIFY_BINARY_V017=/path/to/agent-dispatch-v0.1.7-darwin-arm64
 
 # 2. Run the lifecycle qualification (with the compatibility matrix).
 make test-qualify
@@ -95,3 +96,13 @@ Dispatch data. A failed disposable test is evidence for the maintainer to inspec
 not a reason to repeat it against a live profile. Success requires the documented
 fresh-session observations, not directory creation alone. Escalate unresolved
 failures through [troubleshooting](troubleshooting.md#escalation).
+
+## Current release matrix
+
+The current gate runs this lifecycle for both pinned v0.1.6 and v0.1.7
+executables. Set `AGENT_DISPATCH_QUALIFY_BINARY` and
+`AGENT_DISPATCH_QUALIFY_BINARY_V017` as described in the
+[qualification runbook](../implementation-tips/qualification-darwin-arm64.md).
+The gate now also swaps to the pre-release revision and back to the candidate,
+checking that profile settings survive and fresh-session smoke calls succeed.
+Historical identity tables above describe the original run only.

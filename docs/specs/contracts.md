@@ -69,5 +69,8 @@ verified the version surface: the binary rejects `--version` and answers
 Frozen for v0.1.0. Any change to the roster, mappings, schemas, error,
 compatibility, or resource contracts requires explicit maintainer approval
 and a canonical PRD amendment, then a new versioned contract directory with
-updated fixtures. Qualification evidence may reject these contracts but may
-not silently adapt them.
+updated fixtures. The approved first-release doctor amendment is a specific
+pre-publication exception: rebaseline v0.1.0 in place before its first tag.
+Release-only metadata updates to `plugin.version` do not change the contract
+baseline (`product_version`), directory, or schema URNs. Qualification evidence
+may reject these contracts but may not silently adapt them.

@@ -61,6 +61,13 @@ fields, changed types, unknown enum values, security-sensitive additions, and
 unexpected fields at closed structural boundaries fail validation. Raw CLI
 output is never returned as a successful result.
 
+A validated success normally requires exit code 0. For
+`agent_dispatch_doctor` with command identity `doctor`, exit code 3 also
+means successful retrieval of diagnostic findings. Preserve `ok: true`,
+`exit_code: 3`, and the redacted envelope; this does not assert a healthy
+system. Other success/nonzero combinations remain `contract_mismatch`.
+No raw stderr is added to this successful result.
+
 The closed error codes are:
 
 - binary_unavailable
@@ -123,7 +130,9 @@ through Hermes v0.20.5 or newer invoking the real pinned Agent Dispatch executab
 Darwin arm64. Contract fixtures supplement this evidence for malformed
 envelopes, unknown versions, truncation, resource limits, redaction, unavailable
 dependencies, and unsafe or nondeterministic failure branches. Fixtures never
-replace a successful real run of an advertised action.
+replace a successful real run of an advertised action. A real doctor findings
+response with the approved exit code 3 satisfies diagnostic retrieval success;
+fixtures cover the clean exit-0 variant and malformed responses.
 
 Any failed compatibility assumption blocks v0.1.0. First distinguish a plugin
 defect from upstream incompatibility. Release remains blocked pending a fix,
@@ -170,3 +179,16 @@ expanding authority; weakening a release gate; or changing the public result,
 error, compatibility, or resource contract requires explicit maintainer
 approval and a canonical amendment. Implementation decisions that preserve
 these contracts belong in ADRs and adopted dossiers.
+
+## Approved pre-publication amendment and version ownership
+
+The v0.1.0 release amendment admits doctor findings at exit 3 and updates
+its schemas, fixtures, runtime, and qualification together in the existing
+contract directory. It preserves every other execution and output boundary.
+This is an explicit pre-publication rebaseline, not a retrospective waiver.
+
+`contracts/v0.1.0/`, its schema URNs, and catalog `product_version` identify
+the public contract baseline. Catalog `plugin.version` identifies the plugin
+release and must match the derived manifest, Python project, and lockfile.
+Opening v0.1.1 changes release metadata only; it does not create a new API
+contract or alter the published v0.1.0 tag.

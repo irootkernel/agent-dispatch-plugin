@@ -27,7 +27,8 @@ Three closed boundaries and one open interior, expressed in
   exactly one carrier is present — the validated envelope (itself `ok: false`)
   for a domain rejection, or the closed plugin error object when no envelope
   exists (timeout, output limits, unavailable binary, malformed output,
-  execution or redaction failure). `exit_code` is 0 on validated success, the
+  execution or redaction failure). `exit_code` is 0 on validated success, also 3 for a validated `doctor`
+  findings response (ADR-008), the
   Agent Dispatch exit status on domain rejection, and -1 when no process
   completed.
 - The envelope (`envelope.schema.json`) is closed at its member set:

@@ -76,3 +76,13 @@ tools, the toolset reports available with the unchanged settings, and
 one smoke inspection succeeds through the full boundary. A failed trust
 gate after a swap means the settings no longer match the frozen contract
 — restore the documented settings rather than loosening the gate.
+
+## Current candidate gate
+
+The qualification lifecycle repeats rollback and restoration against both
+pinned Agent Dispatch versions. It restores pre-release plugin commit
+`0c4e70e384bc9891bc15820c4e0b6a42ba700d5a`, then the candidate source, with
+explicit disablement and re-enablement around each swap. It requires unchanged
+profile configuration, the ten-tool inventory, and a successful fresh-session
+status call at both revisions. This verifies source and settings continuity;
+it does not claim the older revision supports the amended doctor exit rule.

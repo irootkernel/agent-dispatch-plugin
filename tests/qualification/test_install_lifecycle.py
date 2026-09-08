@@ -26,6 +26,8 @@ through ``make test-qualify`` (TESTING.md owns the contract).
 from __future__ import annotations
 
 import hashlib
+import io
+import zipfile
 import json
 import os
 import platform
@@ -37,8 +39,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent.parent
 CONTRACTS = ROOT / "contracts" / "v0.1.0"
 
-PINNED_AGENT_DISPATCH_SHA256 = "ee1de77d3d4aa67cc1dcc6d7d1510024e4ce793c440b3f3d5c14debc1f424479"
-PINNED_AGENT_DISPATCH_VERSION = "v0.1.6"
 MINIMUM_HERMES_VERSION = (0, 20, 5)
 PLUGIN_NAME = "agent-dispatch-plugin"
 TOOLSET = "agent_dispatch"
@@ -114,29 +114,6 @@ def _require_qualification_prerequisites():
     return hermes, venv_python
 
 
-def _pinned_executable(sandbox: Path) -> Path:
-    source = os.environ.get("AGENT_DISPATCH_QUALIFY_BINARY") or shutil.which("agent-dispatch")
-    assert source, (
-        "missing prerequisite: set AGENT_DISPATCH_QUALIFY_BINARY to a copy of "
-        "the pinned agent-dispatch v0.1.6 darwin/arm64 release artifact (or "
-        "have it on PATH); its SHA-256 is verified against the pinned identity"
-    )
-    binary = sandbox / "agent-dispatch"
-    shutil.copy2(source, binary)
-    binary.chmod(0o755)
-    digest = hashlib.sha256(binary.read_bytes()).hexdigest()
-    assert digest == PINNED_AGENT_DISPATCH_SHA256, (
-        "the provided Agent Dispatch executable does not match the pinned "
-        f"v0.1.6 release digest (got {digest})"
-    )
-    probe = _run([str(binary), "version", "--json"])
-    assert probe.returncode == 0 and json.loads(probe.stdout) == {
-        "name": "agent-dispatch",
-        "version": PINNED_AGENT_DISPATCH_VERSION,
-    }, f"the pinned executable failed its version probe: {probe.stdout}{probe.stderr}"
-    return binary
-
-
 def _install_plugin_directory(home: Path) -> None:
     """Install the pinned plugin checkout as a source-only directory plugin."""
     destination = home / "plugins" / PLUGIN_NAME
@@ -191,21 +168,21 @@ def _seed_settings(home: Path, binary: Path, ad_config: Path) -> None:
     config = yaml.safe_load(config_file.read_text(encoding="utf-8"))
     config["plugins"]["entries"][PLUGIN_NAME]["settings"] = {
         "binary_path": str(binary),
-        "binary_sha256": PINNED_AGENT_DISPATCH_SHA256,
+        "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
         "config_path": str(ad_config),
         "timeout_seconds": 30,
     }
     config_file.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
 
 
-def test_install_lifecycle_proves_disabled_enable_disable_and_removal(tmp_path):
+def test_install_lifecycle_proves_disabled_enable_disable_and_removal(tmp_path, qualified_binary):
     hermes, venv_python = _require_qualification_prerequisites()
 
     sandbox = tmp_path / "lifecycle-sandbox"
     sandbox.mkdir()
     driver = sandbox / "lifecycle_driver.py"
     driver.write_text(LIFECYCLE_DRIVER_SCRIPT, encoding="utf-8")
-    binary = _pinned_executable(sandbox)
+    binary = qualified_binary
 
     # Agent Dispatch configuration seeded through the binary's own command,
     # entirely inside the sandbox with absolute (non-symlinked) paths.
@@ -302,6 +279,39 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(tmp_path):
     )
     cli_toolsets = (_plugins_config(home).get("platform_toolsets", {}) or {}).get("cli") or []
     assert TOOLSET in cli_toolsets, "an enabled plugin toolset joins the platform list"
+
+    # Exercise a real source rollback and upgrade with identical profile settings.
+    previous = "0c4e70e384bc9891bc15820c4e0b6a42ba700d5a"
+    archive = subprocess.run(
+        ["git", "archive", "--format=zip", previous],
+        cwd=ROOT,
+        capture_output=True,
+        timeout=30,
+    )
+    assert archive.returncode == 0, "rollback prerequisite: full Git history containing " + previous
+    destination = home / "plugins" / PLUGIN_NAME
+    profile_before = (home / "config.yaml").read_bytes()
+    for revision in ("previous", "candidate"):
+        assert _hermes(hermes, home, "tools", "disable", TOOLSET).returncode == 0
+        assert _hermes(hermes, home, "plugins", "disable", PLUGIN_NAME).returncode == 0
+        shutil.rmtree(destination)
+        if revision == "previous":
+            with zipfile.ZipFile(io.BytesIO(archive.stdout)) as files:
+                files.extractall(destination)
+        else:
+            _install_plugin_directory(home)
+        assert (
+            _hermes(
+                hermes, home, "plugins", "enable", PLUGIN_NAME, "--no-allow-tool-override"
+            ).returncode
+            == 0
+        )
+        assert _hermes(hermes, home, "tools", "enable", TOOLSET).returncode == 0
+        assert (home / "config.yaml").read_bytes() == profile_before
+        observation = _observe(venv_python, home, driver)
+        assert observation["registered"] == roster
+        assert observation["toolset_available"] is True
+        assert observation["smoke"]["ok"] is True
 
     # -- 4. Plugin disablement hides the tool surface ---------------------------
     plugin_disabled = _hermes(hermes, home, "plugins", "disable", PLUGIN_NAME)
