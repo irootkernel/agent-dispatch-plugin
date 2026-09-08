@@ -15,6 +15,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+import yaml
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 IGNORE = shutil.ignore_patterns(".git", ".venv", "__pycache__", ".mulgae", ".zcode", ".podway")
@@ -138,10 +139,9 @@ def corrupt_parity_unparseable_manifest(work: Path) -> None:
 
 def corrupt_parity_drifted_manifest(work: Path) -> None:
     manifest = work / "plugin.yaml"
-    manifest.write_text(
-        manifest.read_text(encoding="utf-8").replace("version: 0.1.0", "version: 9.9.9"),
-        encoding="utf-8",
-    )
+    data = yaml.safe_load(manifest.read_text(encoding="utf-8"))
+    data["version"] = f"{data['version']}-drift"
+    manifest.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
 
 
 def corrupt_parity_denied_argv_suffix(work: Path) -> None:

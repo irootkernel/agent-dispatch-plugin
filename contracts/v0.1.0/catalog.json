@@ -5,7 +5,7 @@
   "toolset": "agent_dispatch",
   "plugin": {
     "name": "agent-dispatch-plugin",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "kind": "standalone",
     "manifest_version": 2,
     "api_version": 1,
