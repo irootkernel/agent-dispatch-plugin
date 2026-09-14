@@ -56,11 +56,11 @@ Identity does not encode order; the roadmap records dependencies. ADRs use
 `ADR-NNN` in their own index.
 
 Lifecycle values remain Planned, In Progress, In Review, Completed, Deferred,
-and Blocked. Every active epic links one Detailed SOT dossier under the existing
-repository convention. All initial dossiers were promoted to the canonical
-outcomes in their roadmap rows and retired. This migration creates no dossiers
-or work units and changes no lifecycle state. Child task completion alone does
-not establish epic acceptance.
+and Blocked. Every planned or active epic links one Detailed SOT dossier under
+the existing repository convention. All initial dossiers were promoted to the
+canonical outcomes in their roadmap rows and retired. EPIC-006 uses
+[docs/todo/TODO-LINUX-SUPPORT.md](todo/TODO-LINUX-SUPPORT.md). Child task
+completion alone does not establish epic acceptance.
 
 ## Documentation checks
 

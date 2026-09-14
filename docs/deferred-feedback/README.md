@@ -10,9 +10,22 @@ Initial candidate topics:
 - administrative mutation tools.
 
 These candidates are not v0.1.0 requirements and have no initial epic or task.
-All other excluded surfaces remain durable non-goals unless the PRD is amended.
+Linux host support is adopted as EPIC-006. All other excluded surfaces remain
+durable non-goals unless the PRD is amended.
 
 ## Entries
+
+### Linux and multi-platform support
+
+Source: `REQ-PLUGIN-WIKI-SYNC/v1` plugin intake (EPIC-006). Disposition:
+adopted as EPIC-006; living catalog and PRD now admit linux/amd64 and
+linux/arm64 with host-selected launchd/systemd. Rationale: Darwin arm64
+is still the qualified release host. This Mac can run the hermetic suite
+and an OrbStack linux/arm64 unit pass; it cannot close real Hermes
+qualification on Linux arm64 or native linux/amd64. Revisit: TASK-021 on
+a real Linux arm64 machine with Hermes installed; do not treat translated
+amd64 containers as that evidence.
+Roadmap identity: EPIC-006 (TASK-018 through TASK-022).
 
 ### Protected-path redaction vocabulary
 

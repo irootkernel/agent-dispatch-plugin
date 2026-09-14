@@ -10,7 +10,8 @@
     "manifest_version": 2,
     "api_version": 1,
     "platforms": [
-      "macos"
+      "macos",
+      "linux"
     ],
     "description": "Inspect Agent Dispatch through its public CLI.",
     "author": "irootkernel",
@@ -484,7 +485,7 @@
     },
     {
       "name": "agent_dispatch_schedule_inspect",
-      "description": "Inspect the managed launchd drain schedule for one route: presence, loaded state, definition match, digests, and health. Never renders, installs, disables, uninstalls, or runs a schedule.",
+      "description": "Inspect the managed drain schedule for one route: presence, loaded state, definition match, digests, and health. The trusted host selects launchd on macOS and systemd on Linux. Never renders, installs, disables, uninstalls, or runs a schedule.",
       "input_schema": "schemas/tools/agent_dispatch_schedule_inspect.input.json",
       "actions": [
         {
@@ -500,9 +501,8 @@
             }
           ],
           "optional_flags": [],
+          "native_schedule_platform": true,
           "argv_suffix": [
-            "--platform",
-            "launchd",
             "--output",
             "json"
           ],
@@ -738,13 +738,17 @@
     "agent_dispatch": ">=0.1.6,<0.2.0",
     "agent_dispatch_envelope": "agent-dispatch.cli/v1",
     "hermes": ">=0.20.5",
-    "platform": "darwin/arm64",
+    "platforms": [
+      "darwin/arm64",
+      "linux/amd64",
+      "linux/arm64"
+    ],
     "plugin_format": {
       "kind": "standalone",
       "manifest_version": 2,
       "api_version": 1
     },
-    "qualification_policy": "Qualification records exact artifact identities on a disposable, isolated Darwin arm64 profile with synthetic Agent Dispatch state and controlled fake targets. The support matrix includes Agent Dispatch v0.1.6 and the selected highest available compatible release below 0.2.0.",
+    "qualification_policy": "Qualification records exact artifact identities on disposable, isolated profiles with synthetic Agent Dispatch state and controlled fake targets for each advertised platform (darwin/arm64, linux/amd64, linux/arm64). The support matrix includes Agent Dispatch v0.1.6 and the selected highest available compatible release below 0.2.0. A missing advertised environment blocks that platform claim; it does not rewrite a completed Darwin qualification.",
     "initial_verification_state": "unverified",
     "failed_assumption_policy": "Any failed compatibility assumption blocks v0.1.0. First distinguish a plugin defect from upstream incompatibility. The implementation may not silently narrow, widen, or adapt the baseline."
   },

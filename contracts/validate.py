@@ -65,7 +65,7 @@ PRD_COMPATIBILITY = {
     "agent_dispatch": ">=0.1.6,<0.2.0",
     "agent_dispatch_envelope": "agent-dispatch.cli/v1",
     "hermes": ">=0.20.5",
-    "platform": "darwin/arm64",
+    "platforms": ["darwin/arm64", "linux/amd64", "linux/arm64"],
 }
 PRD_WRAPPER_VERSION = "agent-dispatch-plugin.result/v1"
 
@@ -87,6 +87,16 @@ def load_json(path: Path):
 
 # Independent fixture oracle for registry.ActionSpec.resolve_argv. Keep their
 # binding semantics aligned when amending the command contract.
+def native_schedule_platform() -> str:
+    """Independent copy of registry.native_schedule_platform for the oracle."""
+    if sys.platform == "darwin":
+        return "launchd"
+    if sys.platform.startswith("linux"):
+        return "systemd"
+    fail("oracle: native schedule mapping has no host platform")
+    return "unsupported"
+
+
 def resolve_argv(action: dict, instance: dict) -> list[str]:
     """Resolve an action's argv against an instance.
 
@@ -106,6 +116,8 @@ def resolve_argv(action: dict, instance: dict) -> list[str]:
     for flag in action.get("optional_flags", ()):
         if instance.get(flag["param"]) is True:
             argv.extend(flag["tokens"])
+    if action.get("native_schedule_platform") is True:
+        argv.extend(["--platform", native_schedule_platform()])
     argv.extend(action["argv_suffix"])
     return argv
 
@@ -221,6 +233,17 @@ def check_catalog(catalog: dict) -> None:
                     fail(f"{tool_name}: subcommand '{subcommand}' not allowed for '{command}'")
                 if subcommand in denied:
                     fail(f"{tool_name}: denied subcommand '{subcommand}' reached")
+            native_flag = action.get("native_schedule_platform", False)
+            if native_flag is not True and native_flag is not False:
+                fail(f"{tool_name}/{action['id']}: native_schedule_platform must be a boolean")
+            schedule_inspect = (
+                tool_name == "agent_dispatch_schedule_inspect" and action["id"] == "inspect"
+            )
+            if bool(native_flag) != schedule_inspect:
+                fail(
+                    f"{tool_name}/{action['id']}: native_schedule_platform is required "
+                    "only on schedule inspect"
+                )
 
         # every schema property must be consumed by some action binding
         bound_params: set[str] = set()

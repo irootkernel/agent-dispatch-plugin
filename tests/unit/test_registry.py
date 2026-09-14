@@ -126,10 +126,17 @@ def test_resolve_argv_schedule_keeps_fixed_platform_suffix(plugin):
         "--route",
         "wiki",
         "--platform",
-        "launchd",
+        plugin.registry.native_schedule_platform(),
         "--output",
         "json",
     )
+
+
+def test_native_schedule_platform_is_launchd_or_systemd(plugin, monkeypatch):
+    monkeypatch.setattr(plugin.registry.sys, "platform", "darwin")
+    assert plugin.registry.native_schedule_platform() == "launchd"
+    monkeypatch.setattr(plugin.registry.sys, "platform", "linux")
+    assert plugin.registry.native_schedule_platform() == "systemd"
 
 
 def test_no_denied_subcommand_is_reachable_from_any_action(plugin):

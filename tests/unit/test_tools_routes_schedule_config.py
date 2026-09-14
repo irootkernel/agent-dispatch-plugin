@@ -12,6 +12,7 @@ a domain rejection and malformed output onto the closed error contract.
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -23,6 +24,7 @@ from conftest import HermesCtxStub, make_fake_binary
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 CONTRACTS = ROOT / "contracts" / "v0.1.0"
+NATIVE_SCHEDULE = "launchd" if sys.platform == "darwin" else "systemd"
 
 
 def _wrapper_validator() -> Draft202012Validator:
@@ -83,7 +85,7 @@ def _handler(plugin, ctx, name):
                 "--route",
                 "wiki",
                 "--platform",
-                "launchd",
+                NATIVE_SCHEDULE,
                 "--output",
                 "json",
                 "--config",

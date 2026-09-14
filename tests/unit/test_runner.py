@@ -114,8 +114,39 @@ def test_digest_mismatch_rejects(runner, fake_agent_dispatch):
     _expect_failure(runner, config, runner.BINARY_UNAVAILABLE)
 
 
-def test_platform_gate_rejects_unsupported_hosts(runner, fake_agent_dispatch, monkeypatch):
-    monkeypatch.setattr(runner.sys, "platform", "linux")
+@pytest.mark.parametrize(
+    ("sys_platform", "machine"),
+    [
+        ("linux", "arm64"),
+        ("linux", "aarch64"),
+        ("linux", "x86_64"),
+        ("linux", "amd64"),
+        ("darwin", "arm64"),
+        ("darwin", "aarch64"),
+    ],
+)
+def test_platform_gate_accepts_advertised_hosts(
+    runner, fake_agent_dispatch, monkeypatch, sys_platform, machine
+):
+    monkeypatch.setattr(runner.sys, "platform", sys_platform)
+    monkeypatch.setattr(runner.platform_module, "machine", lambda: machine)
+    assert runner.probe_availability(fake_agent_dispatch["config"]) is True
+
+
+@pytest.mark.parametrize(
+    ("sys_platform", "machine"),
+    [
+        ("win32", "arm64"),
+        ("darwin", "x86_64"),
+        ("linux", "ppc64le"),
+        ("freebsd", "amd64"),
+    ],
+)
+def test_platform_gate_rejects_unsupported_hosts(
+    runner, fake_agent_dispatch, monkeypatch, sys_platform, machine
+):
+    monkeypatch.setattr(runner.sys, "platform", sys_platform)
+    monkeypatch.setattr(runner.platform_module, "machine", lambda: machine)
     _expect_failure(runner, fake_agent_dispatch["config"], runner.BINARY_UNAVAILABLE)
 
 
@@ -192,6 +223,8 @@ def test_oversized_version_probe_output_is_bounded_not_buffered(runner, tmp_path
 def test_execute_only_binary_is_unreadable_for_the_digest(runner, fake_agent_dispatch):
     """An execute-only file passes the metadata checks but cannot yield its
     digest bytes, closing on the unreadable-executable branch."""
+    if os.geteuid() == 0:
+        pytest.skip("root can read mode 0111 files; this branch needs a non-root uid")
     config = dict(fake_agent_dispatch["config"])
     fake_agent_dispatch["binary"].chmod(0o111)
     try:

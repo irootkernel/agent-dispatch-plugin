@@ -130,11 +130,19 @@ def test_working_directory_is_neutral_and_trusted(plugin, runner, fake_agent_dis
 
 def test_the_public_wrapper_redacts_echoed_absolute_paths(plugin, runner, fake_agent_dispatch):
     """Defense in depth: the echoed environment and cwd never survive the
-    output boundary verbatim."""
+    output boundary verbatim. Display-policy binary and config paths may
+    remain; they are the configured identities. pytest's Linux tmp root
+    is /tmp, so a raw '/tmp' substring is not a leak by itself.
+    """
     result = _run(plugin, runner, "agent_dispatch_status", "inspect", fake_agent_dispatch)
     dumped = json.dumps(result)
     assert str(runner.NEUTRAL_CWD) not in dumped
-    assert "/tmp" not in dumped
+    env = result["agent_dispatch"]["result"]["env"]
+    cwd = result["agent_dispatch"]["result"]["cwd"]
+    assert env["TMPDIR"] != runner.MINIMAL_ENVIRONMENT["TMPDIR"]
+    assert env["TMPDIR"].startswith("[redacted")
+    assert cwd.startswith("[redacted")
+    assert not cwd.startswith("/")
 
 
 def test_model_inputs_never_reach_execution_settings(plugin, runner, fake_agent_dispatch):
@@ -383,7 +391,7 @@ def test_handler_routes_one_action_end_to_end(plugin, fake_agent_dispatch):
     assert result["ok"] is True
     argv = result["agent_dispatch"]["result"]["argv"]
     assert argv[1:5] == ["schedule", "inspect", "--route", "wiki-maintenance"]
-    assert argv[5:7] == ["--platform", "launchd"]
+    assert argv[5:7] == ["--platform", plugin.registry.native_schedule_platform()]
 
 
 def test_handler_rejects_unregistered_actions(plugin, fake_agent_dispatch):

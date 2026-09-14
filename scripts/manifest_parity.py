@@ -112,6 +112,8 @@ def command_vocabulary_errors(catalog: dict) -> list[str]:
                 if not binding.get("positional")
             ]
             argv += [token for flag in action.get("optional_flags", ()) for token in flag["tokens"]]
+            if action.get("native_schedule_platform") is True:
+                argv += ["--platform"]
             argv += list(action["argv_suffix"])
             leaked = sorted(token for token in argv if token in denied)
             if leaked:

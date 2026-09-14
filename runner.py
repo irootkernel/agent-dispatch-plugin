@@ -175,17 +175,33 @@ def _bounded_int(
     return value
 
 
-def _verify_platform() -> None:
-    expected = str(load_catalog().get("compatibility", {}).get("platform", ""))
+def _host_platform() -> str:
+    """Return the catalog platform key for this process, or a closed unknown."""
     machine = platform_module.machine().lower()
-    if expected == "darwin/arm64":
-        supported = sys.platform == "darwin" and machine in ("arm64", "aarch64")
-    else:  # pragma: no cover - the frozen catalog pins darwin/arm64 for v0.1.0
-        supported = False
-    if not supported:
+    if machine in ("arm64", "aarch64"):
+        arch = "arm64"
+    elif machine in ("amd64", "x86_64"):
+        arch = "amd64"
+    else:
+        return "unsupported"
+    if sys.platform == "darwin":
+        return f"darwin/{arch}"
+    if sys.platform.startswith("linux"):
+        return f"linux/{arch}"
+    return "unsupported"
+
+
+def _verify_platform() -> None:
+    supported = load_catalog().get("compatibility", {}).get("platforms")
+    if not isinstance(supported, list) or not all(isinstance(item, str) for item in supported):
+        raise TrustFailure(
+            ADAPTER_USAGE_ERROR,
+            "the frozen catalog does not declare a supported platform list",
+        )
+    if _host_platform() not in supported:
         raise TrustFailure(
             BINARY_UNAVAILABLE,
-            "this plugin build supports Darwin arm64 hosts only",
+            "this plugin build does not support this host platform",
         )
 
 

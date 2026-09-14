@@ -26,8 +26,10 @@ fixtures:
   then process-group kill, stdout 1,048,576 bytes, stderr 65,536 bytes,
   combined 1,048,576 bytes (configurable tighter, never higher);
 - the compatibility matrix: Agent Dispatch >=0.1.6,<0.2.0 with
-  `agent-dispatch.cli/v1`, Hermes >=0.20.5, darwin/arm64, standalone
-  manifest v2 / API v1, initially unverified pending qualification;
+  `agent-dispatch.cli/v1`, Hermes >=0.20.5, darwin/arm64 plus linux/amd64
+  and linux/arm64, standalone manifest v2 / API v1; Darwin arm64 is the
+  qualified host, and advertised Linux hosts remain unverified until their
+  real-platform evidence exists;
 - the five defense-in-depth redaction rules.
 
 The supporting decisions are accepted in ADR-001 (declarative registry and

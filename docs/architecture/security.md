@@ -25,7 +25,7 @@ Paths below are relative to the repository root.
 | Boundary | Implemented control | Code and verification |
 |---|---|---|
 | Input and command selection | Closed schemas, literal identifiers, conditional action requirements, fixed argv, denied mutation vocabulary | `tools/inputs.py`, `registry.py`; `tests/unit/test_input_validation.py`, `tests/unit/test_security_negatives.py`, `scripts/manifest_parity.py` |
-| Binary and config identity | Darwin arm64 gate, absolute regular paths without symlinked components, executable SHA-256 and version verification | `runner.py`; `tests/unit/test_runner.py`; ADR-004 |
+| Binary and config identity | Advertised-platform gate (darwin/arm64, linux/amd64, linux/arm64), absolute regular paths without symlinked components, executable SHA-256 and version verification | `runner.py`; `tests/unit/test_runner.py`; ADR-004 |
 | Process isolation | No shell, neutral working directory, fixed PATH and TMPDIR without inherited HOME or credentials, closed extra descriptors | `runner.py`; `tests/unit/test_execution.py`, `tests/unit/test_security_negatives.py`; ADR-005 |
 | Resource bounds | Concurrent draining, bounded stdout/stderr and combined bytes, deadline, process-group TERM then kill, no automatic retry | `runner.py`; `tests/unit/test_execution.py`, `tests/unit/test_security_negatives.py`; ADR-005 |
 | Result integrity | Closed envelope and wrapper validation, expected command and exit consistency, bounded diagnostics, redaction, no raw partial output on failure | `envelopes.py`, `runner.py`; `tests/unit/test_validation.py`, `tests/unit/test_security_negatives.py`; ADR-003 and ADR-006 |

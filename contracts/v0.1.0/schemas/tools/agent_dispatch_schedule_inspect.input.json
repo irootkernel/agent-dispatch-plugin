@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:agent-dispatch-plugin:contracts:v0.1.0:input:agent_dispatch_schedule_inspect",
   "title": "agent_dispatch_schedule_inspect input",
-  "description": "route_id is required and preserved literally after validation. The platform is fixed to launchd by the command mapping.",
+  "description": "route_id is required and preserved literally after validation. The platform is selected by the trusted host (launchd on macOS, systemd on Linux) and is not a model input.",
   "type": "object",
   "additionalProperties": false,
   "properties": {

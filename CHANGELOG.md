@@ -4,6 +4,13 @@ This file records concise shipped outcomes and pending changes.
 
 ## v0.1.1 - Unreleased
 
+### Changed
+
+- Admit Linux amd64 and Linux arm64 alongside Darwin arm64 in the living
+  catalog, and select launchd or systemd for schedule inspection from the
+  trusted host. Darwin arm64 remains the qualified release host; advertised
+  Linux hosts still need real-machine evidence.
+
 ## v0.1.0 - 2026-09-09
 
 ### Added

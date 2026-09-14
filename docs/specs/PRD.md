@@ -32,7 +32,7 @@ closed with additionalProperties false.
 | agent_dispatch_event_show | events show AGGREGATE_ID --output json | Required aggregate_id | Aggregate and child evidence |
 | agent_dispatch_quarantine | quarantine list or quarantine show ID, documented filters, then --output json | action list or show; conditional quarantine_id; optional route, state, limit | Held or resolved structural cases |
 | agent_dispatch_notifications | notifications list, documented filters, then --output json | Optional route, state, sink, limit | Notification delivery evidence |
-| agent_dispatch_schedule_inspect | schedule inspect --route ID --platform launchd --output json | Required route_id | Presence, loaded state, definition match, digests, and health |
+| agent_dispatch_schedule_inspect | schedule inspect --route ID --platform launchd or systemd --output json | Required route_id | Presence, loaded state, definition match, digests, and health. The trusted host selects launchd on macOS and systemd on Linux; the platform is not a model input. |
 | agent_dispatch_config | config show or config validate [--probe-targets], then --output json | action show or validate; probe_targets valid only for validate | Redacted normalized config, revisions, or findings |
 
 agent_dispatch_receipts is read-only inspection. It does not authorize worker
@@ -118,7 +118,7 @@ The mandatory, initially unverified targets are:
 - Agent Dispatch >=0.1.6,<0.2.0
 - envelope agent-dispatch.cli/v1
 - Hermes >=0.20.5
-- Darwin arm64
+- Darwin arm64, Linux amd64, and Linux arm64
 
 Qualification must record exact artifact identities and use a disposable,
 isolated profile containing synthetic Agent Dispatch state and controlled fake
@@ -127,7 +127,10 @@ highest available compatible release below v0.2.0.
 
 Every advertised public action must complete a successful end-to-end path
 through Hermes v0.20.5 or newer invoking the real pinned Agent Dispatch executable on
-Darwin arm64. Contract fixtures supplement this evidence for malformed
+each advertised platform. Darwin arm64 remains the first qualified host.
+Linux amd64 and Linux arm64 are admitted platforms whose missing real-host
+evidence blocks those platform claims without rewriting the Darwin record.
+Contract fixtures supplement this evidence for malformed
 envelopes, unknown versions, truncation, resource limits, redaction, unavailable
 dependencies, and unsafe or nondeterministic failure branches. Fixtures never
 replace a successful real run of an advertised action. A real doctor findings
@@ -166,7 +169,7 @@ Release acceptance requires:
 - Direct Agent Dispatch database access or duplicated domain logic.
 - Generic CLI pass-through, arbitrary command execution, plugin hooks, custom
   Hermes commands, LLM override, or Desktop plugin APIs.
-- Linux, Windows, Hermes versions below v0.20.5, or Agent Dispatch 0.2.x.
+- Windows, Hermes versions below v0.20.5, or Agent Dispatch 0.2.x.
 - Automatic installation, activation, publication, tagging, or release.
 
 Worker receipt mutations and administrative mutations are post-v0.1.0
@@ -190,5 +193,8 @@ This is an explicit pre-publication rebaseline, not a retrospective waiver.
 `contracts/v0.1.0/`, its schema URNs, and catalog `product_version` identify
 the public contract baseline. Catalog `plugin.version` identifies the plugin
 release and must match the derived manifest, Python project, and lockfile.
-Opening v0.1.1 changes release metadata only; it does not create a new API
-contract or alter the published v0.1.0 tag.
+The published v0.1.0 tag is unchanged. The living v0.1.1 development catalog
+admits Darwin arm64, Linux amd64, and Linux arm64 and derives the schedule
+`--platform` flag from the trusted host. Schema URNs remain under
+`contracts/v0.1.0/` because the ten-tool input and result contracts are
+otherwise unchanged.

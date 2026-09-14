@@ -11,10 +11,26 @@ network, a database, or Agent Dispatch state.
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping
+
+
+def native_schedule_platform() -> str:
+    """Select the fixed schedule inspector for this trusted host.
+
+    The model never supplies ``--platform``. Darwin uses launchd; Linux uses
+    systemd. Unsupported hosts never reach argv resolution: the runner trust
+    gate rejects them first.
+    """
+    if sys.platform == "darwin":
+        return "launchd"
+    if sys.platform.startswith("linux"):
+        return "systemd"
+    raise ContractSourceError("no native schedule mapping for this host")
+
 
 PLUGIN_ROOT = Path(__file__).resolve().parent
 CONTRACTS_VERSION_DIR = PLUGIN_ROOT / "contracts" / "v0.1.0"
@@ -42,6 +58,7 @@ class ActionSpec:
     optional_flags: tuple[Mapping[str, Any], ...]
     argv_suffix: tuple[str, ...]
     expected_command: str
+    native_schedule_platform_flag: bool = False
 
     def resolve_argv(self, params: Mapping[str, Any]) -> tuple[str, ...]:
         """Resolve the concrete argv for this action from validated params.
@@ -64,6 +81,8 @@ class ActionSpec:
         for flag in self.optional_flags:
             if params.get(flag["param"]) is True:
                 argv.extend(flag["tokens"])
+        if self.native_schedule_platform_flag:
+            argv.extend(["--platform", native_schedule_platform()])
         argv.extend(self.argv_suffix)
         return tuple(argv)
 
@@ -179,6 +198,11 @@ def tool_specs() -> tuple[ToolSpec, ...]:
                         f"{tool['name']}/{action['id']}: optional flags must be "
                         "mappings with a string param and a string-array tokens"
                     )
+            native_flag = action.get("native_schedule_platform", False)
+            if native_flag is not True and native_flag is not False:
+                raise ContractSourceError(
+                    f"{tool['name']}/{action['id']}: native_schedule_platform must be a boolean"
+                )
             actions.append(
                 ActionSpec(
                     action_id=action["id"],
@@ -188,6 +212,7 @@ def tool_specs() -> tuple[ToolSpec, ...]:
                     optional_flags=tuple(action.get("optional_flags", ())),
                     argv_suffix=tuple(action["argv_suffix"]),
                     expected_command=action["expected_command"],
+                    native_schedule_platform_flag=bool(native_flag),
                 )
             )
         specs.append(
