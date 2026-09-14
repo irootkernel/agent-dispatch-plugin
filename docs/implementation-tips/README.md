@@ -13,7 +13,7 @@ and has no third-party runtime dependencies. Read the
 
 Unit and integration tests use deterministic fakes. Plugin Doctor e2e needs
 Hermes on PATH; qualification additionally needs darwin/arm64 or linux/arm64
-and the host-selected pinned Agent Dispatch artifact. See
+and the host-selected pinned Agent Dispatch artifacts. See
 [TESTING.md](../../TESTING.md) for exact environment requirements and failure
 behavior. Keep qualification profiles disposable.
 

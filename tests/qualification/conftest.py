@@ -12,13 +12,13 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import platform as platform_module
 import re
 import shutil
 import subprocess
-import sys
 
 import pytest
+
+import runner
 
 MINIMUM_HERMES_VERSION = (0, 20, 5)
 
@@ -45,19 +45,8 @@ LINUX_ARM64_ARTIFACTS = [
 
 
 def qualification_host() -> str:
-    """Return the catalog platform key for this qualification process."""
-    machine = platform_module.machine().lower()
-    if machine in ("arm64", "aarch64"):
-        arch = "arm64"
-    elif machine in ("amd64", "x86_64"):
-        arch = "amd64"
-    else:
-        return f"unsupported/{machine}"
-    if sys.platform == "darwin":
-        return f"darwin/{arch}"
-    if sys.platform.startswith("linux"):
-        return f"linux/{arch}"
-    return f"unsupported/{sys.platform}"
+    """Return the catalog platform key; identical to the runner trust gate."""
+    return runner._host_platform()
 
 
 def artifacts_for_this_host() -> list[tuple[str, str, str]]:

@@ -33,8 +33,9 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 from pathlib import Path
+
+import runner
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 CONTRACTS = ROOT / "contracts" / "v0.1.0"
@@ -278,13 +279,16 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(
         assert (home / "config.yaml").read_bytes() == profile_before
         observation = _observe(venv_python, home, driver)
         assert observation["registered"] == roster
-        darwin_only_rollback = revision == "previous" and sys.platform.startswith("linux")
+        darwin_only_rollback = revision == "previous" and runner._host_platform().startswith(
+            "linux/"
+        )
         if darwin_only_rollback:
             assert observation["toolset_available"] is False, (
                 "the Darwin-only rollback source must not open the toolset on linux/arm64: "
                 f"{observation}"
             )
-            assert observation["smoke"].get("ok") is not True
+            assert observation["smoke"].get("ok") is False
+            assert observation["smoke"].get("error") == "binary_unavailable", observation["smoke"]
         else:
             assert observation["toolset_available"] is True
             assert observation["smoke"]["ok"] is True

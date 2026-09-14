@@ -27,8 +27,9 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 from pathlib import Path
+
+import runner
 
 from jsonschema import Draft202012Validator
 from referencing import Registry as RefRegistry
@@ -482,8 +483,12 @@ def test_compatibility_matrix_qualifies_every_public_action(
     ]
     schedule_result = schedule["agent_dispatch"]["result"]
     assert schedule_result["present"] is False
-    if sys.platform.startswith("linux"):
-        assert "systemd" in schedule_result["service_path"]
-        assert schedule_result["service_path"].endswith(".service")
-        assert "systemd" in schedule_result["timer_path"]
-        assert schedule_result["timer_path"].endswith(".timer")
+    if runner._host_platform().startswith("linux/"):
+        service = schedule_result["service_path"]
+        timer = schedule_result["timer_path"]
+        label = schedule_result["label"]
+        assert service.endswith(".service")
+        assert timer.endswith(".timer")
+        assert ".config/systemd/user/" in service
+        assert ".config/systemd/user/" in timer
+        assert Path(service).stem == Path(timer).stem == label
