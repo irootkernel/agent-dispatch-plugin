@@ -27,9 +27,9 @@ fixtures:
   combined 1,048,576 bytes (configurable tighter, never higher);
 - the compatibility matrix: Agent Dispatch >=0.1.6,<0.2.0 with
   `agent-dispatch.cli/v1`, Hermes >=0.20.5, darwin/arm64 plus linux/amd64
-  and linux/arm64, standalone manifest v2 / API v1; Darwin arm64 is the
-  qualified host, and advertised Linux hosts remain unverified until their
-  real-platform evidence exists;
+  and linux/arm64, standalone manifest v2 / API v1; Darwin arm64 remains
+  the release host; linux/arm64 has real-platform evidence against Agent
+  Dispatch v0.1.7, and linux/amd64 remains unverified;
 - the five defense-in-depth redaction rules.
 
 The supporting decisions are accepted in ADR-001 (declarative registry and

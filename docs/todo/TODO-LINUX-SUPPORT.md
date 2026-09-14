@@ -147,29 +147,29 @@ mocked platform string as Linux support.
 
 ## This-machine verification scope
 
-Recorded 2026-09-14 on this Darwin arm64 host:
+Recorded 2026-09-15 on a native linux/arm64 host (non-root, systemd as
+PID 1). Identities and reproduction live in
+[qualification-linux-arm64](../implementation-tips/qualification-linux-arm64.md).
 
-- `make test` passed (prepare, 529 unit, 28 integration, Plugin Doctor e2e).
-- OrbStack `linux/arm64` (`Linux aarch64`) ran the hermetic unit and
-  integration suites: 556 passed, 1 skipped. The skip is
-  `test_execute_only_binary_is_unreadable_for_the_digest` under uid 0
-  (root can read mode 0111 files). Re-run that case as non-root on a
-  real Linux arm64 host.
-- Agent Dispatch `v0.1.8` linux-arm64 `version --json` ran in the same
-  container and answered `{"name":"agent-dispatch","version":"v0.1.8"}`.
-  `schedule inspect --help` documents `--platform launchd|systemd`.
+- `make test-prepare`, 529 unit (0 skipped; the execute-only digest case
+  ran), 28 integration, and Plugin Doctor e2e passed on Hermes >=0.20.5.
+- The disposable compatibility matrix and installation lifecycle
+  (`make test-qualify`) run against Agent Dispatch v0.1.7 linux-arm64
+  SHA-256 `5493b1a13d28fa28eee850617be7c745d47898b87a7c3c4ea114f5c1cf2481c0`.
+  Every advertised public action returned the frozen wrapper; doctor
+  preserved findings at exit 3 (`watchman_unavailable`); schedule inspect
+  selected systemd with `present=false`.
+- This does not install, load, or repair a systemd user timer.
 
-This host cannot close advertised Linux qualification:
+This host still cannot close advertised Linux qualification:
 
-- real Hermes sessions on Linux arm64 (install Hermes on the OCI arm64
-  machine and rerun Plugin Doctor plus the action matrix there);
-- native Linux amd64 (no x86 host; OrbStack amd64 is translated
-  `VirtualApple` and is not claimed);
-- systemd user-schedule lifecycle (this Mac is launchd; typical
-  containers have no systemd as PID 1).
+- native Linux amd64 (this host is aarch64; do not treat translated
+  amd64 as that evidence);
+- Agent Dispatch v0.1.6 linux-arm64 (artifact absent);
+- Darwin arm64 `make test-qualify` on the same candidate (wrong host).
 
-Those gaps keep TASK-021 from completing. They do not block Darwin
-regression evidence.
+Those remaining gaps keep TASK-021 from completing. They do not erase
+the linux/arm64 v0.1.7 record above or prior Darwin qualification.
 
 ## Reserved identities
 

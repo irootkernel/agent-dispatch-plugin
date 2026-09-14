@@ -98,19 +98,22 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
 
 - Artifact identities: Hermes v0.20.5 or newer on `PATH` (the stage also
   locates the install's venv interpreter for the in-process dispatch
-  driver) and both Agent Dispatch v0.1.6 and v0.1.7 darwin/arm64 release
-  artifacts, supplied through `AGENT_DISPATCH_QUALIFY_BINARY` and
-  `AGENT_DISPATCH_QUALIFY_BINARY_V017`. Each case verifies its pinned SHA-256
-  before its version probe. PATH is a fallback only when its binary matches
-  that exact case; missing or mismatching prerequisites fail, never skip.
+  driver) and the host-selected pinned Agent Dispatch artifacts: Darwin
+  arm64 uses both v0.1.6 and v0.1.7 darwin/arm64 builds
+  (`AGENT_DISPATCH_QUALIFY_BINARY` and `AGENT_DISPATCH_QUALIFY_BINARY_V017`);
+  linux/arm64 uses the v0.1.7 linux-arm64 build
+  (`AGENT_DISPATCH_QUALIFY_BINARY_V017`). Each case verifies its pinned
+  SHA-256 before its version probe. PATH is a fallback only when its binary
+  matches that exact case; missing or mismatching prerequisites fail, never
+  skip. Other hosts, including linux/amd64, fail the platform prerequisite.
 - Public interface: the qualification matrix seeds a disposable profile
   (temporary `HERMES_HOME`, temporary Agent Dispatch configuration and
   state, controlled fake downstream Hermes target) and dispatches every
   advertised action through the real Hermes runtime deterministically —
   no model, no network, no live state.
 - Prerequisite refusal: the stage fails with the exact missing
-  prerequisite when the host platform, Hermes version, or pinned
-  artifact is absent; there is no skip path.
+  prerequisite when the host platform (darwin/arm64 or linux/arm64),
+  Hermes version, or pinned artifact is absent; there is no skip path.
 - Credentials: none.
 
 ## Language Diagnostics
@@ -128,8 +131,8 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   compatibility matrix (TASK-012): every advertised public action of all
   ten tools dispatched through the real Hermes runtime (v0.20.5 or newer)
   (plugin discovery plus `model_tools.handle_function_call` over a
-  disposable `HERMES_HOME`) invoking the real pinned Agent Dispatch
-  v0.1.6 and v0.1.7 release artifacts against synthetic state seeded through Agent
+  disposable `HERMES_HOME`) invoking the host-selected pinned Agent Dispatch
+  release artifacts against synthetic state seeded through Agent
   Dispatch's own commands; and the disposable installation lifecycle
   (TASK-015): disabled-by-default pinned installation, explicit plugin
   and toolset enablement and disablement as separate states, and complete

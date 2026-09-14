@@ -39,7 +39,7 @@ evidence named by the Detailed SOT, not prose assertion.
 | TASK-018 | EPIC-006 | Admit the Linux amendment and program charter | Planned | Reviewed platform amendment, reserved later identities, and qualification readiness record |
 | TASK-019 | EPIC-006 | Qualify the trusted runner on Linux | Planned | Linux and Darwin runner tests for isolation, trust, timeout, and redaction |
 | TASK-020 | EPIC-006 | Add native schedule mapping and contract parity | Planned | Launchd/systemd descriptor parity with matching tests and documentation |
-| TASK-021 | EPIC-006 | Run real platform and existing-action qualification | Planned | Action-level transcripts on Darwin arm64, Linux amd64, and Linux arm64 |
+| TASK-021 | EPIC-006 | Run real platform and existing-action qualification | In Progress | linux/arm64 v0.1.7: docs/implementation-tips/qualification-linux-arm64.md; remaining: linux/amd64, AD v0.1.6 linux-arm64, Darwin candidate qualify |
 | TASK-022 | EPIC-006 | Close Linux operations and hand off to Dispatch | Planned | Lifecycle guidance, cold review, and Dispatch E20 / E20-T1 handoff |
 
 ## Sequencing

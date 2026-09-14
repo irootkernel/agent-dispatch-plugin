@@ -8,8 +8,11 @@ This file records concise shipped outcomes and pending changes.
 
 - Admit Linux amd64 and Linux arm64 alongside Darwin arm64 in the living
   catalog, and select launchd or systemd for schedule inspection from the
-  trusted host. Darwin arm64 remains the qualified release host; advertised
-  Linux hosts still need real-machine evidence.
+  trusted host. Darwin arm64 remains the release host.
+- Record real-machine linux/arm64 qualification of the existing ten tools
+  against Agent Dispatch v0.1.7 (Hermes >=0.20.5, systemd absent-schedule
+  inspect). linux/amd64 and Agent Dispatch v0.1.6 linux-arm64 remain
+  unqualified.
 
 ## v0.1.0 - 2026-09-09
 

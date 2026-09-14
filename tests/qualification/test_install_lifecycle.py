@@ -19,8 +19,8 @@ source-only plugin-directory mechanism.
 The stage never touches the operator's live Hermes or Agent Dispatch
 state: the profile, the pinned executable copy, and the Agent Dispatch
 configuration all live in the sandbox. Like the compatibility matrix it
-requires the pinned artifacts, is not part of ``make test``, and runs
-through ``make test-qualify`` (TESTING.md owns the contract).
+requires the host-selected pinned artifacts, is not part of ``make test``,
+and runs through ``make test-qualify`` (TESTING.md owns the contract).
 """
 
 from __future__ import annotations
@@ -30,16 +30,15 @@ import io
 import zipfile
 import json
 import os
-import platform
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 CONTRACTS = ROOT / "contracts" / "v0.1.0"
 
-MINIMUM_HERMES_VERSION = (0, 20, 5)
 PLUGIN_NAME = "agent-dispatch-plugin"
 TOOLSET = "agent_dispatch"
 
@@ -76,42 +75,6 @@ print(json.dumps({"registered": names, "toolset_available": available, "smoke": 
 
 def _run(argv, *, env=None, timeout=120, cwd=None):
     return subprocess.run(argv, capture_output=True, env=env, timeout=timeout, cwd=cwd, text=True)
-
-
-def _require_qualification_prerequisites():
-    """Fail with the exact missing prerequisite; this stage never skips."""
-    assert platform.system() == "Darwin" and platform.machine() in ("arm64", "aarch64"), (
-        "missing prerequisite: the installation lifecycle targets Darwin arm64 hosts"
-    )
-    hermes = shutil.which("hermes")
-    assert hermes is not None, (
-        "missing prerequisite: the Hermes Agent CLI (v0.20.5 or newer) must be on PATH "
-        "for the installation lifecycle qualification"
-    )
-    version_output = _run([hermes, "--version"]).stdout
-    first_line = version_output.splitlines()[0].strip()
-    # v0.21.0+ appends upstream/local commit trailers after the build date,
-    # so the identity check anchors the prefix rather than the whole line.
-    version_match = re.match(r"Hermes Agent v(\d+)\.(\d+)\.(\d+) \(\d{4}\.\d+\.\d+\)", first_line)
-    assert version_match, (
-        f"missing prerequisite: unrecognized hermes --version line, got "
-        f"{version_output.splitlines()[:1]}"
-    )
-    hermes_version = tuple(int(part) for part in version_match.groups())
-    assert hermes_version >= MINIMUM_HERMES_VERSION, (
-        f"missing prerequisite: Hermes must be v0.20.5 or newer, got "
-        f"v{'.'.join(str(part) for part in hermes_version)}"
-    )
-    install_dir = None
-    for line in version_output.splitlines():
-        if line.startswith("Install directory:"):
-            install_dir = line.split(":", 1)[1].strip()
-    assert install_dir, "missing prerequisite: hermes --version names no install directory"
-    venv_python = Path(install_dir) / "venv" / "bin" / "python"
-    assert venv_python.is_file(), (
-        f"missing prerequisite: the Hermes venv interpreter is expected at {venv_python}"
-    )
-    return hermes, venv_python
 
 
 def _install_plugin_directory(home: Path) -> None:
@@ -175,8 +138,10 @@ def _seed_settings(home: Path, binary: Path, ad_config: Path) -> None:
     config_file.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
 
 
-def test_install_lifecycle_proves_disabled_enable_disable_and_removal(tmp_path, qualified_binary):
-    hermes, venv_python = _require_qualification_prerequisites()
+def test_install_lifecycle_proves_disabled_enable_disable_and_removal(
+    tmp_path, qualified_binary, qualification_runtime
+):
+    hermes, venv_python = qualification_runtime
 
     sandbox = tmp_path / "lifecycle-sandbox"
     sandbox.mkdir()
@@ -281,6 +246,9 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(tmp_path, 
     assert TOOLSET in cli_toolsets, "an enabled plugin toolset joins the platform list"
 
     # Exercise a real source rollback and upgrade with identical profile settings.
+    # 0c4e70e is the recorded pre-release Darwin-only source: Darwin keeps
+    # inspecting through it; linux/arm64 must keep the toolset closed until
+    # the candidate (which admits Linux) is restored.
     previous = "0c4e70e384bc9891bc15820c4e0b6a42ba700d5a"
     archive = subprocess.run(
         ["git", "archive", "--format=zip", previous],
@@ -310,8 +278,16 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(tmp_path, 
         assert (home / "config.yaml").read_bytes() == profile_before
         observation = _observe(venv_python, home, driver)
         assert observation["registered"] == roster
-        assert observation["toolset_available"] is True
-        assert observation["smoke"]["ok"] is True
+        darwin_only_rollback = revision == "previous" and sys.platform.startswith("linux")
+        if darwin_only_rollback:
+            assert observation["toolset_available"] is False, (
+                "the Darwin-only rollback source must not open the toolset on linux/arm64: "
+                f"{observation}"
+            )
+            assert observation["smoke"].get("ok") is not True
+        else:
+            assert observation["toolset_available"] is True
+            assert observation["smoke"]["ok"] is True
 
     # -- 4. Plugin disablement hides the tool surface ---------------------------
     plugin_disabled = _hermes(hermes, home, "plugins", "disable", PLUGIN_NAME)

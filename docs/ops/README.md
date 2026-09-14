@@ -1,7 +1,8 @@
 # Operations
 
-Plugin maintainers own these runbooks for operators of Hermes profiles on
-Darwin arm64. The plugin has no independent daemon or hosted service: Hermes
+Plugin maintainers own these runbooks for operators of Hermes profiles.
+The published operator installation path remains Darwin arm64 until the
+v0.1.1 release handoff. The plugin has no independent daemon or hosted service: Hermes
 owns the profile and tool lifecycle, and Agent Dispatch owns its configuration,
 store, sensing, and execution. Start with the public
 [installation instructions](../../README.md) for normal first use.
@@ -26,7 +27,8 @@ path and provide evidence under the security capture guide to plugin maintainers
 Code-changing and release-engineering guidance is owned by
 [implementation tips](../implementation-tips/README.md):
 
-- [Qualification matrix](../implementation-tips/qualification-darwin-arm64.md).
+- [Qualification matrix (Darwin arm64)](../implementation-tips/qualification-darwin-arm64.md).
+- [Qualification matrix (Linux arm64)](../implementation-tips/qualification-linux-arm64.md).
 - [Maintainer guide](../implementation-tips/maintainer-guide.md).
 - [Clean-clone verification](../implementation-tips/clean-clone-verification.md), including Plugin Doctor and fresh-session inventory.
 - [Release handoff](../implementation-tips/release-handoff.md).

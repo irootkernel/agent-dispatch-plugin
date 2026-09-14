@@ -12,9 +12,10 @@ and has no third-party runtime dependencies. Read the
 [architecture](../architecture/README.md) before changing module boundaries.
 
 Unit and integration tests use deterministic fakes. Plugin Doctor e2e needs
-Hermes on PATH; qualification additionally needs Darwin arm64 and the pinned
-Agent Dispatch artifact. See [TESTING.md](../../TESTING.md) for exact environment
-requirements and failure behavior. Keep qualification profiles disposable.
+Hermes on PATH; qualification additionally needs darwin/arm64 or linux/arm64
+and the host-selected pinned Agent Dispatch artifact. See
+[TESTING.md](../../TESTING.md) for exact environment requirements and failure
+behavior. Keep qualification profiles disposable.
 
 ## Choose the change entrypoint
 
@@ -49,7 +50,8 @@ old qualification transcript as proof for a new runtime revision.
 
 - [Maintainer guide](maintainer-guide.md): frozen surface, review, and change control.
 - [Clean-clone verification](clean-clone-verification.md): exact-revision test reproduction and historical evidence.
-- [Qualification matrix](qualification-darwin-arm64.md): pinned artifacts and disposable compatibility verification.
+- [Qualification matrix (Darwin arm64)](qualification-darwin-arm64.md): pinned Darwin artifacts and disposable compatibility verification.
+- [Qualification matrix (Linux arm64)](qualification-linux-arm64.md): pinned v0.1.7 linux-arm64 artifact and disposable compatibility verification.
 - [Release handoff](release-handoff.md): candidate identity and release gates.
 - [Operations](../ops/README.md): installation, recovery, and support.
 

@@ -20,11 +20,11 @@ durable non-goals unless the PRD is amended.
 Source: `REQ-PLUGIN-WIKI-SYNC/v1` plugin intake (EPIC-006). Disposition:
 adopted as EPIC-006; living catalog and PRD now admit linux/amd64 and
 linux/arm64 with host-selected launchd/systemd. Rationale: Darwin arm64
-is still the qualified release host. This Mac can run the hermetic suite
-and an OrbStack linux/arm64 unit pass; it cannot close real Hermes
-qualification on Linux arm64 or native linux/amd64. Revisit: TASK-021 on
-a real Linux arm64 machine with Hermes installed; do not treat translated
-amd64 containers as that evidence.
+is still the release host. A native linux/arm64 host has now recorded
+real Hermes qualification against Agent Dispatch v0.1.7; native
+linux/amd64 and Agent Dispatch v0.1.6 linux-arm64 remain missing. Revisit:
+TASK-021 for those remaining advertised combinations; do not treat
+translated amd64 containers as that evidence.
 Roadmap identity: EPIC-006 (TASK-018 through TASK-022).
 
 ### Protected-path redaction vocabulary

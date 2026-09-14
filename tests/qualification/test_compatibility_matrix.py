@@ -2,21 +2,21 @@
 
 Qualifies every advertised public action of all ten tools through the real
 Hermes runtime, v0.20.5 or newer (plugin discovery plus ``handle_function_call``
-dispatch over a disposable ``HERMES_HOME``) invoking the real pinned Agent
-Dispatch v0.1.6 and v0.1.7 executables on Darwin arm64, against synthetic state seeded
-through Agent Dispatch's own commands inside one disposable profile. The
-suite never touches the operator's live Agent Dispatch configuration,
-state database, or LaunchAgents: the state directory, configuration,
-resource root, and HOME that Agent Dispatch resolves are pinned into the
-sandbox (seeding commands otherwise run with an inherited environment),
-and the downstream Hermes target is a controlled fake answering only the
-surfaces Agent Dispatch probes — the isolation model the PRD names for
-qualification.
+dispatch over a disposable ``HERMES_HOME``) invoking the host-selected pinned
+Agent Dispatch release artifacts (Darwin arm64: v0.1.6 and v0.1.7; linux/arm64:
+v0.1.7), against synthetic state seeded through Agent Dispatch's own commands
+inside one disposable profile. The suite never touches the operator's live
+Agent Dispatch configuration, state database, or native scheduler: the state
+directory, configuration, resource root, and HOME that Agent Dispatch resolves
+are pinned into the sandbox (seeding commands otherwise run with an inherited
+environment), and the downstream Hermes target is a controlled fake answering
+only the surfaces Agent Dispatch probes — the isolation model the PRD names
+for qualification.
 
 Both doctor variants must deliver the real findings envelope, including
 exit 3 when Watchman is unavailable under the fixed PATH. Fixtures supplement
 malformed-output and other nondeterministic branches, never this success path.
-The two pinned releases are supplied by the shared qualification fixture.
+Pinned releases are supplied by the shared qualification fixture.
 """
 
 from __future__ import annotations
@@ -24,10 +24,10 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import platform
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
@@ -36,8 +36,6 @@ from referencing import Resource
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 CONTRACTS = ROOT / "contracts" / "v0.1.0"
-
-MINIMUM_HERMES_VERSION = (0, 20, 5)
 
 ROUTE_ID = "wiki-maintenance"
 PROFILE = "wiki-maintainer"
@@ -54,42 +52,6 @@ def _run(argv, *, env=None, timeout=90, stdin_text=None, cwd=None):
         text=True,
     )
     return result
-
-
-def _require_qualification_prerequisites():
-    """Fail with the exact missing prerequisite; this stage never skips."""
-    assert platform.system() == "Darwin" and platform.machine() in ("arm64", "aarch64"), (
-        "missing prerequisite: the qualification matrix targets Darwin arm64 hosts"
-    )
-    hermes = shutil.which("hermes")
-    assert hermes is not None, (
-        "missing prerequisite: the Hermes Agent CLI (v0.20.5 or newer) must be on PATH "
-        "for the compatibility qualification"
-    )
-    version_output = _run([hermes, "--version"]).stdout
-    first_line = version_output.splitlines()[0].strip()
-    # v0.21.0+ appends upstream/local commit trailers after the build date,
-    # so the identity check anchors the prefix rather than the whole line.
-    version_match = re.match(r"Hermes Agent v(\d+)\.(\d+)\.(\d+) \(\d{4}\.\d+\.\d+\)", first_line)
-    assert version_match, (
-        f"missing prerequisite: unrecognized hermes --version line, got "
-        f"{version_output.splitlines()[:1]}"
-    )
-    hermes_version = tuple(int(part) for part in version_match.groups())
-    assert hermes_version >= MINIMUM_HERMES_VERSION, (
-        f"missing prerequisite: Hermes must be v0.20.5 or newer, got "
-        f"v{'.'.join(str(part) for part in hermes_version)}"
-    )
-    install_dir = None
-    for line in version_output.splitlines():
-        if line.startswith("Install directory:"):
-            install_dir = line.split(":", 1)[1].strip()
-    assert install_dir, "missing prerequisite: hermes --version names no install directory"
-    venv_python = Path(install_dir) / "venv" / "bin" / "python"
-    assert venv_python.is_file(), (
-        f"missing prerequisite: the Hermes venv interpreter is expected at {venv_python}"
-    )
-    return hermes, venv_python
 
 
 def _fake_hermes_target(sandbox: Path) -> Path:
@@ -389,8 +351,10 @@ def _wrapper_validator() -> Draft202012Validator:
     return Draft202012Validator(schema, registry=ref_registry)
 
 
-def test_compatibility_matrix_qualifies_every_public_action(tmp_path, qualified_binary):
-    hermes, venv_python = _require_qualification_prerequisites()
+def test_compatibility_matrix_qualifies_every_public_action(
+    tmp_path, qualified_binary, qualification_runtime
+):
+    _hermes, venv_python = qualification_runtime
     sandbox = tmp_path / "qualification"
     sandbox.mkdir()
 
@@ -476,8 +440,9 @@ def test_compatibility_matrix_qualifies_every_public_action(tmp_path, qualified_
         assert envelope["command"] == expected, (tool, args, envelope["command"])
 
     # The synthetic state is real: the seeded rows surface through the
-    # qualified actions, and the absent launchd schedule is the documented
-    # successful inspection (present=false with ok:true).
+    # qualified actions, and the absent native schedule is the documented
+    # successful inspection (present=false with ok:true). On linux/arm64 the
+    # inspect result is the systemd descriptor shape.
     dispatches = results[
         (
             "agent_dispatch_dispatches",
@@ -515,4 +480,10 @@ def test_compatibility_matrix_qualifies_every_public_action(tmp_path, qualified_
     schedule = results[
         ("agent_dispatch_schedule_inspect", json.dumps({"route_id": ROUTE_ID}, sort_keys=True))
     ]
-    assert schedule["agent_dispatch"]["result"]["present"] is False
+    schedule_result = schedule["agent_dispatch"]["result"]
+    assert schedule_result["present"] is False
+    if sys.platform.startswith("linux"):
+        assert "systemd" in schedule_result["service_path"]
+        assert schedule_result["service_path"].endswith(".service")
+        assert "systemd" in schedule_result["timer_path"]
+        assert schedule_result["timer_path"].endswith(".timer")
