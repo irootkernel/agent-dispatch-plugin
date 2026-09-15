@@ -4,17 +4,18 @@ This file records concise shipped outcomes and pending changes.
 
 ## v0.1.1 - Unreleased
 
+### Added
+
+- Add Linux source-directory install and rollback runbooks for native
+  linux/amd64 and linux/arm64 hosts.
+
 ### Changed
 
-- Admit Linux amd64 and Linux arm64 alongside Darwin arm64 in the living
-  catalog, and select launchd or systemd for schedule inspection from the
-  trusted host. Darwin arm64 remains the release host.
-- Record real-machine linux/arm64 qualification of the existing ten tools
-  against Agent Dispatch v0.1.7 (Hermes >=0.20.5, systemd absent-schedule
-  inspect). Admit linux/amd64 into the qualification matrix against
-  Agent Dispatch v0.1.8. GitHub v0.1.6/v0.1.7 linux artifacts were not
-  published. Next program position after EPIC-006 is Dispatch E20 / E20-T1;
-  v0.1.1 is not tagged by that close.
+- Admit native Linux amd64 and Linux arm64 alongside Darwin arm64, and
+  select launchd or systemd for schedule inspection from the trusted host.
+  Darwin arm64 remains the release host.
+- Qualify linux/arm64 against Agent Dispatch v0.1.7 and linux/amd64 against
+  v0.1.8. GitHub v0.1.6 and v0.1.7 published Darwin arm64 artifacts only.
 
 ## v0.1.0 - 2026-09-09
 
