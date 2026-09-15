@@ -32,15 +32,20 @@ The plugin does not submit jobs, retry or discard dispatches, change routes, or 
 
 | Component | Requirement |
 |---|---|
-| Host | macOS on Apple Silicon (`darwin/arm64`) |
+| Host | Published v0.1.0: macOS on Apple Silicon (`darwin/arm64`). Living candidate also qualifies native `linux/amd64` and `linux/arm64` at the recorded artifacts; v0.1.1 is unreleased. |
 | Hermes | `>=0.20.5`; interactive CLI sessions only |
 | Agent Dispatch | `>=0.1.6,<0.2.0`, with `agent-dispatch.cli/v1` |
 | Distribution | Source directory; no wheel or bundled Agent Dispatch binary |
 
 The v0.1.0 qualification targets Hermes v0.21.0 and both Agent Dispatch
-v0.1.6 and v0.1.7 Darwin arm64 release artifacts. Version requirements do not mean
-that every newer combination has been tested; see the
-[qualification matrix](docs/implementation-tips/qualification-darwin-arm64.md).
+v0.1.6 and v0.1.7 Darwin arm64 release artifacts. The living candidate
+additionally records linux/arm64 against Agent Dispatch v0.1.7 and
+linux/amd64 against v0.1.8. Version requirements do not mean that every
+newer combination has been tested; see the
+[Darwin](docs/implementation-tips/qualification-darwin-arm64.md),
+[Linux arm64](docs/implementation-tips/qualification-linux-arm64.md), and
+[Linux amd64](docs/implementation-tips/qualification-linux-amd64.md)
+matrices.
 
 The plugin offers inspection tools only: it cannot submit work, retry dispatches, or edit routes.
 Inspection can still trigger Agent Dispatch's forward store migration and

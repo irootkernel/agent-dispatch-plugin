@@ -12,8 +12,9 @@ This file records concise shipped outcomes and pending changes.
 - Record real-machine linux/arm64 qualification of the existing ten tools
   against Agent Dispatch v0.1.7 (Hermes >=0.20.5, systemd absent-schedule
   inspect). Admit linux/amd64 into the qualification matrix against
-  Agent Dispatch v0.1.8; that host remains unqualified until a native
-  amd64 run. GitHub v0.1.6/v0.1.7 linux artifacts were not published.
+  Agent Dispatch v0.1.8. GitHub v0.1.6/v0.1.7 linux artifacts were not
+  published. Next program position after EPIC-006 is Dispatch E20 / E20-T1;
+  v0.1.1 is not tagged by that close.
 
 ## v0.1.0 - 2026-09-09
 

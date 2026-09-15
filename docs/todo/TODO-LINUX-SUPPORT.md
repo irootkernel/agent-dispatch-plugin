@@ -1,6 +1,6 @@
 # EPIC-006 Linux Support and Existing-Tool Parity
 
-Status: Adopted
+Status: Closed (EPIC-006 Completed)
 Roadmap: EPIC-006 in docs/roadmap/README.md
 Tasks: TASK-018, TASK-019, TASK-020, TASK-021, TASK-022
 Depends on: EPIC-005 Completed; independent of Dispatch E20
@@ -125,6 +125,8 @@ transcript and artifact digest. Required missing environments keep the
 epic Blocked.
 
 ### TASK-022: Close Linux operations and hand off to Dispatch
+
+Status: Completed. Close record: [TASK-022 close](#task-022-close).
 
 Finish source-directory lifecycle guidance, cold-review the immutable
 Linux candidate, and set the next global position to Dispatch E20 /
@@ -440,6 +442,50 @@ remain unverified and are not claimed.
 TASK-022 (Linux ops / Dispatch E20 handoff) stays Planned. Do not start
 EPIC-007 or EPIC-008 from this close.
 
+## TASK-022 close
+
+Recorded 2026-09-16. This section is the TASK-022 review record and the
+EPIC-006 cold review. It does not tag v0.1.1, start EPIC-007, or edit
+the companion repository.
+
+### P-001..P-004
+
+| Requirement | Evidence |
+|---|---|
+| P-001 Versioned Linux/platform contract | Living catalog platforms and host-selected schedule; TASK-018 close |
+| P-002 Trusted runner on Linux with Darwin regression | TASK-019 close; Darwin `make test` 542 unit |
+| P-003 Native schedule mapping and parity | TASK-020 close |
+| P-004 Real platform/action qualify and install/rollback | TASK-021 close; Linux lifecycle runbooks below |
+
+### Linux operations
+
+Source-directory install, enable, disable, remove, upgrade, and rollback
+on Linux: [install-lifecycle-linux.md](../ops/install-lifecycle-linux.md)
+and [upgrade-rollback-linux.md](../ops/upgrade-rollback-linux.md).
+Disabled-by-default and Darwin-only rollback `binary_unavailable` are
+the existing `make test-qualify` transcripts, not new live-profile runs.
+
+### Cold review
+
+Reviewed the Linux candidate against the three advertised platforms and
+this ops/handoff set:
+
+- Ten inspection tools only; no sync or mutation tools.
+- Public schedule input remains `route_id`.
+- Qualify pins and digests match the recorded host tables.
+- README still names published v0.1.0 as Darwin; living candidate
+  documents Linux combinations without a tag.
+- No unresolved mandatory acceptance condition.
+
+Findings: none that block EPIC-006 close. TASK-022 does not publish a
+release.
+
+### Dispatch handoff
+
+Exact versions and platforms:
+[dispatch-e20-handoff.md](../implementation-tips/dispatch-e20-handoff.md).
+Next global position: **Dispatch E20 / E20-T1**.
+
 ## Reserved identities
 
 The intake program also defines EPIC-007 (sync inspection; TASK-023
@@ -450,6 +496,7 @@ roadmap register as Planned. Do not start them from this dossier.
 
 ## Handoff
 
-When TASK-022 is accepted, the next owner is Dispatch E20 / E20-T1. Stop
+TASK-022 is accepted. The next owner is Dispatch E20 / E20-T1. Stop
 plugin feature work until Dispatch E26 is accepted. Update the global
-program position before any subsequent plugin epic.
+program position before any subsequent plugin epic. See
+[dispatch-e20-handoff.md](../implementation-tips/dispatch-e20-handoff.md).

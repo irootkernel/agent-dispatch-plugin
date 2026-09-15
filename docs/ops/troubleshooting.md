@@ -64,6 +64,19 @@ settings no longer match the swapped revision's frozen contract.
 Resolution: restore the documented settings (upgrade/rollback runbook)
 and verify with one smoke inspection in a fresh session.
 
+On Linux, rollback to the Darwin-only pre-release `0c4e70e` is expected
+to close as `binary_unavailable` at the platform gate until the
+Linux-admitting candidate is restored. That is not a broken install.
+See [upgrade-rollback-linux.md](upgrade-rollback-linux.md).
+
+## The host is rejected as unsupported
+
+`binary_unavailable` with an unsupported-platform diagnostic means
+`_host_platform()` is not in `darwin/arm64`, `linux/amd64`, or
+`linux/arm64`. Translated amd64 (VirtualApple) is not `linux/amd64`.
+Native schedule inspect uses systemd on Linux and launchd on macOS; the
+model does not supply `--platform`.
+
 ## Escalation
 
 Anything not resolved above is a contract question: check

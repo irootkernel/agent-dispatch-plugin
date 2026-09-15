@@ -1,8 +1,9 @@
 # Operations
 
 Plugin maintainers own these runbooks for operators of Hermes profiles.
-The published operator installation path remains Darwin arm64 until the
-v0.1.1 release handoff. The plugin has no independent daemon or hosted service: Hermes
+The published GitHub tag `v0.1.0` remains Darwin arm64. The living
+candidate also has Linux source-directory lifecycle runbooks. The plugin
+has no independent daemon or hosted service: Hermes
 owns the profile and tool lifecycle, and Agent Dispatch owns its configuration,
 store, sensing, and execution. Start with the public
 [installation instructions](../../README.md) for normal first use.
@@ -11,8 +12,10 @@ store, sensing, and execution. Start with the public
 
 | Purpose | Owner document |
 |---|---|
-| Install, enable, disable, remove, and clean profile bookkeeping | [Installation lifecycle](install-lifecycle-darwin-arm64.md) |
-| Replace an installed revision and recover through rollback | [Upgrade and rollback](upgrade-rollback-darwin-arm64.md) |
+| Install, enable, disable, remove, and clean profile bookkeeping (Darwin) | [Installation lifecycle (Darwin arm64)](install-lifecycle-darwin-arm64.md) |
+| Install, enable, disable, remove, and clean profile bookkeeping (Linux) | [Installation lifecycle (Linux)](install-lifecycle-linux.md) |
+| Replace an installed revision and recover through rollback (Darwin) | [Upgrade and rollback (Darwin arm64)](upgrade-rollback-darwin-arm64.md) |
+| Replace an installed revision and recover through rollback (Linux) | [Upgrade and rollback (Linux)](upgrade-rollback-linux.md) |
 | Capture bounded, redacted support evidence | [Security evidence capture](security-evidence-capture.md) |
 | Diagnose missing tools, trust failures, and known runtime boundaries | [Troubleshooting](troubleshooting.md) |
 
@@ -33,6 +36,7 @@ Code-changing and release-engineering guidance is owned by
 - [Maintainer guide](../implementation-tips/maintainer-guide.md).
 - [Clean-clone verification](../implementation-tips/clean-clone-verification.md), including Plugin Doctor and fresh-session inventory.
 - [Release handoff](../implementation-tips/release-handoff.md).
+- [Dispatch E20 / E20-T1 handoff](../implementation-tips/dispatch-e20-handoff.md).
 
 Installation, plugin enablement, and toolset enablement are separate states.
 A documented procedure does not authorize changes to a live profile or a

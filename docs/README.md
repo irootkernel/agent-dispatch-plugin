@@ -58,9 +58,10 @@ Identity does not encode order; the roadmap records dependencies. ADRs use
 Lifecycle values remain Planned, In Progress, In Review, Completed, Deferred,
 and Blocked. Every planned or active epic links one Detailed SOT dossier under
 the existing repository convention. All initial dossiers were promoted to the
-canonical outcomes in their roadmap rows and retired. EPIC-006 uses
-[docs/todo/TODO-LINUX-SUPPORT.md](todo/TODO-LINUX-SUPPORT.md). Child task
-completion alone does not establish epic acceptance.
+canonical outcomes in their roadmap rows and retired. EPIC-006 is
+Completed and keeps [docs/todo/TODO-LINUX-SUPPORT.md](todo/TODO-LINUX-SUPPORT.md)
+as its Detailed SOT. Child task completion alone does not establish epic
+acceptance.
 
 ## Documentation checks
 
