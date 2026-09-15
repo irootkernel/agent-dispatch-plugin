@@ -32,16 +32,15 @@ The plugin does not submit jobs, retry or discard dispatches, change routes, or 
 
 | Component | Requirement |
 |---|---|
-| Host | Published v0.1.0: macOS on Apple Silicon (`darwin/arm64`). Living candidate also qualifies native `linux/amd64` and `linux/arm64` at the recorded artifacts; v0.1.1 is unreleased. |
+| Host | Published v0.1.1: macOS on Apple Silicon (`darwin/arm64`) as the release host; native `linux/amd64` and `linux/arm64` qualified at the recorded artifacts. |
 | Hermes | `>=0.20.5`; interactive CLI sessions only |
 | Agent Dispatch | `>=0.1.6,<0.2.0`, with `agent-dispatch.cli/v1` |
 | Distribution | Source directory; no wheel or bundled Agent Dispatch binary |
 
-The v0.1.0 qualification targets Hermes v0.21.0 and both Agent Dispatch
-v0.1.6 and v0.1.7 Darwin arm64 release artifacts. The living candidate
-additionally records linux/arm64 against Agent Dispatch v0.1.7 and
-linux/amd64 against v0.1.8. Version requirements do not mean that every
-newer combination has been tested; see the
+The v0.1.1 qualification targets Hermes v0.21.0 and both Agent Dispatch
+v0.1.6 and v0.1.7 Darwin arm64 release artifacts, and records linux/arm64
+against Agent Dispatch v0.1.7 and linux/amd64 against v0.1.8. Version
+requirements do not mean that every newer combination has been tested; see the
 [Darwin](docs/implementation-tips/qualification-darwin-arm64.md),
 [Linux arm64](docs/implementation-tips/qualification-linux-arm64.md), and
 [Linux amd64](docs/implementation-tips/qualification-linux-amd64.md)
@@ -75,9 +74,9 @@ The Hermes profile configuration and the Agent Dispatch configuration are differ
 
 ### 2. Download the selected plugin revision
 
-The [v0.1.0 release](https://github.com/irootkernel/agent-dispatch-plugin/releases/tag/v0.1.0)
+The [v0.1.1 release](https://github.com/irootkernel/agent-dispatch-plugin/releases/tag/v0.1.1)
 provides a source archive and `SHA256SUMS`. Verify the checksum before
-extracting it. The archive contains a top-level `agent-dispatch-plugin-v0.1.0/`
+extracting it. The archive contains a top-level `agent-dispatch-plugin-v0.1.1/`
 directory; copy that directory's contents into a new profile plugin directory,
 then follow the configuration steps below. Install Agent Dispatch separately.
 The release also records the exact source commit for the Git-based procedure:
