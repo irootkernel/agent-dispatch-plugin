@@ -187,7 +187,8 @@ Inspected living catalog `contracts/v0.1.0/catalog.json` (plugin version
 
 - `compatibility.platforms` is `darwin/arm64`, `linux/amd64`, and
   `linux/arm64`. Darwin arm64 remains the qualified release host.
-  Advertised Linux hosts stay unverified until TASK-021 evidence exists.
+  linux/arm64 now has a v0.1.7 TASK-021 record; linux/amd64 and the
+  remaining linux-arm64 artifacts stay unverified.
 - `product_version` is `0.1.0`. Schema URNs remain under
   `contracts/v0.1.0/`. The published v0.1.0 tag is unchanged.
 - The public inventory is exactly the existing ten inspection tools.
@@ -207,35 +208,39 @@ Darwin qualification pins remain Agent Dispatch v0.1.6 and v0.1.7
 darwin/arm64 as recorded in
 [qualification-darwin-arm64.md](../implementation-tips/qualification-darwin-arm64.md).
 
-Linux qualification, when TASK-021 runs, uses Agent Dispatch **v0.1.8**
-linux/arm64 and linux/amd64 artifacts from companion commit
-`fcd75f1b231e4403c39f5c873bce25b10d95754a`. That is the highest
-compatible published core below 0.2.0 selected at this close. A later
+linux/arm64 TASK-021 evidence already records Agent Dispatch **v0.1.7**
+in [qualification-linux-arm64.md](../implementation-tips/qualification-linux-arm64.md).
+Agent Dispatch **v0.1.8** from companion commit
+`fcd75f1b231e4403c39f5c873bce25b10d95754a` remains the selected highest
+compatible published core below 0.2.0 for remaining Linux claims. A later
 compatible 0.1.x may replace it only through a later task that records
 the new identity.
 
 ### Readiness
 
 The [this-machine verification scope](#this-machine-verification-scope)
-is the TASK-018 readiness record:
+plus the Darwin `make test` run on 2026-09-15 are the TASK-018 readiness
+record:
 
 | Environment | Status |
 |---|---|
 | Darwin arm64 | Ready (qualified release host; `make test` passed here on 2026-09-15) |
-| OrbStack linux/arm64 | Hermetic unit and integration only; not Linux qualification |
-| Real Linux arm64 with Hermes | Missing; blocks TASK-021 for that platform |
+| Native linux/arm64 | Recorded: hermetic suite and v0.1.7 `make test-qualify` on a non-root host with systemd as PID 1 |
+| OrbStack linux/arm64 | Historical hermetic-only pass; not a substitute for the native record |
 | Native linux/amd64 | Missing; translated amd64 is not claimed |
-| systemd user-schedule lifecycle | Missing; typical containers have no systemd as PID 1 |
+| Agent Dispatch v0.1.6 linux-arm64 | Missing |
+| systemd user-timer install/load | Not in the recorded inspect (`present=false`) |
 
-Missing mandatory capacity blocks the affected TASK-021 platform claims.
-It does not block this charter.
+Missing mandatory capacity keeps TASK-021 In Progress. It does not block
+this charter. TASK-019 and TASK-020 stay Planned.
 
 ### Program position and reserved identities
 
 `docs/roadmap/README.md` now records G01 as the only active plugin
-program slot, EPIC-006 as In Progress, TASK-018 as Completed, and
-EPIC-007, EPIC-008, and TASK-023 through TASK-032 as Planned register
-rows. Do not start those reserved identities from this dossier.
+program slot, EPIC-006 as In Progress, TASK-018 as Completed, TASK-021
+as the active task, and EPIC-007, EPIC-008, and TASK-023 through
+TASK-032 as Planned register rows. Do not start those reserved identities
+from this dossier.
 
 ## Reserved identities
 

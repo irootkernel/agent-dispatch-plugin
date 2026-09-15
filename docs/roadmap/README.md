@@ -12,9 +12,11 @@ reserved identities and must not start until their intake prerequisites are
 accepted (Dispatch E26 for G09; EPIC-007 for G10). Dispatch owns G02 through
 G08 and G11; those rows are not executed from this roadmap.
 
-Active epic: EPIC-006 (In Progress). Active task: none. TASK-018 is
-Completed; TASK-019 is the next executable task and stays Planned until it
-starts. X-025 still allows at most one active epic and one active task.
+Active epic: EPIC-006 (In Progress). Active task: TASK-021 (In Progress),
+with a partial linux/arm64 v0.1.7 qualification record. TASK-018 is
+Completed. TASK-019 and TASK-020 remain Planned; that TASK-021 record
+does not close them. X-025 still allows at most one active epic and one
+active task.
 
 ## Epic register
 
@@ -77,6 +79,7 @@ TASK-019 precedes TASK-020, TASK-020 precedes TASK-021, and TASK-021 precedes
 TASK-022. After TASK-022 the next global position is Dispatch E20 / E20-T1.
 TASK-018 placed EPIC-007, EPIC-008, and TASK-023 through TASK-032 on this
 register as Planned so those identities are not reused. Do not start them
-from EPIC-006. After TASK-018 the next executable task is TASK-019. Parallel
-work is allowed only where a dossier states that contracts and evidence
-ownership do not overlap.
+from EPIC-006. TASK-019 and TASK-020 remain Planned. TASK-021 already holds
+a partial linux/arm64 v0.1.7 record and stays In Progress until the remaining
+advertised environments exist. Parallel work is allowed only where a dossier
+states that contracts and evidence ownership do not overlap.
