@@ -97,6 +97,8 @@ bounded errors with no raw output, traceback, or credential leakage.
 
 ### TASK-020: Add native schedule mapping and contract parity
 
+Status: Completed. Close record: [TASK-020 close](#task-020-close).
+
 Keep the public schedule input limited to approved route identity.
 Validate native result shapes and unsupported-capability errors against
 the versioned contract. Do not invoke launchd-only commands on Linux or
@@ -324,6 +326,50 @@ environments (linux/amd64, Agent Dispatch v0.1.6 linux-arm64, Darwin
 candidate qualify) so X-025 stays one active task. That qualify record
 is retained and is not this close. Starting TASK-020 occupies the G01
 execution slot.
+
+## TASK-020 close
+
+Recorded 2026-09-16. This section is the TASK-020 review record. It does
+not close TASK-021 and does not start TASK-022. Real systemd and launchd
+inspect interiors through Hermes remain TASK-021 evidence.
+
+### Mapping and public input
+
+The living catalog already selected the native descriptor from the
+trusted host (`native_schedule_platform` only on
+`agent_dispatch_schedule_inspect` / `inspect`). Public input stays
+`route_id`. `--platform` is not a schema property. Envelope command
+identity stays `schedule inspect` for both mappings.
+
+| Host | Argv platform | Proof |
+|---|---|---|
+| Darwin | `launchd` | `test_resolve_argv_schedule_selects_launchd_on_darwin` |
+| Linux | `systemd` | `test_resolve_argv_schedule_selects_systemd_on_linux`; `test_linux_schedule_argv_never_selects_launchd` |
+| Other | closed | `test_native_schedule_platform_rejects_unsupported_hosts` |
+
+Wrong-platform negatives: model `platform` values `launchd` and
+`systemd` reject as `invalid_argument` before the runner. Capability
+negative: an unsupported `sys.platform` raises `ContractSourceError`
+and never emits a platform token. Manifest/registry/schema/descriptor
+parity is the existing `scripts/manifest_parity.py` and
+`contracts/validate.py` gates.
+
+The envelope `result` interior stays open. This close does not add a
+systemd or launchd result schema and does not treat the linux/arm64
+`present=false` inspect as TASK-020 completion.
+
+### Documentation
+
+The README no longer describes schedule inspection as launchd-only.
+Requirements still name Darwin arm64 as the qualified operator host.
+
+### Program position
+
+After this close, EPIC-006 stays In Progress. TASK-018, TASK-019, and
+TASK-020 are Completed. TASK-021 remains Blocked on linux/amd64, Agent
+Dispatch v0.1.6 linux-arm64, and Darwin candidate qualify. There is no
+In Progress task. Starting TASK-021 requires those environments; do not
+start it from this close.
 
 ## Reserved identities
 

@@ -197,6 +197,7 @@ def _spy_never_reaches_the_runner(plugin, monkeypatch):
         ("agent_dispatch_schedule_inspect", {"route_id": "a b"}),
         ("agent_dispatch_schedule_inspect", {}),
         ("agent_dispatch_schedule_inspect", {"route_id": "wiki", "platform": "systemd"}),
+        ("agent_dispatch_schedule_inspect", {"route_id": "wiki", "platform": "launchd"}),
     ],
 )
 def test_invalid_requests_are_rejected_before_the_runner(

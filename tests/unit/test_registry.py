@@ -139,6 +139,64 @@ def test_native_schedule_platform_is_launchd_or_systemd(plugin, monkeypatch):
     assert plugin.registry.native_schedule_platform() == "systemd"
 
 
+def test_resolve_argv_schedule_selects_launchd_on_darwin(plugin, monkeypatch):
+    monkeypatch.setattr(plugin.registry.sys, "platform", "darwin")
+    action = _action(plugin, "agent_dispatch_schedule_inspect", "inspect")
+    assert action.resolve_argv({"route_id": "wiki"}) == (
+        "schedule",
+        "inspect",
+        "--route",
+        "wiki",
+        "--platform",
+        "launchd",
+        "--output",
+        "json",
+    )
+
+
+def test_resolve_argv_schedule_selects_systemd_on_linux(plugin, monkeypatch):
+    monkeypatch.setattr(plugin.registry.sys, "platform", "linux")
+    action = _action(plugin, "agent_dispatch_schedule_inspect", "inspect")
+    assert action.resolve_argv({"route_id": "wiki"}) == (
+        "schedule",
+        "inspect",
+        "--route",
+        "wiki",
+        "--platform",
+        "systemd",
+        "--output",
+        "json",
+    )
+
+
+def test_native_schedule_platform_rejects_unsupported_hosts(plugin, monkeypatch):
+    monkeypatch.setattr(plugin.registry.sys, "platform", "win32")
+    with pytest.raises(plugin.registry.ContractSourceError, match="no native schedule mapping"):
+        plugin.registry.native_schedule_platform()
+    action = _action(plugin, "agent_dispatch_schedule_inspect", "inspect")
+    with pytest.raises(plugin.registry.ContractSourceError, match="no native schedule mapping"):
+        action.resolve_argv({"route_id": "wiki"})
+
+
+def test_native_schedule_platform_flag_is_only_on_schedule_inspect(plugin):
+    flagged = [
+        (spec.name, action.action_id)
+        for spec in plugin.registry.tool_specs()
+        for action in spec.actions
+        if action.native_schedule_platform_flag
+    ]
+    assert flagged == [("agent_dispatch_schedule_inspect", "inspect")]
+
+
+def test_linux_schedule_argv_never_selects_launchd(plugin, monkeypatch):
+    action = _action(plugin, "agent_dispatch_schedule_inspect", "inspect")
+    assert action.expected_command == "schedule inspect"
+    monkeypatch.setattr(plugin.registry.sys, "platform", "linux")
+    argv = action.resolve_argv({"route_id": "wiki"})
+    assert "launchd" not in argv
+    assert argv[4:6] == ("--platform", "systemd")
+
+
 def test_no_denied_subcommand_is_reachable_from_any_action(plugin):
     denied = set(plugin.registry.load_catalog()["command_vocabulary"]["denied_subcommands"])
     for spec in plugin.registry.tool_specs():

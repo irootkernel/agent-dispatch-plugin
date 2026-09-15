@@ -9,7 +9,7 @@ The plugin gives Hermes ten tools with defined inputs. Each tool invokes a speci
 - **Check the current state:** ask for a status summary and inspect the configured routes.
 - **Investigate a dispatch:** list recent dispatches for a route, open a particular dispatch, and inspect its receipts and related event evidence.
 - **Understand a delivery problem:** inspect quarantine entries and notification records before deciding what to do next.
-- **Check configuration and scheduling:** view redacted configuration, request validation or route preflight, and inspect a route's launchd schedule.
+- **Check configuration and scheduling:** view redacted configuration, request validation or route preflight, and inspect a route's managed drain schedule.
 
 The plugin does not submit jobs, retry or discard dispatches, change routes, or send receipts. If the evidence points to a change being needed, you make that change separately through Agent Dispatch.
 
@@ -196,9 +196,9 @@ These requests give you evidence for deciding what to do next. They do not relea
 
 > Run preflight inspection for route ROUTE_ID and summarize its findings.
 
-> Inspect the launchd schedule for route ROUTE_ID. Explain its reported presence, loaded state, and definition match.
+> Inspect the drain schedule for route ROUTE_ID. Explain its reported presence, loaded state, and definition match.
 
-Schedule inspection reports what Agent Dispatch observes; it does not install, load, or repair a schedule.
+Schedule inspection reports what Agent Dispatch observes; it does not install, load, or repair a schedule. On this macOS host the plugin inspects launchd; on a supported Linux host it inspects systemd. The platform is not something you supply.
 
 ### Review configuration or diagnostics
 
@@ -220,7 +220,7 @@ You can also ask for diagnostics with `agent_dispatch_doctor`. Target probing is
 | `agent_dispatch_event_show` | An aggregate event and its child evidence |
 | `agent_dispatch_quarantine` | Quarantined items and individual details |
 | `agent_dispatch_notifications` | Notification delivery evidence |
-| `agent_dispatch_schedule_inspect` | A route's launchd schedule |
+| `agent_dispatch_schedule_inspect` | A route's managed drain schedule (launchd on macOS, systemd on Linux) |
 | `agent_dispatch_config` | Redacted configuration or validation findings |
 
 ## Understand the results
