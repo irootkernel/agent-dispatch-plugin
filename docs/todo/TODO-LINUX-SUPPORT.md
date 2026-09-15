@@ -111,8 +111,9 @@ each.
 ### TASK-021: Run real platform and existing-action qualification
 
 Status: In Progress. Darwin arm64 candidate qualify recorded 2026-09-16;
-linux/arm64 v0.1.7 retained. Remaining: native linux/amd64 against
-Agent Dispatch v0.1.8. See [TASK-021 Darwin slice](#task-021-darwin-slice).
+linux/arm64 v0.1.7 re-run on `e7f3375` (`vnic-doksuri`). Remaining:
+native linux/amd64 against Agent Dispatch v0.1.8. See
+[TASK-021 Darwin slice](#task-021-darwin-slice).
 
 Exercise every public action branch through Hermes on real Darwin arm64,
 Linux amd64, and Linux arm64 with synthetic Dispatch state and exact
@@ -397,7 +398,7 @@ claimed.
 | Host | Command |
 |---|---|
 | native linux/amd64 | `export AGENT_DISPATCH_QUALIFY_BINARY_V018=<v0.1.8 linux-amd64>` then `make test-qualify`. Runbook: [qualification-linux-amd64.md](../implementation-tips/qualification-linux-amd64.md). Translated amd64 is not this host. |
-| linux/arm64 | v0.1.7 record already exists. Do not rerun unless adding a new artifact identity. |
+| linux/arm64 | Re-run on candidate `e7f3375` 2026-09-16 (`vnic-doksuri`, Hermes v0.21.2, AD v0.1.7). See [qualification-linux-arm64.md](../implementation-tips/qualification-linux-arm64.md). |
 
 Do not mark TASK-021 Completed until native linux/amd64 evidence exists.
 Do not start TASK-022 from this slice.

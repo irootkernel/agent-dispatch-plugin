@@ -89,6 +89,21 @@ This host also recorded the hermetic aggregate (`make test-prepare`, unit,
 integration) and Plugin Doctor (`hermes plugins doctor <plugin-directory>
 --ci` reporting ten tools and zero hooks) before the qualification stage.
 
+## Current candidate (TASK-021)
+
+Recorded 2026-09-16 on native linux/arm64 host `vnic-doksuri` (uid 1002,
+systemd as PID 1) against plugin source `e7f3375`:
+
+| Component | Identity |
+|---|---|
+| Hermes | v0.21.2 (2026.9.11) · upstream `9b199246` |
+| Agent Dispatch v0.1.7 linux-arm64 | SHA-256 `5493b1a13d28fa28eee850617be7c745d47898b87a7c3c4ea114f5c1cf2481c0` |
+| Host | Linux aarch64 |
+
+`make test` passed (542 unit, 28 integration, Plugin Doctor e2e).
+`make test-qualify` passed (2 passed: v0.1.7 compatibility matrix and
+installation lifecycle). This slice does not qualify linux/amd64.
+
 ## What this slice does not close
 
 - native `linux/amd64` (run [qualification-linux-amd64.md](qualification-linux-amd64.md) on a native x86_64 host)
