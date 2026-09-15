@@ -97,6 +97,23 @@ the action's expected command identity, and the seeded synthetic state surfacing
 actions (`schedule inspect` proving the absent-schedule successful
 inspection with `present=false`).
 
+## Current candidate (TASK-021)
+
+Recorded 2026-09-16 on this Darwin arm64 host against plugin source
+`f600363` plus the linux/amd64 qualification-fixture admission in the
+same working tree:
+
+| Component | Identity |
+|---|---|
+| Hermes | v0.21.0 (2026.8.31) · upstream `d9833c56` · local `29112bef` |
+| Agent Dispatch v0.1.6 | SHA-256 `ee1de77d3d4aa67cc1dcc6d7d1510024e4ce793c440b3f3d5c14debc1f424479` |
+| Agent Dispatch v0.1.7 | SHA-256 `c949e5c56929332cc102c228bfd9415fee0dbdd0b21c296ac136b9d114efbccf` |
+| Host | darwin/arm64 |
+
+`make test-qualify` collected 4 passed (compatibility matrix and
+installation lifecycle against both pinned Darwin artifacts) in 33 s.
+This slice does not qualify linux/amd64 or linux/arm64.
+
 ## Ownership and failure recovery
 
 The plugin maintainer owns qualification and the release owner consumes its

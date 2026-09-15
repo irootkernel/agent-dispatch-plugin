@@ -110,9 +110,9 @@ each.
 
 ### TASK-021: Run real platform and existing-action qualification
 
-Status: Blocked. Partial linux/arm64 v0.1.7 record retained;
-remaining advertised environments are missing. Parked by
-[TASK-019 close](#task-019-close) so X-025 stays one active task.
+Status: In Progress. Darwin arm64 candidate qualify recorded 2026-09-16;
+linux/arm64 v0.1.7 retained. Remaining: native linux/amd64 against
+Agent Dispatch v0.1.8. See [TASK-021 Darwin slice](#task-021-darwin-slice).
 
 Exercise every public action branch through Hermes on real Darwin arm64,
 Linux amd64, and Linux arm64 with synthetic Dispatch state and exact
@@ -370,6 +370,37 @@ TASK-020 are Completed. TASK-021 remains Blocked on linux/amd64, Agent
 Dispatch v0.1.6 linux-arm64, and Darwin candidate qualify. There is no
 In Progress task. Starting TASK-021 requires those environments; do not
 start it from this close.
+
+## TASK-021 Darwin slice
+
+Recorded 2026-09-16. This is not TASK-021 completion.
+
+### Darwin arm64 candidate qualify
+
+`make test-qualify` passed on this Darwin arm64 host (4 passed:
+v0.1.6 and v0.1.7 compatibility matrix plus installation lifecycle).
+Hermes v0.21.0 (2026.8.31). Identities:
+[qualification-darwin-arm64.md](../implementation-tips/qualification-darwin-arm64.md).
+
+### Qualification fixture
+
+`tests/qualification/conftest.py` now admits `linux/amd64` with Agent
+Dispatch **v0.1.8** linux-amd64 SHA-256
+`ac844117af9cb10d5e7a18b5294336283e03e44bd8ab3c59aa500d0ad4b6ce7d`
+(`AGENT_DISPATCH_QUALIFY_BINARY_V018`). linux/arm64 stays on v0.1.7
+(`AGENT_DISPATCH_QUALIFY_BINARY_V017`). GitHub releases v0.1.6 and
+v0.1.7 published Darwin arm64 only, so v0.1.6 linux artifacts are not
+claimed.
+
+### Remaining for Linux hosts
+
+| Host | Command |
+|---|---|
+| native linux/amd64 | `export AGENT_DISPATCH_QUALIFY_BINARY_V018=<v0.1.8 linux-amd64>` then `make test-qualify`. Runbook: [qualification-linux-amd64.md](../implementation-tips/qualification-linux-amd64.md). Translated amd64 is not this host. |
+| linux/arm64 | v0.1.7 record already exists. Do not rerun unless adding a new artifact identity. |
+
+Do not mark TASK-021 Completed until native linux/amd64 evidence exists.
+Do not start TASK-022 from this slice.
 
 ## Reserved identities
 

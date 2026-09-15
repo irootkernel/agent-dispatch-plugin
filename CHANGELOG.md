@@ -11,8 +11,9 @@ This file records concise shipped outcomes and pending changes.
   trusted host. Darwin arm64 remains the release host.
 - Record real-machine linux/arm64 qualification of the existing ten tools
   against Agent Dispatch v0.1.7 (Hermes >=0.20.5, systemd absent-schedule
-  inspect). linux/amd64 and Agent Dispatch v0.1.6 linux-arm64 remain
-  unqualified.
+  inspect). Admit linux/amd64 into the qualification matrix against
+  Agent Dispatch v0.1.8; that host remains unqualified until a native
+  amd64 run. GitHub v0.1.6/v0.1.7 linux artifacts were not published.
 
 ## v0.1.0 - 2026-09-09
 

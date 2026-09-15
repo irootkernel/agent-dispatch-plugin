@@ -91,9 +91,8 @@ integration) and Plugin Doctor (`hermes plugins doctor <plugin-directory>
 
 ## What this slice does not close
 
-- native `linux/amd64`
-- Agent Dispatch v0.1.6 linux-arm64
-- Darwin arm64 `make test-qualify` on the same candidate
+- native `linux/amd64` (run [qualification-linux-amd64.md](qualification-linux-amd64.md) on a native x86_64 host)
+- Agent Dispatch v0.1.6 linux-arm64 (GitHub releases v0.1.6 and v0.1.7 published Darwin arm64 only; not claimed)
 - Linux operator install, upgrade, and rollback runbooks (TASK-022)
 - a v0.1.1 release tag
 

@@ -1,9 +1,9 @@
 """Verified release artifacts shared by every real-runtime qualification case.
 
 The fixture is host-selected and fail-closed: Darwin arm64 runs both pinned
-Darwin artifacts; linux/arm64 runs the pinned v0.1.7 linux-arm64 artifact.
-Any other host, a missing binary, or a digest mismatch fails the stage.
-There is no skip path.
+Darwin artifacts; linux/arm64 runs the pinned v0.1.7 linux-arm64 artifact;
+linux/amd64 runs the pinned v0.1.8 linux-amd64 artifact. Any other host, a
+missing binary, or a digest mismatch fails the stage. There is no skip path.
 """
 
 from __future__ import annotations
@@ -43,6 +43,14 @@ LINUX_ARM64_ARTIFACTS = [
     ),
 ]
 
+LINUX_AMD64_ARTIFACTS = [
+    (
+        "v0.1.8",
+        "ac844117af9cb10d5e7a18b5294336283e03e44bd8ab3c59aa500d0ad4b6ce7d",
+        "AGENT_DISPATCH_QUALIFY_BINARY_V018",
+    ),
+]
+
 
 def qualification_host() -> str:
     """Return the catalog platform key; identical to the runner trust gate."""
@@ -55,9 +63,11 @@ def artifacts_for_this_host() -> list[tuple[str, str, str]]:
         return DARWIN_ARM64_ARTIFACTS
     if host == "linux/arm64":
         return LINUX_ARM64_ARTIFACTS
+    if host == "linux/amd64":
+        return LINUX_AMD64_ARTIFACTS
     raise AssertionError(
-        "missing prerequisite: the qualification matrix targets darwin/arm64 or "
-        f"linux/arm64 hosts, got {host}"
+        "missing prerequisite: the qualification matrix targets darwin/arm64, "
+        f"linux/amd64, or linux/arm64 hosts, got {host}"
     )
 
 
@@ -67,9 +77,9 @@ ARTIFACTS = artifacts_for_this_host()
 def require_qualification_prerequisites() -> tuple[str, Path]:
     """Fail with the exact missing prerequisite; this stage never skips."""
     host = qualification_host()
-    assert host in ("darwin/arm64", "linux/arm64"), (
-        "missing prerequisite: the qualification matrix targets darwin/arm64 or "
-        f"linux/arm64 hosts, got {host}"
+    assert host in ("darwin/arm64", "linux/amd64", "linux/arm64"), (
+        "missing prerequisite: the qualification matrix targets darwin/arm64, "
+        f"linux/amd64, or linux/arm64 hosts, got {host}"
     )
     hermes = shutil.which("hermes")
     assert hermes is not None, (

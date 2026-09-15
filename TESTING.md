@@ -105,18 +105,21 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   arm64 uses both v0.1.6 and v0.1.7 darwin/arm64 builds
   (`AGENT_DISPATCH_QUALIFY_BINARY` and `AGENT_DISPATCH_QUALIFY_BINARY_V017`);
   linux/arm64 uses the v0.1.7 linux-arm64 build
-  (`AGENT_DISPATCH_QUALIFY_BINARY_V017`). Each case verifies its pinned
-  SHA-256 before its version probe. PATH is a fallback only when its binary
-  matches that exact case; missing or mismatching prerequisites fail, never
-  skip. Other hosts, including linux/amd64, fail the platform prerequisite.
+  (`AGENT_DISPATCH_QUALIFY_BINARY_V017`); linux/amd64 uses the v0.1.8
+  linux-amd64 build (`AGENT_DISPATCH_QUALIFY_BINARY_V018`). Each case
+  verifies its pinned SHA-256 before its version probe. PATH is a fallback
+  only when its binary matches that exact case; missing or mismatching
+  prerequisites fail, never skip. Other hosts fail the platform
+  prerequisite.
 - Public interface: the qualification matrix seeds a disposable profile
   (temporary `HERMES_HOME`, temporary Agent Dispatch configuration and
   state, controlled fake downstream Hermes target) and dispatches every
   advertised action through the real Hermes runtime deterministically —
   no model, no network, no live state.
 - Prerequisite refusal: the stage fails with the exact missing
-  prerequisite when the host platform (darwin/arm64 or linux/arm64),
-  Hermes version, or pinned artifact is absent; there is no skip path.
+  prerequisite when the host platform (darwin/arm64, linux/amd64, or
+  linux/arm64), Hermes version, or pinned artifact is absent; there is no
+  skip path.
 - Credentials: none.
 
 ## Language Diagnostics

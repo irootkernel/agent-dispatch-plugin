@@ -4,7 +4,7 @@ Qualifies every advertised public action of all ten tools through the real
 Hermes runtime, v0.20.5 or newer (plugin discovery plus ``handle_function_call``
 dispatch over a disposable ``HERMES_HOME``) invoking the host-selected pinned
 Agent Dispatch release artifacts (Darwin arm64: v0.1.6 and v0.1.7; linux/arm64:
-v0.1.7), against synthetic state seeded through Agent Dispatch's own commands
+v0.1.7; linux/amd64: v0.1.8), against synthetic state seeded through Agent Dispatch's own commands
 inside one disposable profile. The suite never touches the operator's live
 Agent Dispatch configuration, state database, or native scheduler: the state
 directory, configuration, resource root, and HOME that Agent Dispatch resolves

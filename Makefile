@@ -34,7 +34,8 @@ test-e2e:
 # host-selected pinned Agent Dispatch artifacts (Darwin arm64: v0.1.6 and
 # v0.1.7 via AGENT_DISPATCH_QUALIFY_BINARY and
 # AGENT_DISPATCH_QUALIFY_BINARY_V017; linux/arm64: v0.1.7 via
-# AGENT_DISPATCH_QUALIFY_BINARY_V017). Not part of `make test`, which
+# AGENT_DISPATCH_QUALIFY_BINARY_V017; linux/amd64: v0.1.8 via
+# AGENT_DISPATCH_QUALIFY_BINARY_V018). Not part of `make test`, which
 # stays hermetic on the deterministic fake executable; this stage fails
 # hard when the pinned prerequisites are absent (TESTING.md owns the
 # contract).

@@ -248,7 +248,7 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(
 
     # Exercise a real source rollback and upgrade with identical profile settings.
     # 0c4e70e is the recorded pre-release Darwin-only source: Darwin keeps
-    # inspecting through it; linux/arm64 must keep the toolset closed until
+    # inspecting through it; Linux hosts must keep the toolset closed until
     # the candidate (which admits Linux) is restored.
     previous = "0c4e70e384bc9891bc15820c4e0b6a42ba700d5a"
     archive = subprocess.run(
@@ -284,8 +284,7 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(
         )
         if darwin_only_rollback:
             assert observation["toolset_available"] is False, (
-                "the Darwin-only rollback source must not open the toolset on linux/arm64: "
-                f"{observation}"
+                f"the Darwin-only rollback source must not open the toolset on Linux: {observation}"
             )
             assert observation["smoke"].get("ok") is False
             assert observation["smoke"].get("error") == "binary_unavailable", observation["smoke"]

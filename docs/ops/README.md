@@ -29,6 +29,7 @@ Code-changing and release-engineering guidance is owned by
 
 - [Qualification matrix (Darwin arm64)](../implementation-tips/qualification-darwin-arm64.md).
 - [Qualification matrix (Linux arm64)](../implementation-tips/qualification-linux-arm64.md).
+- [Qualification matrix (Linux amd64)](../implementation-tips/qualification-linux-amd64.md).
 - [Maintainer guide](../implementation-tips/maintainer-guide.md).
 - [Clean-clone verification](../implementation-tips/clean-clone-verification.md), including Plugin Doctor and fresh-session inventory.
 - [Release handoff](../implementation-tips/release-handoff.md).
