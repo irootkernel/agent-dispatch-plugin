@@ -68,6 +68,8 @@ review, and remediation inside the same active task.
 
 ### TASK-018: Admit the Linux amendment and program charter
 
+Status: Completed. Close record: [TASK-018 close](#task-018-close).
+
 Establish the first executable task and platform contract without a
 circular dependency on future sync design. Reserve EPIC-007, EPIC-008,
 and TASK-023 through TASK-032 on this roadmap so those identities are
@@ -171,13 +173,77 @@ This host still cannot close advertised Linux qualification:
 Those remaining gaps keep TASK-021 from completing. They do not erase
 the linux/arm64 v0.1.7 record above or prior Darwin qualification.
 
+## TASK-018 close
+
+Recorded 2026-09-15. This section is the TASK-018 review record. It does
+not close TASK-019 or TASK-020. Runner and native-schedule code that
+landed in `5d8d8f5851700563627b55ad5269810daac182d9` remains those later
+tasks' implementation, not this charter's completion.
+
+### Reviewed contract amendment
+
+Inspected living catalog `contracts/v0.1.0/catalog.json` (plugin version
+0.1.1) against `docs/specs/PRD.md` and `docs/specs/contracts.md`:
+
+- `compatibility.platforms` is `darwin/arm64`, `linux/amd64`, and
+  `linux/arm64`. Darwin arm64 remains the qualified release host.
+  Advertised Linux hosts stay unverified until TASK-021 evidence exists.
+- `product_version` is `0.1.0`. Schema URNs remain under
+  `contracts/v0.1.0/`. The published v0.1.0 tag is unchanged.
+- The public inventory is exactly the existing ten inspection tools.
+  No tool was added or removed. Denied mutation vocabulary is unchanged.
+- `native_schedule_platform` is true only on
+  `agent_dispatch_schedule_inspect` / `inspect`. The model input remains
+  `route_id`; `--platform` is not a schema property. The trusted host
+  selects `launchd` on macOS and `systemd` on Linux.
+- Agent Dispatch compatibility stays `>=0.1.6,<0.2.0` on every
+  advertised platform. Linux does not raise that floor. Hermes stays
+  `>=0.20.5`. Envelope identity stays `agent-dispatch.cli/v1`.
+- The companion Agent Dispatch repository was not modified.
+
+### Linux-capable core artifacts
+
+Darwin qualification pins remain Agent Dispatch v0.1.6 and v0.1.7
+darwin/arm64 as recorded in
+[qualification-darwin-arm64.md](../implementation-tips/qualification-darwin-arm64.md).
+
+Linux qualification, when TASK-021 runs, uses Agent Dispatch **v0.1.8**
+linux/arm64 and linux/amd64 artifacts from companion commit
+`fcd75f1b231e4403c39f5c873bce25b10d95754a`. That is the highest
+compatible published core below 0.2.0 selected at this close. A later
+compatible 0.1.x may replace it only through a later task that records
+the new identity.
+
+### Readiness
+
+The [this-machine verification scope](#this-machine-verification-scope)
+is the TASK-018 readiness record:
+
+| Environment | Status |
+|---|---|
+| Darwin arm64 | Ready (qualified release host; `make test` passed here on 2026-09-15) |
+| OrbStack linux/arm64 | Hermetic unit and integration only; not Linux qualification |
+| Real Linux arm64 with Hermes | Missing; blocks TASK-021 for that platform |
+| Native linux/amd64 | Missing; translated amd64 is not claimed |
+| systemd user-schedule lifecycle | Missing; typical containers have no systemd as PID 1 |
+
+Missing mandatory capacity blocks the affected TASK-021 platform claims.
+It does not block this charter.
+
+### Program position and reserved identities
+
+`docs/roadmap/README.md` now records G01 as the only active plugin
+program slot, EPIC-006 as In Progress, TASK-018 as Completed, and
+EPIC-007, EPIC-008, and TASK-023 through TASK-032 as Planned register
+rows. Do not start those reserved identities from this dossier.
+
 ## Reserved identities
 
 The intake program also defines EPIC-007 (sync inspection; TASK-023
 through TASK-027; G09 after Dispatch E26) and EPIC-008 (constrained sync
 management; TASK-028 through TASK-032; G10 after EPIC-007). Do not
-allocate those identities to other work. TASK-018 places them on this
-roadmap as Planned. Do not start them from this dossier.
+allocate those identities to other work. TASK-018 placed them on the
+roadmap register as Planned. Do not start them from this dossier.
 
 ## Handoff
 
