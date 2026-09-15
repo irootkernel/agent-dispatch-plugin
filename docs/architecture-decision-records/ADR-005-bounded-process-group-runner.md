@@ -26,7 +26,8 @@ frozen argv template.
   `argv = (trusted binary,) + ActionSpec.resolve_argv(params) +
   ("--config", trusted config path)`. Command construction lives only in
   the registry derivation (ADR-001); the runner adds nothing model
-  reachable, `shell` is false at the single `Popen` site, and stdin is
+  reachable, `shell` is false at both `Popen` sites in `runner.py` (the
+  version probe and the bounded inspection), and stdin is
   `DEVNULL` with `close_fds` true, so no unexpected descriptor survives
   into the child.
 - **Neutral cwd is the plugin root.** The working directory is the frozen
@@ -97,9 +98,16 @@ frozen argv template.
 `tests/unit/test_execution.py` proves fixed argv as an array with the
 appended trusted `--config` flag, no shell, the exact minimal environment
 (allowing only the macOS python3 shim's documented exec additions in the
-fake), the neutral cwd, forbidden model inputs never reaching execution,
-deadline `timeout` with partial-output disposal, per-stream and combined
+fake, and on Linux at most interpreter-injected `LC_CTYPE`), the neutral
+cwd, forbidden model inputs never reaching execution, deadline `timeout`
+with partial-output and seeded-secret disposal, per-stream and combined
 and configured-ceiling `output_too_large`, the TERM-ignoring group killed
 after grace with its child reaped, exactly one invocation per call under
 every failure mode, domain rejection carrying the envelope and exit
 status, malformed stdout failing closed, and spawn failure failing closed.
+TASK-019 adds runtime wrapping of both `Popen` sites (`shell is False`,
+`env` is exactly `MINIMAL_ENVIRONMENT`, fresh session, closed extra
+descriptors), a source scan that those two sites are the only process
+creation in the runtime package, and a parent-credential negative
+(`AWS_SECRET_ACCESS_KEY`, `SSH_AUTH_SOCK`, `XDG_RUNTIME_DIR`,
+`DBUS_SESSION_BUS_ADDRESS`, `HOME`).

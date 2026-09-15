@@ -48,9 +48,12 @@ The aggregate calls each stage handler exactly once through recursive
   pagination, grammar, enum, and placement negatives plus the read-only
   denied-subcommand proof (`test_tools_dispatch_family.py`), the runner
   trust gate with
-  deterministic fake Agent Dispatch executables (`test_runner.py`), the
+  deterministic fake Agent Dispatch executables (`test_runner.py`), including
+  real-host platform resolution without monkeypatching `sys.platform` and
+  the advertised-host alias matrix, the
   bounded process-group execution — argv, environment, deadline, stream
-  limits, termination, and no-retry — against behavior-scripted fakes
+  limits, termination, no-retry, and the two `Popen` isolation sites —
+  against behavior-scripted fakes
   (`test_execution.py`), and the closed output boundary — frozen-fixture
   envelope validation, carrier rules, diagnostic bounds, and seeded-secret
   redaction (`test_validation.py`).

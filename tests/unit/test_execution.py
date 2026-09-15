@@ -110,6 +110,15 @@ def _raw_echo(plugin, runner, installation):
     return json.loads(outcome.stdout)["result"]
 
 
+_SEEDED_PARENT_SECRETS = {
+    "AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "SSH_AUTH_SOCK": "/tmp/ssh-secret/agent.sock",
+    "XDG_RUNTIME_DIR": "/run/user/1000",
+    "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+    "HOME": "/home/secret-operator",
+}
+
+
 def test_environment_is_the_fixed_minimal_allowlist(plugin, runner, fake_agent_dispatch):
     raw = _raw_echo(plugin, runner, fake_agent_dispatch)
     child_env = raw["env"]
@@ -121,11 +130,89 @@ def test_environment_is_the_fixed_minimal_allowlist(plugin, runner, fake_agent_d
     }
     assert leaked == {}
     assert set(child_env) - set(_PYTHON3_SHIM_INJECTED) == set(runner.MINIMAL_ENVIRONMENT)
+    if runner.sys.platform.startswith("linux"):
+        extra = set(child_env) - set(runner.MINIMAL_ENVIRONMENT)
+        assert extra <= {"LC_CTYPE"}
+        assert child_env["PATH"] == runner.MINIMAL_ENVIRONMENT["PATH"]
+        assert child_env["TMPDIR"] == runner.MINIMAL_ENVIRONMENT["TMPDIR"]
 
 
 def test_working_directory_is_neutral_and_trusted(plugin, runner, fake_agent_dispatch):
     raw = _raw_echo(plugin, runner, fake_agent_dispatch)
     assert Path(raw["cwd"]) == runner.NEUTRAL_CWD
+
+
+def test_parent_credentials_never_enter_the_child(plugin, runner, fake_agent_dispatch, monkeypatch):
+    """The child environment is a replacement, not a filtered inheritance:
+    Linux session, D-Bus, SSH agent, and cloud-credential variables from
+    the parent must not appear in the inspection process."""
+    for key, value in _SEEDED_PARENT_SECRETS.items():
+        monkeypatch.setenv(key, value)
+    raw = _raw_echo(plugin, runner, fake_agent_dispatch)
+    dumped = json.dumps(raw)
+    for value in _SEEDED_PARENT_SECRETS.values():
+        assert value not in dumped
+    for key in _SEEDED_PARENT_SECRETS:
+        assert key not in raw["env"]
+    assert raw["env"]["PATH"] == runner.MINIMAL_ENVIRONMENT["PATH"]
+    assert raw["env"]["TMPDIR"] == runner.MINIMAL_ENVIRONMENT["TMPDIR"]
+
+
+def test_both_popen_sites_use_the_frozen_isolation_contract(
+    plugin, runner, fake_agent_dispatch, monkeypatch
+):
+    """The version probe and the inspection share one Popen helper: no
+    shell, no inherited environment, a fresh session, and closed extra
+    descriptors. A third spawn site is a second execution path."""
+    calls: list[dict] = []
+    real_popen = runner.subprocess.Popen
+
+    def wrapped(*args, **kwargs):
+        calls.append({"args": args, "kwargs": kwargs})
+        return real_popen(*args, **kwargs)
+
+    monkeypatch.setattr(runner.subprocess, "Popen", wrapped)
+    result = _run(plugin, runner, "agent_dispatch_status", "inspect", fake_agent_dispatch)
+    assert result["ok"] is True
+    assert len(calls) == 2
+    for call in calls:
+        argv = call["args"][0] if call["args"] else call["kwargs"].get("args")
+        assert isinstance(argv, (list, tuple))
+        assert not isinstance(argv, str)
+        kwargs = call["kwargs"]
+        assert kwargs.get("shell") is False
+        assert kwargs.get("env") == runner.MINIMAL_ENVIRONMENT
+        assert kwargs.get("cwd") == runner.NEUTRAL_CWD
+        assert kwargs.get("start_new_session") is True
+        assert kwargs.get("close_fds") is True
+        assert kwargs.get("stdin") is runner.subprocess.DEVNULL
+
+
+def test_runner_owns_the_only_process_creation_sites():
+    """Runtime modules other than runner.py must not spawn processes, and
+    the runner must not enable a shell."""
+    root = Path(__file__).resolve().parent.parent.parent
+    runtime = (
+        root / "runner.py",
+        root / "envelopes.py",
+        root / "registry.py",
+        root / "schemas.py",
+        root / "__init__.py",
+        root / "tools" / "__init__.py",
+        root / "tools" / "inputs.py",
+    )
+    popen_sites: list[str] = []
+    for path in runtime:
+        text = path.read_text(encoding="utf-8")
+        assert "shell=True" not in text
+        assert "shell = True" not in text
+        for forbidden in ("subprocess.run(", "os.system(", "os.popen(", "posix_spawn"):
+            assert forbidden not in text
+        for lineno, line in enumerate(text.splitlines(), 1):
+            if "subprocess.Popen(" in line:
+                popen_sites.append(f"{path.name}:{lineno}")
+    assert len(popen_sites) == 2
+    assert all(site.startswith("runner.py:") for site in popen_sites)
 
 
 def test_the_public_wrapper_redacts_echoed_absolute_paths(plugin, runner, fake_agent_dispatch):
@@ -163,8 +250,10 @@ def test_model_inputs_never_reach_execution_settings(plugin, runner, fake_agent_
 
 
 def test_deadline_returns_timeout_and_discards_output(plugin, runner, tmp_path):
+    secret = _SEEDED_PARENT_SECRETS["AWS_SECRET_ACCESS_KEY"]
     installation = make_fake_binary(
-        tmp_path, behavior={"kind": "sleep", "seconds": 30, "prefix": '{"partial":'}
+        tmp_path,
+        behavior={"kind": "sleep", "seconds": 30, "prefix": '{"partial":"' + secret},
     )
     config = {**installation["config"], "timeout_seconds": 1}
     action = _action(plugin, "agent_dispatch_status", "inspect")
@@ -180,7 +269,10 @@ def test_deadline_returns_timeout_and_discards_output(plugin, runner, tmp_path):
         "discarded all captured output"
     ]
     assert "agent_dispatch" not in result
-    assert "partial" not in json.dumps(result)
+    dumped = json.dumps(result)
+    assert "partial" not in dumped
+    assert secret not in dumped
+    assert "Traceback" not in dumped
 
 
 def test_stdout_overflow_returns_output_too_large(plugin, runner, tmp_path):
@@ -194,8 +286,10 @@ def test_stdout_overflow_returns_output_too_large(plugin, runner, tmp_path):
     elapsed = time.monotonic() - started
     assert elapsed < 10
     assert result["error"]["code"] == "output_too_large"
-    assert "xxxx" not in json.dumps(result)
+    dumped = json.dumps(result)
+    assert "xxxx" not in dumped
     assert "agent_dispatch" not in result
+    assert "Traceback" not in dumped
 
 
 def test_stderr_overflow_returns_output_too_large(plugin, runner, tmp_path):
@@ -204,6 +298,10 @@ def test_stderr_overflow_returns_output_too_large(plugin, runner, tmp_path):
     action = _action(plugin, "agent_dispatch_status", "inspect")
     result = runner.run_inspection(action, "agent_dispatch_status", {}, config)
     assert result["error"]["code"] == "output_too_large"
+    dumped = json.dumps(result)
+    assert "xxxx" not in dumped
+    assert "Traceback" not in dumped
+    assert "agent_dispatch" not in result
 
 
 def test_combined_overflow_below_per_stream_caps_returns_output_too_large(plugin, runner, tmp_path):
@@ -219,6 +317,11 @@ def test_combined_overflow_below_per_stream_caps_returns_output_too_large(plugin
     action = _action(plugin, "agent_dispatch_status", "inspect")
     result = runner.run_inspection(action, "agent_dispatch_status", {}, config)
     assert result["error"]["code"] == "output_too_large"
+    dumped = json.dumps(result)
+    assert "o" * 20 not in dumped
+    assert "e" * 20 not in dumped
+    assert "Traceback" not in dumped
+    assert "agent_dispatch" not in result
 
 
 def test_configured_ceiling_tightens_the_stream_cap(plugin, runner, tmp_path):
@@ -227,6 +330,10 @@ def test_configured_ceiling_tightens_the_stream_cap(plugin, runner, tmp_path):
     action = _action(plugin, "agent_dispatch_status", "inspect")
     result = runner.run_inspection(action, "agent_dispatch_status", {}, config)
     assert result["error"]["code"] == "output_too_large"
+    dumped = json.dumps(result)
+    assert "xxxx" not in dumped
+    assert "Traceback" not in dumped
+    assert "agent_dispatch" not in result
 
 
 def test_stdout_exactly_at_the_ceiling_is_not_an_overflow(plugin, runner, tmp_path):
@@ -361,12 +468,25 @@ def test_domain_rejection_carries_the_envelope_and_exit_status(plugin, runner, t
 
 
 def test_malformed_stdout_fails_closed(plugin, runner, tmp_path):
-    installation = make_fake_binary(tmp_path, behavior={"kind": "garbage"})
+    secret = _SEEDED_PARENT_SECRETS["AWS_SECRET_ACCESS_KEY"]
+    installation = make_fake_binary(
+        tmp_path,
+        behavior={
+            "kind": "raw",
+            "stdout": f"this is not json {secret}\n",
+            "stderr_lines": [f"secret {secret}"],
+            "exit": 0,
+        },
+    )
     config = {**installation["config"], "timeout_seconds": 10}
     action = _action(plugin, "agent_dispatch_status", "inspect")
     result = runner.run_inspection(action, "agent_dispatch_status", {}, config)
     assert result["error"]["code"] == "malformed_json"
-    assert "this is not json" not in json.dumps(result)
+    dumped = json.dumps(result)
+    assert "this is not json" not in dumped
+    assert secret not in dumped
+    assert "raise " not in dumped
+    assert "runner.py" not in dumped
 
 
 def test_spawn_failure_fails_closed_without_output(
@@ -382,6 +502,10 @@ def test_spawn_failure_fails_closed_without_output(
     )
     assert result["error"]["code"] == "execution_failed"
     assert result["exit_code"] == -1
+    dumped = json.dumps(result)
+    assert "spawn refused" not in dumped
+    assert "Traceback" not in dumped
+    assert "OSError" not in dumped
 
 
 def test_handler_routes_one_action_end_to_end(plugin, fake_agent_dispatch):

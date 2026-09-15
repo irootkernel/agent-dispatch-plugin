@@ -84,6 +84,8 @@ that names real test environments or explicitly blocks missing capacity.
 
 ### TASK-019: Qualify the trusted runner on Linux
 
+Status: Completed. Close record: [TASK-019 close](#task-019-close).
+
 Extend runner verification and process lifecycle for supported Linux
 hosts while keeping one execution boundary. Do not treat a patched
 platform string as real Linux execution, and do not add `shell=True`,
@@ -105,6 +107,10 @@ native mappings; happy-path and wrong-platform/capability negatives for
 each.
 
 ### TASK-021: Run real platform and existing-action qualification
+
+Status: Blocked. Partial linux/arm64 v0.1.7 record retained;
+remaining advertised environments are missing. Parked by
+[TASK-019 close](#task-019-close) so X-025 stays one active task.
 
 Exercise every public action branch through Hermes on real Darwin arm64,
 Linux amd64, and Linux arm64 with synthetic Dispatch state and exact
@@ -241,6 +247,83 @@ program slot, EPIC-006 as In Progress, TASK-018 as Completed, TASK-021
 as the active task, and EPIC-007, EPIC-008, and TASK-023 through
 TASK-032 as Planned register rows. Do not start those reserved identities
 from this dossier.
+
+## TASK-019 close
+
+Recorded 2026-09-15. This section is the TASK-019 review record. It does
+not close TASK-020 or TASK-021. Native-schedule mapping that already
+landed in `5d8d8f5851700563627b55ad5269810daac182d9` remains TASK-020's
+implementation. The linux/arm64 v0.1.7 Hermes matrix remains TASK-021's
+partial record.
+
+### Single execution boundary
+
+Inspected `runner.py` against the TASK-019 constraints:
+
+- Process creation stays in `runner.py` only: two `subprocess.Popen`
+  sites (the version probe and the bounded inspection). Runtime modules
+  `envelopes.py`, `registry.py`, `schemas.py`, `__init__.py`,
+  `tools/__init__.py`, and `tools/inputs.py` create no process.
+- Both sites set `shell=False`, `env=MINIMAL_ENVIRONMENT`
+  (`PATH=/usr/bin:/bin:/usr/sbin:/sbin`, `TMPDIR=/tmp`),
+  `cwd=NEUTRAL_CWD`, `close_fds=True`, and `start_new_session=True`.
+  There is no second subprocess helper and no inherited Hermes, HOME,
+  D-Bus, SSH-agent, or cloud-credential environment.
+- `_host_platform()` reads this process (`sys.platform` and
+  `platform.machine()`): `linux` plus `arm64`/`aarch64` or
+  `amd64`/`x86_64` yields `linux/arm64` or `linux/amd64`; Darwin arm64
+  is unchanged. A monkeypatched platform string is not Linux execution.
+
+No runner behavior change was required. The `5d8d8f5` admission already
+extended the gate; this task supplies the real-host proof.
+
+### Runner evidence
+
+Real-host tests in `tests/unit/test_runner.py` and
+`tests/unit/test_execution.py` cover the dossier classes without
+patching the platform string:
+
+| Class | Proof |
+|---|---|
+| Real host | `test_real_host_platform_resolves_trust_without_monkeypatch` on this linux/arm64 process (no `sys.platform` patch). The tests added in this close are written to run on Darwin without a platform monkeypatch; they have not been executed on Darwin |
+| Grandchildren | `test_term_to_force_kill_kills_the_whole_process_group`; `test_version_probe_timeout_kills_the_whole_process_tree` (these pre-existing classes also ran in the Darwin arm64 `make test` on 2026-09-15) |
+| Timeout | `test_deadline_returns_timeout_and_discards_output` (partial output and seeded secret discarded) |
+| Overflow | stdout, stderr, combined, and configured-ceiling `output_too_large` with captured bytes discarded |
+| Symlink paths | binary, parent directory, and trusted config symlink each close as `binary_unavailable` without echoing the path or digest |
+| Digest replacement | `test_digest_is_reverified_on_every_call` |
+| Unsafe configuration | relative paths, directory-as-config, missing/non-executable files, invalid settings |
+| Isolation | both Popen sites asserted at runtime; parent `AWS_SECRET_ACCESS_KEY`, `SSH_AUTH_SOCK`, `XDG_RUNTIME_DIR`, `DBUS_SESSION_BUS_ADDRESS`, and `HOME` never enter the child |
+| Closed errors | timeout, overflow, malformed stdout, and trust failures carry no raw stdout, no plugin traceback, and no seeded secret |
+
+The alias monkeypatch matrix remains mapping evidence only
+(`aarch64`/`x86_64` names). Linux child environment extras are at most
+`LC_CTYPE` from the interpreter; PATH stays the frozen allowlist.
+
+### Host record
+
+This close ran on the same native linux/arm64 non-root host recorded in
+[this-machine verification scope](#this-machine-verification-scope).
+After the close-record and assertion edits, `make test` on 2026-09-15
+collected 535 unit (0 skipped; the execute-only digest case ran), 28
+integration, and Plugin Doctor e2e, all passing. `make test-qualify` is
+not this task. linux/amd64 hardware is absent and is not claimed.
+Darwin class coverage for tests that already existed (grandchildren,
+timeout, overflow, binary and parent symlink, digest replacement,
+unsafe settings) is the Darwin arm64 `make test` on 2026-09-15. The 529
+unit count in the this-machine section is native linux/arm64, not that
+Darwin run. Tests added in this close are proven on this linux/arm64
+process only.
+
+### Program position
+
+After this close, EPIC-006 stays In Progress. TASK-018 and TASK-019 are
+Completed. The next sequenced task is TASK-020 (Planned). TASK-018 had
+held TASK-021 In Progress with a partial linux/arm64 v0.1.7 record;
+this close parks TASK-021 as Blocked on the remaining advertised
+environments (linux/amd64, Agent Dispatch v0.1.6 linux-arm64, Darwin
+candidate qualify) so X-025 stays one active task. That qualify record
+is retained and is not this close. Starting TASK-020 occupies the G01
+execution slot.
 
 ## Reserved identities
 

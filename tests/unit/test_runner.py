@@ -74,7 +74,10 @@ def test_symlinked_binary_rejects(runner, fake_agent_dispatch, tmp_path):
     os.symlink(fake_agent_dispatch["binary"], link)
     config = dict(fake_agent_dispatch["config"])
     config["binary_path"] = str(link)
-    _expect_failure(runner, config, runner.BINARY_UNAVAILABLE)
+    failure = _expect_failure(runner, config, runner.BINARY_UNAVAILABLE)
+    assert str(link) not in failure.message
+    assert fake_agent_dispatch["config"]["binary_sha256"] not in failure.message
+    assert "Traceback" not in failure.message
 
 
 def test_symlinked_parent_directory_rejects(runner, tmp_path):
@@ -85,7 +88,31 @@ def test_symlinked_parent_directory_rejects(runner, tmp_path):
     installation = make_fake_binary(real_parent)
     config = dict(installation["config"])
     config["binary_path"] = str(linked_parent / "trusted" / "agent-dispatch")
-    _expect_failure(runner, config, runner.BINARY_UNAVAILABLE)
+    failure = _expect_failure(runner, config, runner.BINARY_UNAVAILABLE)
+    assert str(linked_parent) not in failure.message
+    assert installation["config"]["binary_sha256"] not in failure.message
+    assert "Traceback" not in failure.message
+
+
+def test_symlinked_config_rejects(runner, fake_agent_dispatch, tmp_path):
+    link = tmp_path / "config-link.json"
+    os.symlink(fake_agent_dispatch["config_file"], link)
+    config = dict(fake_agent_dispatch["config"])
+    config["config_path"] = str(link)
+    failure = _expect_failure(runner, config, runner.BINARY_UNAVAILABLE)
+    assert str(link) not in failure.message
+    assert fake_agent_dispatch["config"]["binary_sha256"] not in failure.message
+    assert "Traceback" not in failure.message
+
+
+def test_directory_used_as_trusted_config_rejects(runner, fake_agent_dispatch, tmp_path):
+    directory = tmp_path / "not-a-config"
+    directory.mkdir()
+    config = dict(fake_agent_dispatch["config"])
+    config["config_path"] = str(directory)
+    failure = _expect_failure(runner, config, runner.BINARY_UNAVAILABLE)
+    assert str(directory) not in failure.message
+    assert "Traceback" not in failure.message
 
 
 def test_missing_or_nonexecutable_binary_rejects(runner, fake_agent_dispatch):
@@ -148,6 +175,30 @@ def test_platform_gate_rejects_unsupported_hosts(
     monkeypatch.setattr(runner.sys, "platform", sys_platform)
     monkeypatch.setattr(runner.platform_module, "machine", lambda: machine)
     _expect_failure(runner, fake_agent_dispatch["config"], runner.BINARY_UNAVAILABLE)
+
+
+def test_real_host_platform_resolves_trust_without_monkeypatch(runner, fake_agent_dispatch):
+    """Linux or Darwin execution is this process's platform, not a patched
+    catalog string. Alias mapping stays in the monkeypatch matrix above."""
+    host = runner._host_platform()
+    platforms = runner.load_catalog()["compatibility"]["platforms"]
+    assert host in platforms
+    machine = runner.platform_module.machine().lower()
+    if machine in ("arm64", "aarch64"):
+        arch = "arm64"
+    elif machine in ("amd64", "x86_64"):
+        arch = "amd64"
+    else:
+        pytest.fail(f"unexpected machine {machine!r}")
+    if runner.sys.platform == "darwin":
+        assert host == f"darwin/{arch}"
+    elif runner.sys.platform.startswith("linux"):
+        assert host == f"linux/{arch}"
+    else:
+        pytest.fail(f"unexpected sys.platform {runner.sys.platform!r}")
+    trust = runner.resolve_trust(fake_agent_dispatch["config"])
+    assert trust.binary_path == Path(fake_agent_dispatch["config"]["binary_path"])
+    assert runner.probe_availability(fake_agent_dispatch["config"]) is True
 
 
 def test_in_range_version_resolves_trust(runner, fake_agent_dispatch):

@@ -7,12 +7,16 @@ Status: Accepted
 The PRD requires runner.py to admit only a configured absolute non-symlink
 Agent Dispatch executable after verifying its lowercase SHA-256, to use only
 a trusted absolute non-symlink configuration path, and to reject binaries
-outside the frozen compatibility range `>=0.1.6,<0.2.0` on the supported
-darwin/arm64 platform. The catalog fixes the version range, the platform
-string, and the timeout bounds; the EPIC-002 dossier names safe non-symlink
-path verification and time-of-check handling as a decision to record. The
-catalog command vocabulary contains no `version` subcommand, so the probing
-mechanism had to be established against the real binary.
+outside the frozen compatibility range `>=0.1.6,<0.2.0` on the advertised
+platforms `darwin/arm64`, `linux/amd64`, and `linux/arm64`. The catalog
+fixes the version range, the platform list, and the timeout bounds; the
+EPIC-002 dossier names safe non-symlink path verification and time-of-check
+handling as a decision to record. The catalog command vocabulary contains
+no `version` subcommand, so the probing mechanism had to be established
+against the real binary. TASK-019 records that Linux uses this same gate:
+`_host_platform()` reads the current process (`linux` plus `arm64`/`aarch64`
+or `amd64`/`x86_64`), and a patched platform string is not execution
+evidence.
 
 ## Decision
 
@@ -92,7 +96,14 @@ mechanism had to be established against the real binary.
 `tests/unit/test_runner.py` proves every mapping above with deterministic
 fake Agent Dispatch executables (in-range, out-of-range, wrong name,
 garbage, failure exit, no answer, symlinked binary, symlinked parent,
-missing and non-executable files, digest mismatch, relative paths, invalid
-settings, platform monkeypatch) and `tests/unit/test_tools.py` plus
+symlinked trusted config, directory used as config, missing and
+non-executable files, digest mismatch, relative paths, invalid settings,
+and the advertised-host alias matrix). Real-host proof is
+`test_real_host_platform_resolves_trust_without_monkeypatch`: it reads
+this process's platform and resolves trust without monkeypatching
+`sys.platform`. That test is proven on native linux/arm64; it is written
+to run on Darwin without a platform patch and has not been executed on
+Darwin. The alias monkeypatch matrix remains
+mapping evidence only. `tests/unit/test_tools.py` plus
 `tests/integration/test_registration_and_gates.py` prove the availability
 and handler wiring through the real registration path.
