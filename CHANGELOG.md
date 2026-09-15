@@ -2,6 +2,8 @@
 
 This file records concise shipped outcomes and pending changes.
 
+## v0.1.2 - Unreleased
+
 ## v0.1.1 - 2026-09-16
 
 ### Added
