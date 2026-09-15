@@ -106,7 +106,7 @@ installation lifecycle). This slice does not qualify linux/amd64.
 
 ## What this slice does not close
 
-- native `linux/amd64` (run [qualification-linux-amd64.md](qualification-linux-amd64.md) on a native x86_64 host)
+- native `linux/amd64` (recorded separately in [qualification-linux-amd64.md](qualification-linux-amd64.md) on `fa6f1cd`; this arm64 slice still does not claim it)
 - Agent Dispatch v0.1.6 linux-arm64 (GitHub releases v0.1.6 and v0.1.7 published Darwin arm64 only; not claimed)
 - Linux operator install, upgrade, and rollback runbooks (TASK-022)
 - a v0.1.1 release tag

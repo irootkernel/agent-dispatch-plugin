@@ -110,9 +110,9 @@ each.
 
 ### TASK-021: Run real platform and existing-action qualification
 
-Status: In Progress. Darwin arm64 candidate qualify recorded 2026-09-16;
-linux/arm64 v0.1.7 re-run on `e7f3375` (`vnic-doksuri`). Remaining:
-native linux/amd64 against Agent Dispatch v0.1.8. See
+Status: Completed. Close record: [TASK-021 close](#task-021-close).
+Darwin arm64, linux/arm64 v0.1.7 (`e7f3375` / `vnic-doksuri`), and native
+linux/amd64 v0.1.8 (`fa6f1cd` / `cursor`) are recorded. See also
 [TASK-021 Darwin slice](#task-021-darwin-slice).
 
 Exercise every public action branch through Hermes on real Darwin arm64,
@@ -172,15 +172,16 @@ PID 1). Identities and reproduction live in
   selected systemd with `present=false`.
 - This does not install, load, or repair a systemd user timer.
 
-This host still cannot close advertised Linux qualification:
+This arm64 host cannot itself supply every advertised environment:
 
-- native Linux amd64 (this host is aarch64; do not treat translated
-  amd64 as that evidence);
-- Agent Dispatch v0.1.6 linux-arm64 (artifact absent);
-- Darwin arm64 `make test-qualify` on the same candidate (wrong host).
+- native Linux amd64 (recorded on a separate x86_64 host; see
+  [TASK-021 close](#task-021-close));
+- Agent Dispatch v0.1.6 linux-arm64 (artifact absent; not claimed);
+- Darwin arm64 `make test-qualify` on the same candidate (wrong host;
+  Darwin is recorded separately).
 
-Those remaining gaps keep TASK-021 from completing. They do not erase
-the linux/arm64 v0.1.7 record above or prior Darwin qualification.
+Those gaps do not erase the linux/arm64 v0.1.7 record above or prior
+Darwin qualification.
 
 ## TASK-018 close
 
@@ -196,8 +197,9 @@ Inspected living catalog `contracts/v0.1.0/catalog.json` (plugin version
 
 - `compatibility.platforms` is `darwin/arm64`, `linux/amd64`, and
   `linux/arm64`. Darwin arm64 remains the qualified release host.
-  linux/arm64 now has a v0.1.7 TASK-021 record; linux/amd64 and the
-  remaining linux-arm64 artifacts stay unverified.
+  linux/arm64 has a v0.1.7 TASK-021 record; linux/amd64 has a v0.1.8
+  TASK-021 record. Remaining linux-arm64 older artifacts stay unverified
+  and are not claimed.
 - `product_version` is `0.1.0`. Schema URNs remain under
   `contracts/v0.1.0/`. The published v0.1.0 tag is unchanged.
 - The public inventory is exactly the existing ten inspection tools.
@@ -236,7 +238,7 @@ record:
 | Darwin arm64 | Ready (qualified release host; `make test` passed here on 2026-09-15) |
 | Native linux/arm64 | Recorded: hermetic suite and v0.1.7 `make test-qualify` on a non-root host with systemd as PID 1 |
 | OrbStack linux/arm64 | Historical hermetic-only pass; not a substitute for the native record |
-| Native linux/amd64 | Missing; translated amd64 is not claimed |
+| Native linux/amd64 | Recorded: v0.1.8 `make test-qualify` on host `cursor` (plugin `fa6f1cd`) |
 | Agent Dispatch v0.1.6 linux-arm64 | Missing |
 | systemd user-timer install/load | Not in the recorded inspect (`present=false`) |
 
@@ -397,11 +399,46 @@ claimed.
 
 | Host | Command |
 |---|---|
-| native linux/amd64 | `export AGENT_DISPATCH_QUALIFY_BINARY_V018=<v0.1.8 linux-amd64>` then `make test-qualify`. Runbook: [qualification-linux-amd64.md](../implementation-tips/qualification-linux-amd64.md). Translated amd64 is not this host. |
+| native linux/amd64 | Recorded 2026-09-16 on `cursor` against `fa6f1cd` (Hermes v0.21.3, AD v0.1.8). See [qualification-linux-amd64.md](../implementation-tips/qualification-linux-amd64.md). |
 | linux/arm64 | Re-run on candidate `e7f3375` 2026-09-16 (`vnic-doksuri`, Hermes v0.21.2, AD v0.1.7). See [qualification-linux-arm64.md](../implementation-tips/qualification-linux-arm64.md). |
 
-Do not mark TASK-021 Completed until native linux/amd64 evidence exists.
-Do not start TASK-022 from this slice.
+Native linux/amd64 evidence now exists. TASK-021 close is
+[TASK-021 close](#task-021-close). Do not start TASK-022 from the Darwin
+slice alone.
+
+
+## TASK-021 close
+
+Recorded 2026-09-16. This section closes TASK-021 after all three
+advertised platforms have real-host qualification evidence.
+
+### Platform records
+
+| Platform | Artifact | Plugin source | Evidence |
+|---|---|---|---|
+| Darwin arm64 | Agent Dispatch v0.1.6 + v0.1.7 | Darwin candidate (2026-09-16) | [qualification-darwin-arm64.md](../implementation-tips/qualification-darwin-arm64.md) |
+| linux/arm64 | Agent Dispatch v0.1.7 | `e7f3375` on `vnic-doksuri` | [qualification-linux-arm64.md](../implementation-tips/qualification-linux-arm64.md) |
+| linux/amd64 | Agent Dispatch v0.1.8 | `fa6f1cd` on `cursor` | [qualification-linux-amd64.md](../implementation-tips/qualification-linux-amd64.md) |
+
+### linux/amd64 host evidence
+
+On native linux/amd64 host `cursor` (uid 1000, `uname` Linux x86_64):
+
+- Hermes Agent v0.21.3 (2026.9.14) · upstream `f13a87e6`
+- Agent Dispatch v0.1.8 linux-amd64 SHA-256
+  `ac844117af9cb10d5e7a18b5294336283e03e44bd8ab3c59aa500d0ad4b6ce7d`
+- `make test-qualify` exit 0 (2 passed: v0.1.8 compatibility matrix and
+  installation lifecycle)
+
+Translated amd64 and Darwin binaries are not claimed. Agent Dispatch
+v0.1.6 / v0.1.7 linux-amd64 artifacts were not published and are not
+claimed. linux/arm64 older artifacts beyond the recorded v0.1.7 slice
+remain unverified and are not claimed.
+
+### What this close does not start
+
+TASK-022 (Linux ops / Dispatch E20 handoff) stays Planned. Do not start
+EPIC-007 or EPIC-008 from this close.
 
 ## Reserved identities
 

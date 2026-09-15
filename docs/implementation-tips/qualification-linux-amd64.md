@@ -59,3 +59,26 @@ paths.
 
 Record Hermes `--version`, `uname -sm`, and the binary digest in the
 TASK-021 evidence. Do not claim linux/arm64 or Darwin from this host.
+
+## Current candidate (TASK-021)
+
+Recorded 2026-09-16 on native linux/amd64 host `cursor` (uid 1000)
+against plugin source `fa6f1cd`:
+
+| Component | Identity |
+|---|---|
+| Hermes | v0.21.3 (2026.9.14) · upstream `f13a87e6` |
+| Agent Dispatch v0.1.8 linux-amd64 | SHA-256 `ac844117af9cb10d5e7a18b5294336283e03e44bd8ab3c59aa500d0ad4b6ce7d` |
+| Host | Linux x86_64 |
+
+`make test-qualify` passed (2 passed: v0.1.8 compatibility matrix and
+installation lifecycle). This slice does not claim linux/arm64 or Darwin.
+
+## What this slice does not close
+
+- linux/arm64 (see [qualification-linux-arm64.md](qualification-linux-arm64.md))
+- Darwin arm64 (see [qualification-darwin-arm64.md](qualification-darwin-arm64.md))
+- Agent Dispatch v0.1.6 / v0.1.7 linux-amd64 (GitHub releases for those tags published Darwin arm64 only; not claimed)
+- Linux operator install, upgrade, and rollback runbooks (TASK-022)
+- a v0.1.1 release tag
+

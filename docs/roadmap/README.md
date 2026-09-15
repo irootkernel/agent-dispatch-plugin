@@ -12,11 +12,11 @@ reserved identities and must not start until their intake prerequisites are
 accepted (Dispatch E26 for G09; EPIC-007 for G10). Dispatch owns G02 through
 G08 and G11; those rows are not executed from this roadmap.
 
-Active epic: EPIC-006 (In Progress). Active task: TASK-021 (In Progress).
-TASK-018, TASK-019, and TASK-020 are Completed. Darwin arm64 candidate
-qualify and linux/arm64 v0.1.7 are recorded; remaining advertised
-environment is native linux/amd64. X-025 still allows at most one active
-epic and one active task.
+Active epic: EPIC-006 (In Progress). Active task: none (TASK-021 Completed;
+next is TASK-022 Planned). TASK-018 through TASK-021 are Completed. Darwin
+arm64, linux/arm64 v0.1.7, and native linux/amd64 v0.1.8 qualify evidence
+are recorded. X-025 still allows at most one active epic and one active
+task.
 
 ## Epic register
 
@@ -55,7 +55,7 @@ epic and one active task.
 | TASK-018 | EPIC-006 | Admit the Linux amendment and program charter | Completed | Reviewed living v0.1.1 platform amendment, reserved later identities, G01, v0.1.8 Linux artifact selection, and readiness record in [docs/todo/TODO-LINUX-SUPPORT.md](../todo/TODO-LINUX-SUPPORT.md#task-018-close) |
 | TASK-019 | EPIC-006 | Qualify the trusted runner on Linux | Completed | Real-host Linux and Darwin runner tests for isolation, trust, timeout, and redaction; close record in [docs/todo/TODO-LINUX-SUPPORT.md](../todo/TODO-LINUX-SUPPORT.md#task-019-close) |
 | TASK-020 | EPIC-006 | Add native schedule mapping and contract parity | Completed | Launchd/systemd argv mapping, wrong-platform and unsupported-host negatives, and close record in [docs/todo/TODO-LINUX-SUPPORT.md](../todo/TODO-LINUX-SUPPORT.md#task-020-close) |
-| TASK-021 | EPIC-006 | Run real platform and existing-action qualification | In Progress | Darwin v0.1.6+v0.1.7 this candidate: docs/implementation-tips/qualification-darwin-arm64.md; linux/arm64 v0.1.7 on e7f3375: docs/implementation-tips/qualification-linux-arm64.md; remaining native linux/amd64 v0.1.8: docs/implementation-tips/qualification-linux-amd64.md |
+| TASK-021 | EPIC-006 | Run real platform and existing-action qualification | Completed | Darwin: docs/implementation-tips/qualification-darwin-arm64.md; linux/arm64 v0.1.7 on e7f3375: docs/implementation-tips/qualification-linux-arm64.md; linux/amd64 v0.1.8 on fa6f1cd: docs/implementation-tips/qualification-linux-amd64.md; close in [docs/todo/TODO-LINUX-SUPPORT.md](../todo/TODO-LINUX-SUPPORT.md#task-021-close) |
 | TASK-022 | EPIC-006 | Close Linux operations and hand off to Dispatch | Planned | Lifecycle guidance, cold review, and Dispatch E20 / E20-T1 handoff |
 | TASK-023 | EPIC-007 | Admit the E26 contract and sync capability rules | Planned | Not started; reserved by TASK-018 |
 | TASK-024 | EPIC-007 | Implement the six typed sync inspection tools | Planned | Not started; reserved by TASK-018 |
@@ -79,7 +79,7 @@ TASK-019 precedes TASK-020, TASK-020 precedes TASK-021, and TASK-021 precedes
 TASK-022. After TASK-022 the next global position is Dispatch E20 / E20-T1.
 TASK-018 placed EPIC-007, EPIC-008, and TASK-023 through TASK-032 on this
 register as Planned so those identities are not reused. Do not start them
-from EPIC-006. TASK-019 and TASK-020 are Completed. TASK-021 is In Progress:
-Darwin candidate qualify and linux/arm64 v0.1.7 are recorded; native
-linux/amd64 remains. Parallel work is allowed only where a dossier
-states that contracts and evidence ownership do not overlap.
+from EPIC-006. TASK-019, TASK-020, and TASK-021 are Completed. Native linux/amd64
+v0.1.8 qualify is recorded; TASK-022 remains Planned. Parallel work is
+allowed only where a dossier states that contracts and evidence ownership
+do not overlap.
