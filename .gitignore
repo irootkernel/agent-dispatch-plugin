@@ -10,3 +10,6 @@ __pycache__/
 
 # Local Gaori execution evidence.
 /.gaori/runs/
+
+# Local Sorage project state.
+/.sorage/
