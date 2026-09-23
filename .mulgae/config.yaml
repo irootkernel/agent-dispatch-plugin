@@ -1,9 +1,10 @@
-version: 3
+version: 4
 project:
   name: "agent-dispatch-plugin"
 providers:
   zcode: {}
-  agy: {}
+  grok: {}
+  codex: {}
 execution:
   workspace_access: "none"
 roles:
@@ -11,7 +12,7 @@ roles:
   security: {enabled: true, primary_provider: "zcode"}
   maintainability: {enabled: true, primary_provider: "zcode"}
   product: {enabled: false, primary_provider: "zcode"}
-  documentation: {enabled: true, primary_provider: "agy"}
+  documentation: {enabled: true, primary_provider: "zcode"}
   testing: {enabled: true, primary_provider: "zcode"}
 review:
   required_roles: ["logic"]

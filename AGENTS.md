@@ -59,6 +59,7 @@ This file is the local agent guidance for the agent-dispatch-plugin repository.
 - Use `$use-mulgae` for authorized asynchronous reviews and their native evidence. A review requires its own authorization.
 - Use `$lore-commits` for non-trivial commit messages and `$lore-query` for recorded decision context.
 - Keep `.mulgae/**` runtime content, `.gaori/runs/**`, and `.podway/runtime/**` local. Retain only reviewed, bounded structured evidence through the existing `evidence/aquarium/` promotion convention; do not put raw logs or provider reports in Git.
+- Use `$use-sorage` only when Master explicitly requests a broker operation. Check only the requested inbox or outbox; Project registration does not authorize discovery. Resolve Handoff, review, revision, retention, deletion, and Vault operations through that skill; never edit the managed Vault or derived `.sorage/INBOX.md` directly.
 
 ## Project Configuration
 
