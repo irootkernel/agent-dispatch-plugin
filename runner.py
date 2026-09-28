@@ -4,9 +4,10 @@ This is the only module allowed to create a process. Before any inspection
 command runs, the trust gate resolves immutable plugin configuration and
 verifies the host platform, the absolute non-symlink executable and trusted
 configuration paths, the executable SHA-256 identity, and the supported
-Agent Dispatch version. The bounded executor then runs exactly one fixed
-argv in a fresh process group with a neutral working directory, a minimal
-environment allowlist, closed extra descriptors, and concurrent bounded
+Agent Dispatch version. Sync reads also require a fresh bounded capability
+probe. The executor runs each fixed argv in a fresh process group with a
+neutral working directory, a minimal environment allowlist, closed extra
+descriptors, and concurrent bounded
 draining of both streams; the deadline and the byte ceilings terminate the
 whole process group through the TERM-then-force-kill ladder and discard
 every captured byte. Completed output is validated against the frozen
@@ -33,19 +34,20 @@ import sys
 import threading
 import time
 from dataclasses import dataclass, field
+from dataclasses import replace
 from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
 if TYPE_CHECKING:  # The static view matches the degenerate top-level import.
     import envelopes
-    from registry import ActionSpec, PLUGIN_ROOT, load_catalog
+    from registry import ActionSpec, PLUGIN_ROOT, load_catalog, tool_specs
 elif "." in __package__:  # Normal path: imported as a plugin package module.
     from . import envelopes
-    from .registry import ActionSpec, PLUGIN_ROOT, load_catalog
+    from .registry import ActionSpec, PLUGIN_ROOT, load_catalog, tool_specs
 else:  # Degenerate top-level import of the plugin root file.
     import envelopes
-    from registry import ActionSpec, PLUGIN_ROOT, load_catalog
+    from registry import ActionSpec, PLUGIN_ROOT, load_catalog, tool_specs
 
 RESULT_SCHEMA_VERSION = "agent-dispatch-plugin.result/v1"
 
@@ -104,6 +106,7 @@ class RunnerTrust:
     config_path: Path
     timeout_seconds: int
     max_output_bytes: int
+    version: tuple[int, int, int] = (0, 0, 0)
 
 
 @lru_cache(maxsize=1)
@@ -127,6 +130,20 @@ def _supported_version_range() -> tuple[tuple[int, int, int], tuple[int, int, in
     low = (int(match[1]), int(match[2]), int(match[3]))
     high = (int(match[4]), int(match[5]), int(match[6]))
     return low, high
+
+
+def _sync_provider_version() -> tuple[int, int, int]:
+    value = load_catalog()["compatibility"]["sync_agent_dispatch"]["version"]
+    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", str(value))
+    if match is None:
+        raise TrustFailure(ADAPTER_USAGE_ERROR, "the sync provider version pin is malformed")
+    return int(match[1]), int(match[2]), int(match[3])
+
+
+def _sync_capability_action() -> ActionSpec:
+    return next(
+        spec.actions[0] for spec in tool_specs() if spec.name == "agent_dispatch_sync_capabilities"
+    )
 
 
 def closed_error_result(
@@ -292,7 +309,7 @@ def _kill_probe_tree(process: subprocess.Popen[Any]) -> None:
     process.wait()
 
 
-def _verify_supported_version(trust: RunnerTrust) -> None:
+def _verify_supported_version(trust: RunnerTrust) -> tuple[int, int, int]:
     """Probe the executable identity through the real `version` subcommand.
 
     The probe reuses the configured deadline so a hung binary cannot pin the
@@ -377,11 +394,14 @@ def _verify_supported_version(trust: RunnerTrust) -> None:
         )
     version = _parse_version_output(bytes(sink))
     low, high = _supported_version_range()
-    if not low <= version < high:
-        raise TrustFailure(
-            UNSUPPORTED_AGENT_DISPATCH_VERSION,
-            "the configured Agent Dispatch executable is outside the supported version range",
-        )
+    if low <= version < high:
+        return version
+    if version == _sync_provider_version():
+        return version
+    raise TrustFailure(
+        UNSUPPORTED_AGENT_DISPATCH_VERSION,
+        "the configured Agent Dispatch executable is outside the supported version range",
+    )
 
 
 def resolve_trust(config: Mapping[str, Any]) -> RunnerTrust:
@@ -437,14 +457,86 @@ def resolve_trust(config: Mapping[str, Any]) -> RunnerTrust:
         timeout_seconds=timeout,
         max_output_bytes=max_output,
     )
-    _verify_supported_version(trust)
-    return trust
+    version = _verify_supported_version(trust)
+    if version == _sync_provider_version():
+        allowlist = load_catalog()["sync_provider"]["artifact_sha256"]
+        if digest_raw != allowlist.get(_host_platform()):
+            raise TrustFailure(
+                BINARY_UNAVAILABLE,
+                "the v0.2.0 executable is outside the platform artifact allowlist",
+            )
+    return replace(trust, version=version)
 
 
 def probe_availability(config: Mapping[str, Any]) -> bool:
     """Report whether the trust gate currently passes for this config."""
     try:
         resolve_trust(config)
+    except TrustFailure:
+        return False
+    return True
+
+
+def verify_sync_capabilities(config: Mapping[str, Any]) -> RunnerTrust:
+    """Freshly attest the read-only sync provider through the bounded runner."""
+    if any(config.get(key) is None for key in ("binary_path", "binary_sha256", "config_path")):
+        resolve_trust(config)  # preserve the common unconfigured-binary error
+    group = config.get("sync_group_id")
+    pattern = load_catalog()["sync_provider"]["trusted_group_pattern"]
+    if not isinstance(group, str) or re.fullmatch(pattern, group) is None:
+        raise TrustFailure(ADAPTER_USAGE_ERROR, "sync_group_id is missing or invalid")
+    trust = resolve_trust(config)
+    if trust.version != _sync_provider_version():
+        raise TrustFailure(
+            UNSUPPORTED_AGENT_DISPATCH_VERSION, "sync reads require the pinned provider"
+        )
+    action = _sync_capability_action()
+    argv = (os.fspath(trust.binary_path),) + action.resolve_argv({})
+    try:
+        outcome = _execute_bounded(argv, trust)
+    except OSError as exc:
+        raise TrustFailure(BINARY_UNAVAILABLE, "sync capability probe could not start") from exc
+    if outcome.timed_out or outcome.overflowed or outcome.exit_code != 0:
+        raise TrustFailure(CONTRACT_MISMATCH, "sync capability probe failed its bounded check")
+    try:
+        payload = json.loads(outcome.stdout.decode("utf-8"))
+        envelope = envelopes.validate_envelope(payload, action.expected_command)
+    except (
+        UnicodeDecodeError,
+        json.JSONDecodeError,
+        ValueError,
+        RecursionError,
+        envelopes.EnvelopeViolation,
+    ) as exc:
+        raise TrustFailure(
+            CONTRACT_MISMATCH, "sync capability probe returned an invalid envelope"
+        ) from exc
+    result = envelope.get("result")
+    provider = load_catalog()["sync_provider"]
+    if (
+        envelope["ok"] is not True
+        or not isinstance(result, dict)
+        or result.get("schema_version")
+        != f"agent-dispatch.sync-capabilities/{provider['contract_version']}"
+        or result.get("contract_version") != provider["contract_version"]
+        or result.get("contract_digest") != provider["contract_digest"]
+        or result.get("side_effects") != []
+    ):
+        raise TrustFailure(CONTRACT_MISMATCH, "sync capability contract does not match the pin")
+    capabilities = result.get("capabilities")
+    required = provider["required_capabilities"]
+    if not isinstance(capabilities, dict) or any(
+        capabilities.get(key) is not True for key in required
+    ):
+        raise TrustFailure(CONTRACT_MISMATCH, "sync read capabilities are unavailable")
+    if any(not isinstance(value, bool) for value in capabilities.values()):
+        raise TrustFailure(CONTRACT_MISMATCH, "sync capability values are malformed")
+    return trust
+
+
+def probe_sync_availability(config: Mapping[str, Any]) -> bool:
+    try:
+        verify_sync_capabilities(config)
     except TrustFailure:
         return False
     return True
@@ -459,19 +551,33 @@ def run_inspection(
     """Execute exactly one fixed inspection command through the full boundary.
 
     The argv is the trusted executable, the action's registered template,
-    and the trusted --config flag; shell is never used and no execution
-    setting is reachable from model input. Both streams drain concurrently
+    and the trusted --config flag where the contract permits it. Shell is
+    never used and no execution setting is reachable from model input.
+    Both streams drain concurrently
     under the frozen byte ceilings; the deadline and any overflow terminate
     the whole process group through the TERM-then-force-kill ladder and
     discard every captured byte. Nothing is ever retried.
     """
     try:
-        trust = resolve_trust(config)
+        trust = (
+            verify_sync_capabilities(config)
+            if spec.requires_sync_attestation
+            else resolve_trust(config)
+        )
     except TrustFailure as failure:
         return trust_failure_result(operation, failure)
 
-    argv = (os.fspath(trust.binary_path),) + spec.resolve_argv(params)
-    argv = argv + ("--config", os.fspath(trust.config_path))
+    trusted_settings = (
+        {"sync_group_id": config["sync_group_id"]} if spec.trusted_value_bindings else {}
+    )
+    try:
+        argv = (os.fspath(trust.binary_path),) + spec.resolve_argv(params, trusted_settings)
+    except ValueError:
+        return closed_error_result(
+            operation, ADAPTER_USAGE_ERROR, "trusted sync group is unavailable"
+        )
+    if spec.append_trusted_config:
+        argv += ("--config", os.fspath(trust.config_path))
     try:
         outcome = _execute_bounded(argv, trust)
     except OSError:

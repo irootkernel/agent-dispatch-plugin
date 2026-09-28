@@ -32,4 +32,4 @@ def test_plugin_doctor_validates_the_skeleton_over_the_public_cli():
     assert (
         "OK: runtime discovery, manifest parsing, import, and registration passed" in result.stdout
     )
-    assert "10 tool(s), 0 hook(s)" in result.stdout
+    assert "13 tool(s), 0 hook(s)" in result.stdout

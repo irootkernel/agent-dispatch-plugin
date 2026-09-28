@@ -18,7 +18,7 @@ import pytest
 from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-CONTRACTS = ROOT / "contracts" / "v0.1.0"
+CONTRACTS = ROOT / "contracts" / "v0.2.0"
 
 
 def _schema_path(tool: str) -> Path:
@@ -79,7 +79,7 @@ def test_derived_interpreter_agrees_with_the_frozen_schema_on_every_fixture_case
 def test_every_frozen_fixture_case_is_replayed():
     """The corpus must stay complete: every tool contributes at least one case."""
     case_files = sorted((CONTRACTS / "fixtures" / "tools").glob("*.cases.json"))
-    assert len(case_files) == 10
+    assert len(case_files) == 13
 
 
 def test_prohibited_execution_settings_are_rejected_for_every_tool(inputs, plugin):

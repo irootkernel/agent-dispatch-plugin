@@ -10,7 +10,7 @@ disposable one.
 The Darwin model in
 [upgrade-rollback-darwin-arm64.md](upgrade-rollback-darwin-arm64.md)
 applies: an installation is the plugin directory at one exact revision;
-profile enablement and the five frozen settings survive the swap.
+profile enablement and the configured plugin settings survive the swap.
 
 ## Procedure
 
@@ -23,8 +23,9 @@ profile enablement and the five frozen settings survive the swap.
 4. `hermes plugins doctor <plugin-directory> --ci`. Confirm the trusted
    binary and settings still meet the target contract.
 5. Re-enable the plugin with `--no-allow-tool-override`, then enable the
-   `agent_dispatch` toolset. Verify ten tools and one status inspection
-   in a fresh session.
+   `agent_dispatch` toolset. In a fresh session, verify the target revision's
+   registered roster (ten for v0.1.x; thirteen for v0.2.0), the expected
+   available subset for the selected core, and one status inspection.
 
 ## Linux-specific rollback boundary
 

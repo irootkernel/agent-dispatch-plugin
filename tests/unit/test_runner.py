@@ -209,7 +209,7 @@ def test_in_range_version_resolves_trust(runner, fake_agent_dispatch):
     assert runner.probe_availability(fake_agent_dispatch["config"]) is True
 
 
-@pytest.mark.parametrize("version", ["v0.1.5", "v0.2.0", "v1.0.0"])
+@pytest.mark.parametrize("version", ["v0.1.5", "v0.2.1", "v1.0.0"])
 def test_out_of_range_versions_reject(runner, tmp_path, version):
     installation = make_fake_binary(tmp_path, version=version)
     _expect_failure(runner, installation["config"], runner.UNSUPPORTED_AGENT_DISPATCH_VERSION)
@@ -406,7 +406,7 @@ def test_handler_executes_through_the_boundary_after_a_passing_trust_gate(
     assert result["agent_dispatch"]["api_version"] == "agent-dispatch.cli/v1"
 
 
-def test_runner_config_reads_only_the_five_settings(plugin):
+def test_runner_config_reads_only_the_catalog_settings(plugin):
     ctx = HermesCtxStub({"binary_path": "/bin/x", "unrelated": "value"})
     resolved = plugin.tools.runner_config(ctx)
     assert resolved == {
@@ -415,6 +415,7 @@ def test_runner_config_reads_only_the_five_settings(plugin):
         "config_path": None,
         "timeout_seconds": None,
         "max_output_bytes": None,
+        "sync_group_id": None,
     }
 
 

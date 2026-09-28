@@ -1,6 +1,6 @@
 # Maintainer Guide
 
-Audience: maintainers of `agent-dispatch-plugin` v0.1.0. This guide owns
+Audience: maintainers of the current `agent-dispatch-plugin` source. This guide owns
 the durable maintenance procedure: what is frozen, how changes are
 accepted, which gates every change runs, and which development or operational document
 answers each question. It intentionally references the canonical owners
@@ -9,11 +9,12 @@ instead of restating them.
 ## Frozen surface and change control
 
 The product scope, tool roster, command vocabulary, wrapper and error
-contracts, resource limits, and compatibility matrix are frozen in
-`contracts/v0.1.0/` and bound by `docs/specs/PRD.md` and
+contracts, resource limits, and compatibility matrix are defined by
+`contracts/v0.2.0/`, with `contracts/v0.1.0/` retained as the frozen legacy
+baseline, and bound by `docs/specs/PRD.md` and
 `docs/specs/contracts.md`. Changes require explicit maintainer approval
 and a canonical amendment; the deterministic oracle
-(`uv run contracts/validate.py`) and the parity gate
+(`uv run contracts/validate.py` and `uv run contracts/validate_v020.py`) and the parity gate
 (`uv run scripts/manifest_parity.py`) fail closed on any drift between
 the catalog, schemas, `plugin.yaml`, and the registered inventory.
 `plugin.yaml` is derived — never edit it directly; regenerate with
@@ -35,7 +36,7 @@ commands. None implies another:
 
 The installed plugin is a source-only directory at one exact revision
 (the installer manifest boundary is recorded in the installation
-lifecycle runbook); the five frozen settings under
+lifecycle runbook); the five original settings and optional `sync_group_id` under
 `plugins.entries.agent-dispatch-plugin.settings` are the operator's
 trust anchor and are validated by the plugin's own trust gate on every
 session start.
@@ -43,8 +44,8 @@ session start.
 ## Every-change gates
 
 Before any change is committed, `make test` must pass: the prepare
-gates (format, lint, type check, byte-compilation, the frozen-contract
-oracle, and manifest/registry parity), the deterministic unit and
+gates (format, lint, type check, byte-compilation, both contract
+oracles, and manifest/registry parity), the deterministic unit and
 integration suites, and the Plugin Doctor e2e stage. Changes that touch
 the pinned runtime surface additionally run `make test-qualify`
 (disposable compatibility matrix and installation lifecycle; requires

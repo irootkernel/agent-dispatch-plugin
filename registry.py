@@ -1,6 +1,6 @@
-"""Declarative tool registry derived from the frozen contract source.
+"""Declarative tool registry derived from the active versioned contract.
 
-The catalog at contracts/v0.1.0/catalog.json is the single handwritten
+The catalog at contracts/v0.2.0/catalog.json is the active handwritten
 authority (ADR-001). This module is its derived in-memory view: it parses the
 catalog once and exposes the tool roster, per-action command mappings, and
 the expected inventory that plugin.yaml and parity checks are generated from.
@@ -33,7 +33,7 @@ def native_schedule_platform() -> str:
 
 
 PLUGIN_ROOT = Path(__file__).resolve().parent
-CONTRACTS_VERSION_DIR = PLUGIN_ROOT / "contracts" / "v0.1.0"
+CONTRACTS_VERSION_DIR = PLUGIN_ROOT / "contracts" / "v0.2.0"
 CATALOG_PATH = CONTRACTS_VERSION_DIR / "catalog.json"
 TOOLSET = "agent_dispatch"
 
@@ -59,12 +59,20 @@ class ActionSpec:
     argv_suffix: tuple[str, ...]
     expected_command: str
     native_schedule_platform_flag: bool = False
+    trusted_value_bindings: tuple[Mapping[str, str], ...] = ()
+    append_trusted_config: bool = True
 
-    def resolve_argv(self, params: Mapping[str, Any]) -> tuple[str, ...]:
+    @property
+    def requires_sync_attestation(self) -> bool:
+        return self.expected_command.startswith("sync ")
+
+    def resolve_argv(
+        self, params: Mapping[str, Any], trusted_settings: Mapping[str, str] | None = None
+    ) -> tuple[str, ...]:
         """Resolve the concrete argv for this action from validated params.
 
-        The independent fixture oracle in contracts/validate.py implements
-        the same binding semantics; amendments must update both resolvers.
+        The versioned contract oracle in contracts/validate_v020.py checks
+        the trusted binding semantics and command fixtures.
         Bindings whose parameter is absent are skipped; the caller is
         responsible for having validated params against the tool's input
         schema first, which is what makes absence equal optionality.
@@ -78,6 +86,11 @@ class ActionSpec:
                 argv.append(str(params[param]))
             else:
                 argv.extend([binding["flag"], str(params[param])])
+        for binding in self.trusted_value_bindings:
+            setting = binding["setting"]
+            if trusted_settings is None or setting not in trusted_settings:
+                raise ValueError(f"missing trusted {setting} setting")
+            argv.extend([binding["flag"], trusted_settings[setting]])
         for flag in self.optional_flags:
             if params.get(flag["param"]) is True:
                 argv.extend(flag["tokens"])
@@ -115,13 +128,13 @@ class ToolSpec:
 
 @lru_cache(maxsize=1)
 def load_catalog() -> Mapping[str, Any]:
-    """Parse the frozen catalog exactly once per process."""
+    """Parse the active catalog exactly once per process."""
     try:
         with CATALOG_PATH.open(encoding="utf-8") as handle:
             catalog = json.load(handle)
     except (OSError, json.JSONDecodeError) as exc:
         raise ContractSourceError(
-            f"frozen contract source unavailable: {CATALOG_PATH.name}: {exc}"
+            f"active contract source unavailable: {CATALOG_PATH.name}: {exc}"
         ) from exc
     if catalog.get("schema_version") != "agent-dispatch-plugin.contracts/v1":
         raise ContractSourceError("unsupported contract source schema version")
@@ -203,6 +216,17 @@ def tool_specs() -> tuple[ToolSpec, ...]:
                 raise ContractSourceError(
                     f"{tool['name']}/{action['id']}: native_schedule_platform must be a boolean"
                 )
+            trusted_bindings = action.get("trusted_value_bindings", [])
+            if not isinstance(trusted_bindings, list) or any(
+                not isinstance(binding, Mapping)
+                or binding.get("setting") != "sync_group_id"
+                or binding.get("flag") != "--group"
+                for binding in trusted_bindings
+            ):
+                raise ContractSourceError(f"{tool['name']}/{action['id']}: invalid trusted binding")
+            append_config = action.get("append_trusted_config", True)
+            if not isinstance(append_config, bool):
+                raise ContractSourceError(f"{tool['name']}/{action['id']}: invalid config rule")
             actions.append(
                 ActionSpec(
                     action_id=action["id"],
@@ -213,8 +237,20 @@ def tool_specs() -> tuple[ToolSpec, ...]:
                     argv_suffix=tuple(action["argv_suffix"]),
                     expected_command=action["expected_command"],
                     native_schedule_platform_flag=bool(native_flag),
+                    trusted_value_bindings=tuple(trusted_bindings),
+                    append_trusted_config=append_config,
                 )
             )
+        sync_named = tool["name"].startswith("agent_dispatch_sync_")
+        if any(action.requires_sync_attestation != sync_named for action in actions):
+            raise ContractSourceError(f"{tool['name']}: sync name and command disagree")
+        if any(action.trusted_value_bindings and not sync_named for action in actions):
+            raise ContractSourceError(f"{tool['name']}: trusted group requires sync attestation")
+        if any(
+            not action.append_trusted_config and action.expected_command != "sync capabilities"
+            for action in actions
+        ):
+            raise ContractSourceError(f"{tool['name']}: invalid config omission")
         specs.append(
             ToolSpec(
                 name=tool["name"],
@@ -224,8 +260,8 @@ def tool_specs() -> tuple[ToolSpec, ...]:
             )
         )
     names = [spec.name for spec in specs]
-    if len(names) != 10 or len(set(names)) != len(names):
-        raise ContractSourceError("the frozen roster must contain exactly ten unique tools")
+    if len(names) != 13 or len(set(names)) != len(names):
+        raise ContractSourceError("the active roster must contain exactly thirteen unique tools")
     validated: list[ToolSpec] = []
     for spec in specs:  # fail before registration on any unreadable schema
         schema = spec.load_input_schema()

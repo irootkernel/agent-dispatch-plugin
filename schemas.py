@@ -1,7 +1,7 @@
-"""Model-facing schema access derived from the frozen contract source.
+"""Model-facing schema access derived from the active contract source.
 
 The JSON parameter schemas and tool descriptions served to Hermes are the
-frozen contracts/v0.1.0 artifacts; this layer only reads them. It composes
+active contracts/v0.2.0 artifacts; this layer only reads them. It composes
 no schema of its own and adds no properties (ADR-001: derived views carry no
 independent authority).
 """

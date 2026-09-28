@@ -4,8 +4,8 @@ Specifications define externally observable behavior and acceptance. They do
 not track implementation progress.
 
 - docs/specs/PRD.md is the canonical product requirements document. The
-  current development catalog identifies Plugin v0.1.2 and preserves the
-  ten-tool v0.1.0 public contract. Darwin arm64, Linux amd64, and Linux arm64
+  current development catalog identifies Plugin v0.2.0 and thirteen registered
+  tools while preserving the ten-tool v0.1.0 baseline. Darwin arm64, Linux amd64, and Linux arm64
   qualification records are under docs/implementation-tips/.
 - docs/specs/contracts.md binds the PRD to the frozen v0.1.0 and approved
   v0.2.0 contracts and their deterministic offline gates.

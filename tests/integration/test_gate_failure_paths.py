@@ -146,7 +146,7 @@ def corrupt_parity_drifted_manifest(work: Path) -> None:
 
 def corrupt_parity_denied_argv_suffix(work: Path) -> None:
     _set_json(
-        work / "contracts/v0.1.0/catalog.json",
+        work / "contracts/v0.2.0/catalog.json",
         lambda d: d["tools"][0]["actions"][0]["argv_suffix"].insert(0, "plan"),
     )
 
@@ -157,7 +157,7 @@ def corrupt_parity_out_of_vocabulary_command(work: Path) -> None:
         action["argv_prefix"] = ["route", "drain"]
         action["expected_command"] = "route drain"
 
-    _set_json(work / "contracts/v0.1.0/catalog.json", mutate)
+    _set_json(work / "contracts/v0.2.0/catalog.json", mutate)
 
 
 def corrupt_parity_single_word_out_of_vocabulary(work: Path) -> None:
@@ -166,11 +166,11 @@ def corrupt_parity_single_word_out_of_vocabulary(work: Path) -> None:
         action["argv_prefix"] = ["statusx"]
         action["expected_command"] = "statusx"
 
-    _set_json(work / "contracts/v0.1.0/catalog.json", mutate)
+    _set_json(work / "contracts/v0.2.0/catalog.json", mutate)
 
 
 def corrupt_parity_extra_tool_schema(work: Path) -> None:
-    schema_dir = work / "contracts/v0.1.0/schemas/tools"
+    schema_dir = work / "contracts/v0.2.0/schemas/tools"
     extra = schema_dir / "agent_dispatch_extra.input.json"
     extra.write_text(
         (schema_dir / "agent_dispatch_status.input.json").read_text(encoding="utf-8"),
@@ -182,7 +182,7 @@ def corrupt_parity_label_drift(work: Path) -> None:
     """Only expected_command drifts, to a vocabulary-allowed word: the
     argv/equality branch is the only branch that can fail."""
     _set_json(
-        work / "contracts/v0.1.0/catalog.json",
+        work / "contracts/v0.2.0/catalog.json",
         lambda d: d["tools"][0]["actions"][0].__setitem__("expected_command", "doctor"),
     )
 
@@ -196,7 +196,7 @@ def corrupt_parity_merged_prefix(work: Path) -> None:
         action["argv_prefix"] = ["route show"]
         action["expected_command"] = "route show"
 
-    _set_json(work / "contracts/v0.1.0/catalog.json", mutate)
+    _set_json(work / "contracts/v0.2.0/catalog.json", mutate)
 
 
 def corrupt_parity_empty_manifest(work: Path) -> None:
@@ -204,12 +204,12 @@ def corrupt_parity_empty_manifest(work: Path) -> None:
 
 
 def corrupt_parity_missing_plugin_block(work: Path) -> None:
-    _set_json(work / "contracts/v0.1.0/catalog.json", lambda d: d.pop("plugin"))
+    _set_json(work / "contracts/v0.2.0/catalog.json", lambda d: d.pop("plugin"))
 
 
 def corrupt_parity_roster_drift(work: Path) -> None:
     _set_json(
-        work / "contracts/v0.1.0/catalog.json",
+        work / "contracts/v0.2.0/catalog.json",
         lambda d: d["tools"].append(json.loads(json.dumps(d["tools"][0]))),
     )
 

@@ -31,7 +31,7 @@ def toolset() -> str:
 
 
 def register(ctx: Any) -> None:
-    """Register exactly the ten declared inspection tools.
+    """Register exactly the thirteen declared inspection tools.
 
     Fails loudly and registers nothing partial when the frozen contract
     source is unavailable: a malformed roster must never yield a silently
@@ -44,6 +44,6 @@ def register(ctx: Any) -> None:
             toolset=registry.toolset(),
             schema=schemas.input_schema(spec),
             handler=tool_handlers.handler_for(spec, ctx),
-            check_fn=tool_handlers.make_availability_check(ctx),
+            check_fn=tool_handlers.make_availability_check(ctx, spec),
             description=schemas.describe(spec),
         )

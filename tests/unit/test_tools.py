@@ -15,7 +15,7 @@ from referencing import Resource
 from conftest import valid_params_for_action
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-CONTRACTS = ROOT / "contracts" / "v0.1.0"
+CONTRACTS = ROOT / "contracts" / "v0.2.0"
 
 
 def _validators() -> dict[str, Draft202012Validator]:

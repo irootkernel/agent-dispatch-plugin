@@ -2,9 +2,9 @@
 """Generate and verify plugin.yaml from the frozen contract source.
 
 ADR-001: plugin.yaml is a derived view. Run with --write to regenerate it
-from contracts/v0.1.0/catalog.json after an approved contract change; run
+from contracts/v0.2.0/catalog.json after an approved contract change; run
 without arguments to verify manifest, registry, registration, expected
-inventory, and command-vocabulary parity for exactly the ten declared
+inventory, and command-vocabulary parity for exactly the thirteen declared
 tools.
 
     uv run scripts/manifest_parity.py           # verify (exit 1 on mismatch)
@@ -111,6 +111,7 @@ def command_vocabulary_errors(catalog: dict) -> list[str]:
                 for binding in action.get("value_bindings", ())
                 if not binding.get("positional")
             ]
+            argv += [binding["flag"] for binding in action.get("trusted_value_bindings", ())]
             argv += [token for flag in action.get("optional_flags", ()) for token in flag["tokens"]]
             if action.get("native_schedule_platform") is True:
                 argv += ["--platform"]
@@ -202,11 +203,11 @@ def main() -> int:
     roster = [tool["name"] for tool in catalog["tools"]]
     schema_files = sorted(
         path.name[: -len(".input.json")]
-        for path in (REPO_ROOT / "contracts" / "v0.1.0" / "schemas" / "tools").glob("*.input.json")
+        for path in (REPO_ROOT / "contracts" / "v0.2.0" / "schemas" / "tools").glob("*.input.json")
     )
 
-    if not (len(roster) == 10 and len(set(roster)) == 10):
-        errors.append(f"catalog roster is not exactly ten unique tools: {roster}")
+    if not (len(roster) == 13 and len(set(roster)) == 13):
+        errors.append(f"catalog roster is not exactly thirteen unique tools: {roster}")
     if inventory != roster:
         errors.append(f"registry inventory != catalog roster: {inventory}")
     if provides != roster:
@@ -236,7 +237,7 @@ def main() -> int:
         return 1
     print(
         "manifest/registry parity passed: catalog, plugin.yaml, registration, "
-        "expected inventory, and the command vocabulary agree on exactly ten tools"
+        "expected inventory, and the command vocabulary agree on exactly thirteen tools"
     )
     return 0
 

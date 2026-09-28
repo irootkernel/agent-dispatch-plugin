@@ -63,6 +63,16 @@ def validate() -> None:
         catalog["compatibility"]["agent_dispatch"] == old["compatibility"]["agent_dispatch"],
         "legacy version range",
     )
+    require(
+        catalog["compatibility"]["sync_agent_dispatch"]
+        == {
+            "version": "0.2.0",
+            "operator_digest_required": True,
+            "platform_sha_allowlist_required": True,
+            "scope": "exact reviewed artifacts only; no later v0.2.x build is admitted automatically",
+        },
+        "sync provider version pin",
+    )
     provider = catalog["sync_provider"]
     require(provider["contract_digest"] == DIGEST, "provider digest")
     require(provider["artifact_sha256"] == ARTIFACTS, "platform artifact allowlist")

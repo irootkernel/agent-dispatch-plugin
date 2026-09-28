@@ -31,7 +31,7 @@ flat package modules. Hermes imports it as `hermes_plugins.agent_dispatch_plugin
 and calls `register(ctx)`.
 
 - `registry.py` is the declarative registry: it parses
-  `contracts/v0.1.0/catalog.json` into frozen tool and action specs and owns
+  `contracts/v0.2.0/catalog.json` into tool and action specs and owns
   the expected inventory. Every downstream view derives from it (ADR-001).
 - `schemas.py` serves the frozen input schemas and descriptions to Hermes;
   it composes nothing of its own.
@@ -50,7 +50,8 @@ and calls `register(ctx)`.
 - `runner.py` is the sole process boundary. Its trust gate resolves the
   immutable plugin configuration and verifies the platform, both trusted
   paths, the executable SHA-256, and the supported Agent Dispatch version
-  (ADR-004); the bounded executor runs exactly one fixed argv in a fresh
+  (ADR-004); sync reads add a fresh bounded capability probe, and the
+  executor runs each fixed argv in a fresh
   process group with a neutral working directory, a minimal environment
   allowlist, closed extra descriptors, and concurrent bounded stream
   draining, terminating the whole group on deadline or overflow with no
@@ -68,14 +69,14 @@ and calls `register(ctx)`.
   tool-schema-file, and command-vocabulary parity — every action's
   argv_prefix equals its expected_command, each resolves inside the frozen
   allowed vocabulary, and no argv template token is a denied subcommand —
-  for exactly ten tools by driving the real registration path.
+  for exactly thirteen tools by driving the real registration path.
 - `pyproject.toml` is the uv project authority; the runtime is
   dependency-free and the dev group pins the validation toolchain
   (jsonschema 4.26.0, referencing 0.37.0, PyYAML).
 
 ## Request flow and change boundaries
 
-1. Hermes imports the root entrypoint and registers the catalog's ten tools.
+1. Hermes imports the root entrypoint and registers the catalog's thirteen tools.
    Registration reads contracts but does not invoke Agent Dispatch.
 2. Availability checks resolve operator settings and validate the trust gate.
    Failed checks keep the toolset unavailable.
@@ -96,5 +97,7 @@ Handlers accept the request object as one positional argument and return a JSON
 string to Hermes. The availability check and valid tool calls resolve trust
 independently: the runner verifies the executable digest and runs the bounded
 `version --json` probe before inspection, without caching trust across calls.
-Inspection commands use their fixed argv plus trusted configuration and
-`--output json`; version probing uses its separate compact response format.
+Inspection commands use fixed argv and `--output json`. They append the
+trusted configuration except `sync capabilities`, which omits `--config`
+by contract while still validating the trusted path. Version probing uses
+its separate compact response format.

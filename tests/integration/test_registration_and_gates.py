@@ -28,14 +28,14 @@ class RecordingContext:
         self.registered[name] = kwargs
 
 
-def test_registration_through_the_hermes_style_loader_registers_ten_tools():
+def test_registration_through_the_hermes_style_loader_registers_thirteen_tools():
     module = load_plugin("hermes_plugins.agent_dispatch_plugin_integration")
     ctx = RecordingContext()
     module.register(ctx)
 
     roster = list(module.registry.expected_inventory())
     assert sorted(ctx.registered) == sorted(roster)
-    assert len(roster) == 10
+    assert len(roster) == 13
     for name, kwargs in ctx.registered.items():
         assert kwargs["toolset"] == "agent_dispatch"
         assert kwargs["schema"].get("additionalProperties") is False
@@ -62,7 +62,10 @@ def test_registered_availability_and_handlers_route_through_the_trust_gate(tmp_p
 
     exposed_ctx = RecordingContext(installation["config"])
     module.register(exposed_ctx)
-    assert all(kwargs["check_fn"]() is True for kwargs in exposed_ctx.registered.values())
+    assert all(
+        kwargs["check_fn"]() is (not name.startswith("agent_dispatch_sync_"))
+        for name, kwargs in exposed_ctx.registered.items()
+    )
 
 
 def test_contracts_validation_gate_runs_green():

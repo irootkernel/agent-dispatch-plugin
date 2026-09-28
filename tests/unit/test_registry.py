@@ -15,6 +15,9 @@ PRD_ROSTER = [
     "agent_dispatch_notifications",
     "agent_dispatch_schedule_inspect",
     "agent_dispatch_config",
+    "agent_dispatch_sync_capabilities",
+    "agent_dispatch_sync_status",
+    "agent_dispatch_sync_service_inspect",
 ]
 
 COMMAND_NOUNS = {
@@ -28,14 +31,15 @@ COMMAND_NOUNS = {
     "notifications",
     "schedule",
     "config",
+    "sync",
 }
 
 
-def test_roster_is_exactly_ten_unique_tools_in_prd_order(plugin):
+def test_roster_is_exactly_thirteen_unique_tools_in_prd_order(plugin):
     specs = plugin.registry.tool_specs()
     names = [spec.name for spec in specs]
     assert names == PRD_ROSTER
-    assert len(set(names)) == 10
+    assert len(set(names)) == 13
 
 
 def test_expected_inventory_matches_roster(plugin):
@@ -201,8 +205,54 @@ def test_no_denied_subcommand_is_reachable_from_any_action(plugin):
     denied = set(plugin.registry.load_catalog()["command_vocabulary"]["denied_subcommands"])
     for spec in plugin.registry.tool_specs():
         for action in spec.actions:
-            argv = action.resolve_argv({})
+            argv = action.resolve_argv({}, {"sync_group_id": "pair"})
             assert not denied.intersection(argv), (spec.name, action.action_id)
+
+
+@pytest.mark.parametrize(
+    "defect",
+    [
+        "setting",
+        "flag",
+        "config",
+        "sync-command",
+        "legacy-binding",
+        "config-omission",
+        "legacy-sync-command",
+    ],
+)
+def test_sync_catalog_binding_corruption_fails_before_registration(broken_catalog, plugin, defect):
+    def mutate(catalog):
+        status = next(t for t in catalog["tools"] if t["name"] == "agent_dispatch_sync_status")
+        action = status["actions"][0]
+        legacy = next(t for t in catalog["tools"] if t["name"] == "agent_dispatch_status")
+        legacy_action = legacy["actions"][0]
+        if defect == "setting":
+            action["trusted_value_bindings"][0]["setting"] = "binary_path"
+        elif defect == "flag":
+            action["trusted_value_bindings"][0]["flag"] = "--config"
+        elif defect == "config":
+            action["append_trusted_config"] = "false"
+        elif defect == "sync-command":
+            action["expected_command"] = "status"
+        elif defect == "legacy-binding":
+            legacy_action["trusted_value_bindings"] = [
+                {"setting": "sync_group_id", "flag": "--group"}
+            ]
+        elif defect == "config-omission":
+            action["append_trusted_config"] = False
+        else:
+            legacy_action["expected_command"] = "sync status"
+
+    broken_catalog(mutate)
+    with pytest.raises(plugin.registry.ContractSourceError):
+        plugin.registry.tool_specs()
+
+
+def test_trusted_binding_requires_a_runtime_setting(plugin):
+    action = _action(plugin, "agent_dispatch_sync_status", "inspect")
+    with pytest.raises(ValueError, match="missing trusted sync_group_id setting"):
+        action.resolve_argv({})
 
 
 def test_malformed_roster_fails_loud_before_registration(plugin, broken_catalog):

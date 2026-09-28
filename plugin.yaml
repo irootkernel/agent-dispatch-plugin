@@ -1,5 +1,5 @@
 name: agent-dispatch-plugin
-version: 0.1.2
+version: 0.2.0
 kind: standalone
 manifest_version: 2
 api_version: 1
@@ -26,6 +26,9 @@ provides_tools:
 - agent_dispatch_notifications
 - agent_dispatch_schedule_inspect
 - agent_dispatch_config
+- agent_dispatch_sync_capabilities
+- agent_dispatch_sync_status
+- agent_dispatch_sync_service_inspect
 config_schema:
   binary_path:
     type: str
@@ -48,3 +51,8 @@ config_schema:
     default: 1048576
     description: Combined bounded output ceiling; may tighten but never raise the
       frozen hard ceiling.
+  sync_group_id:
+    type: str
+    required: false
+    description: Trusted two-node sync group ID; required for the three sync read
+      tools.

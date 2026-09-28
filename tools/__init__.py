@@ -31,7 +31,7 @@ else:  # Degenerate top-level import of the plugin root file.
 # runtime paths: the namespaced plugin package and the degenerate tools package.
 from . import inputs
 
-# The five immutable settings from the frozen plugin config schema; nothing
+# The six immutable settings from the active plugin config schema; nothing
 # else from the Hermes config tree is ever read.
 _SETTING_KEYS = (
     "binary_path",
@@ -39,11 +39,12 @@ _SETTING_KEYS = (
     "config_path",
     "timeout_seconds",
     "max_output_bytes",
+    "sync_group_id",
 )
 
 
 def runner_config(ctx: Any) -> dict[str, Any]:
-    """Read the five immutable plugin settings through the Hermes config API.
+    """Read the six immutable plugin settings through the Hermes config API.
 
     Any config-system failure reads as an unconfigured plugin so both the
     availability check and handlers fail closed.
@@ -54,7 +55,7 @@ def runner_config(ctx: Any) -> dict[str, Any]:
         return {}
 
 
-def make_availability_check(ctx: Any) -> Callable[[], bool]:
+def make_availability_check(ctx: Any, spec: ToolSpec | None = None) -> Callable[[], bool]:
     """Build the availability probe that gates the toolset per session.
 
     The toolset is exposed only when the runner trust gate verifies the
@@ -63,7 +64,10 @@ def make_availability_check(ctx: Any) -> Callable[[], bool]:
     """
 
     def check() -> bool:
-        return runner.probe_availability(runner_config(ctx))
+        config = runner_config(ctx)
+        if spec is not None and spec.actions[0].requires_sync_attestation:
+            return runner.probe_sync_availability(config)
+        return runner.probe_availability(config)
 
     check.__name__ = "agent_dispatch_availability"
     check.__doc__ = "Real binary, configuration, and version trust detection."

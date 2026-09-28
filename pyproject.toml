@@ -1,6 +1,6 @@
 [project]
 name = "agent-dispatch-plugin"
-version = "0.1.2"
+version = "0.2.0"
 description = "Inspection-only Hermes plugin over the Agent Dispatch public CLI."
 requires-python = ">=3.11"
 license = "MIT"

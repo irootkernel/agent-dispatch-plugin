@@ -12,12 +12,12 @@ disposable one; the reproduction below uses a disposable profile.
 
 An installation is the plugin directory at one exact pinned revision.
 Upgrade or rollback replaces that directory; the profile state — plugin
-enablement (`plugins.enabled`), the five frozen settings
-(`plugins.entries.agent-dispatch-plugin.settings`), and toolset
+enablement (`plugins.enabled`), the five original settings and optional
+`sync_group_id` (`plugins.entries.agent-dispatch-plugin.settings`), and toolset
 enablement (`platform_toolsets.cli`) — is profile configuration and
-survives the swap unchanged. The recorded revisions share the same five-setting contract. Check the
-target revision and executable identity before assuming those settings remain
-valid for another upgrade or rollback.
+survives the swap unchanged. Check the target revision and executable
+identity before assuming those settings remain valid for another upgrade
+or rollback. The recorded v0.1.x revisions used the five-setting contract.
 
 ## Procedure
 
@@ -38,7 +38,12 @@ plugin-specific settings available for recovery.
    Confirm the trusted binary and config settings still meet the target contract.
 5. Re-enable the plugin with `--no-allow-tool-override`, then enable the
    `agent_dispatch` toolset. Start a fresh interactive session and verify one
-   status inspection as well as the ten-tool inventory.
+   status inspection as well as the target revision's registered roster:
+   ten for v0.1.x or thirteen for v0.2.0. Check the
+   available subset against the target core and settings: zero if common
+   trust fails, ten for a qualified legacy core or a v0.2.0 core without
+   sync admission, and thirteen only with the pinned sync provider and
+   valid group/capability evidence.
 
 If verification fails, keep the plugin and toolset disabled, restore the retained
 source and plugin-specific settings, and repeat verification before activation.
@@ -63,21 +68,21 @@ with the profile state untouched between swaps:
 
 The revision history a rollback may target is exactly the committed
 history of this repository; a release handoff (see the release handoff
-runbook) names the exact revision it qualifies. Until a second release
-tag exists, the single-entry support-matrix rationale of the
-compatibility qualification applies to rollback targets as well: every
-documented pinned revision below the next major boundary ships the same
-frozen five-setting contract and manifest identity.
+runbook) names the exact revision it qualifies. The transcript above
+records two v0.1.x revisions. For another target, verify that revision's
+settings contract, manifest roster, executable pin, and support evidence
+before swapping.
 
 ## Success verification
 
-After every swap, a fresh session registers exactly the ten frozen
-tools, the toolset reports available with the unchanged settings, and
-one smoke inspection succeeds through the full boundary. A failed trust
-gate after a swap means the settings no longer match the frozen contract
+After every swap, a fresh session registers the tool count declared by
+the target revision (ten for v0.1.x; thirteen for v0.2.0). The expected
+available subset passes its trust gate, and one smoke inspection succeeds
+through the full boundary. A failed trust gate after a swap means the
+settings no longer match the target contract
 — restore the documented settings rather than loosening the gate.
 
-## Current candidate gate
+## Recorded v0.1.1 candidate gate
 
 The qualification lifecycle repeats rollback and restoration against both
 pinned Agent Dispatch versions. It restores pre-release plugin commit

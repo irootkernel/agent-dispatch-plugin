@@ -34,7 +34,7 @@ The aggregate calls each stage handler exactly once through recursive
   `scripts/manifest_parity.py` (manifest/registry/inventory parity through
   the real registration path).
 - `test-unit`: `tests/unit` — one logical unit per test module:
-  the registry derivation from the frozen catalog (`test_registry.py`), the
+  the registry derivation from the active catalog (`test_registry.py`), the
   model-facing schema layer (`test_schemas.py`), the fail-closed handlers
   validated against the frozen wrapper and error schemas
   (`test_tools.py`), the derived input-validation layer cross-checked
@@ -60,12 +60,19 @@ The aggregate calls each stage handler exactly once through recursive
   redaction (`test_validation.py`).
 - `test-int`: `tests/integration` — cross-module cooperation: registering
   the plugin through the Hermes-style directory loader, a fresh-interpreter
-  session registering the ten-tool inventory and completing one smoke
+  session registering the thirteen-tool inventory and completing one smoke
   inspection through the full boundary (`test_fresh_session_inventory.py`),
   and running the two repository gates as subprocesses.
 - `test-e2e`: `tests/e2e` — the Hermes Plugin Doctor validates the plugin
   directory through its public CLI on a real Hermes installation (v0.20.5 or
   newer).
+
+TASK-024 adds `test_sync_tools.py`: all thirteen names register, while a
+trusted legacy binary exposes ten and an exact v0.2.0 artifact exposes
+thirteen only with a valid group and fresh capability evidence. The tests
+check each fixed argv, the capabilities config-flag exception, SHA denial,
+and direct-dispatch failure after a cached visible state. Native Hermes
+qualification of the new reads remains the TASK-026 gate.
 
 ## Test Frameworks
 

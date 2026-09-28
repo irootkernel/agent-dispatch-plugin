@@ -50,8 +50,8 @@ make test
 ```
 
 `make test` runs, in order and fail-fast: `test-prepare` (ruff format,
-ruff check, mypy, byte-compilation, the frozen contract oracle
-`contracts/validate.py`, and the manifest/registry parity gate
+ruff check, mypy, byte-compilation, both contract oracles
+`contracts/validate.py` and `contracts/validate_v020.py`, and the manifest/registry parity gate
 `scripts/manifest_parity.py`), `test-unit` (the deterministic unit
 suite), `test-int` (including the fresh-session tool inventory), and `test-e2e` (`hermes plugins doctor <root> --ci` over
 a temporary `HERMES_HOME` with outbound sockets blocked).
@@ -74,7 +74,7 @@ an identifier-named directory (proving the remediated import path):
 
 The fresh-session inventory transcript (from the integration stage) is
 the single-line JSON the fresh interpreter prints after registering the
-plugin through the Hermes directory loader: exactly the ten catalog tools
+plugin through the Hermes directory loader: exactly the thirteen catalog tools
 in catalog order, followed by one smoke inspection
 (`agent_dispatch_status` → `status`) returning the frozen wrapper with
 `smoke_ok: true`.
@@ -82,6 +82,6 @@ in catalog order, followed by one smoke inspection
 ## Success verification
 
 `make test` exits 0 from a clone under any directory name at the exact
-revision, the Plugin Doctor reports ten tools and zero hooks, and the
-fresh-session inventory registers exactly the ten frozen tools in catalog
+revision, the Plugin Doctor reports thirteen tools and zero hooks, and the
+fresh-session inventory registers exactly the thirteen catalog tools in catalog
 order with the smoke inspection succeeding.

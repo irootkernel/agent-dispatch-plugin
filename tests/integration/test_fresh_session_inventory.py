@@ -4,7 +4,7 @@ TASK-010. A brand-new interpreter process — no cached imports from the
 test session — loads the plugin exactly the way the Hermes directory
 loader does, registers it against a recording context, and prints the
 inventory plus one smoke inspection result as JSON. The parent test
-asserts the fresh session registers exactly the ten catalog tools in
+asserts the fresh session registers exactly the thirteen catalog tools in
 catalog order and that the smoke inspection completes through the full
 trust-gated boundary. The deterministic transcript is the printed JSON;
 the e2e Plugin Doctor check independently proves the same inventory over
@@ -82,7 +82,7 @@ print(json.dumps(transcript))
 """
 
 
-def test_fresh_session_registers_ten_tools_and_smokes_one_inspection(tmp_path):
+def test_fresh_session_registers_thirteen_tools_and_smokes_one_inspection(tmp_path):
     installation = make_fake_binary(tmp_path)
     result = subprocess.run(
         [
@@ -102,11 +102,11 @@ def test_fresh_session_registers_ten_tools_and_smokes_one_inspection(tmp_path):
     transcript = json.loads(result.stdout.splitlines()[-1])
 
     catalog = json.loads(
-        (ROOT / "contracts" / "v0.1.0" / "catalog.json").read_text(encoding="utf-8")
+        (ROOT / "contracts" / "v0.2.0" / "catalog.json").read_text(encoding="utf-8")
     )
     roster = [tool["name"] for tool in catalog["tools"]]
     assert transcript["inventory"] == roster
-    assert len(roster) == 10 and len(set(roster)) == 10
+    assert len(roster) == 13 and len(set(roster)) == 13
     # Registration follows catalog order, preserved by dict insertion order.
     assert transcript["registered"] == roster
 

@@ -2,7 +2,7 @@
 
 Agent Dispatch Plugin connects [Agent Dispatch](https://github.com/irootkernel/agent-dispatch) to your interactive Hermes conversations. Ask Hermes to inspect routes, follow a dispatch through its recorded history, look up receipts, or explain diagnostic findings without composing Agent Dispatch CLI commands yourself.
 
-The plugin gives Hermes ten tools with defined inputs. Each tool invokes a specific Agent Dispatch inspection command, validates the response, and redacts sensitive information before returning it to the conversation. Agent Dispatch remains responsible for routing, execution, and stored state.
+The current development source registers thirteen inspection tools. Ten retain the v0.1.0 behavior; three inspect the two-node sync provider when an exact allowlisted v0.2.0 executable and trusted group are configured. Native qualification of the new tools is pending. Agent Dispatch remains responsible for routing, execution, and stored state.
 
 ## What you can do
 
@@ -34,7 +34,7 @@ The plugin does not submit jobs, retry or discard dispatches, change routes, or 
 |---|---|
 | Host | Published v0.1.1: macOS on Apple Silicon (`darwin/arm64`) as the release host; native `linux/amd64` and `linux/arm64` qualified at the recorded artifacts. |
 | Hermes | `>=0.20.5`; interactive CLI sessions only |
-| Agent Dispatch | `>=0.1.6,<0.2.0`, with `agent-dispatch.cli/v1` |
+| Agent Dispatch | `>=0.1.6,<0.2.0`, or an exact allowlisted v0.2.0 artifact (which also serves the original ten tools); `agent-dispatch.cli/v1` |
 | Distribution | Source directory; no wheel or bundled Agent Dispatch binary |
 
 The v0.1.1 qualification targets Hermes v0.21.0 and both Agent Dispatch
@@ -129,6 +129,8 @@ plugins:
         config_path: "/absolute/path/to/agent-dispatch-config.yaml"
         timeout_seconds: 30
         max_output_bytes: 1048576
+        # Optional for legacy tools; required for the three sync reads.
+        # sync_group_id: "pair"
 ```
 
 | Setting | Required / default | Meaning |
@@ -138,6 +140,7 @@ plugins:
 | `config_path` | Required | Absolute regular configuration file path; no symlinked path segments |
 | `timeout_seconds` | Optional; `30` | Integer from 1 to 300 seconds per command |
 | `max_output_bytes` | Optional; `1048576` | Integer from 1 to 1048576; tightens the combined output ceiling |
+| `sync_group_id` | Optional; absent | Trusted two-node group ID for sync reads; lowercase letter followed by at most 62 lowercase letters, digits, or hyphens |
 
 Use `shasum -a 256 /absolute/path/to/agent-dispatch` to calculate the local
 digest and compare it with the trusted artifact identity before configuring
@@ -226,6 +229,9 @@ You can also ask for diagnostics with `agent_dispatch_doctor`. Target probing is
 | `agent_dispatch_notifications` | Notification delivery evidence |
 | `agent_dispatch_schedule_inspect` | A route's managed drain schedule (launchd on macOS, systemd on Linux) |
 | `agent_dispatch_config` | Redacted configuration or validation findings |
+| `agent_dispatch_sync_capabilities` | Local sync provider capabilities and contract identity |
+| `agent_dispatch_sync_status` | One configured two-node group's local status evidence |
+| `agent_dispatch_sync_service_inspect` | Managed sync service definition and load posture, not listener readiness |
 
 ## Understand the results
 

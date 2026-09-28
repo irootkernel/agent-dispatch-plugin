@@ -3,7 +3,7 @@
 Status: In Progress (the roadmap owns lifecycle)
 Roadmap: EPIC-007 / TASK-023 through TASK-027 in docs/roadmap/README.md
 Depends on: EPIC-006 Completed; Agent Dispatch E20-E22 Completed
-Next eligible task: TASK-024 after TASK-023 commit
+Next eligible task: TASK-025 after TASK-024 commit
 After completion: no automatic next epic; EPIC-008 remains Deferred
 Planned Plugin target: v0.2.0, with a new versioned public contract
 
@@ -22,9 +22,10 @@ Recheck both identities and the provider bundle before TASK-023 changes an
 executable contract. Completion of the core epic is not a Plugin release or
 qualification claim.
 
-The current Plugin contract still admits Agent Dispatch
-`>=0.1.6,<0.2.0` and exactly ten tools. Dispatch v0.2.0 remains unavailable
-to it until a canonical Plugin amendment and action-level qualification.
+At epic intake, the Plugin admitted Agent Dispatch `>=0.1.6,<0.2.0` and
+exactly ten tools. TASK-023 approved the v0.2.0 amendment, and TASK-024
+activates its thirteen-name development surface. Native action-level
+qualification remains TASK-026 work.
 The checked-in core `dist/` contains v0.1.8 release artifacts, not v0.2.0
 qualification artifacts. A development executable that implements sync but
 reports v0.1.8 cannot stand in for a correctly identified v0.2.0 candidate.
@@ -160,6 +161,27 @@ Evidence: fixed thirteen-name catalog/manifest/registration parity and
 pre-spawn denial of untrusted inputs, group/command mismatch, missing group,
 capability drift after a cached visible state, direct dispatch, and
 capability-probe failure tests.
+
+The existing `make test-qualify` lifecycle suite still pins the v0.1.0
+ten-tool roster. It cannot qualify a v0.2.0 source checkout until TASK-026
+updates its roster, available-subset cases, and candidate artifact pins.
+TASK-024's `make test` result does not claim that qualification gate.
+
+#### TASK-024 close
+
+The active v0.2.0 catalog, generated manifest, registry, and Hermes
+registration declare thirteen fixed tools. A qualified legacy core keeps
+the original ten available; a pinned, allowlisted v0.2.0 core adds the
+three sync reads only with trusted group and fresh bounded capability
+evidence. Direct handlers repeat that gate and deny untrusted or drifting
+inputs before the requested command starts.
+
+The runbook corrections distinguish target-revision ten/thirteen
+registration and retain historical v0.1.x evidence. TASK-025 owns sync
+result validation and presentation; TASK-026 owns native Hermes and
+service-manager qualification plus the currently ten-tool-pinned
+`make test-qualify` harness. No v0.2.0 platform qualification, installation,
+release, or activation is claimed here.
 
 ### TASK-025: Preserve evidence and safe presentation
 

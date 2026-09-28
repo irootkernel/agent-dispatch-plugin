@@ -33,9 +33,9 @@ Every candidate must pass, from a full-history clean clone of the exact revision
 
 1. `uv sync` — the pinned environment resolves from `uv.lock`.
 2. `make test` — the prepare gates (format, lint, type check,
-   byte-compilation, the frozen-contract oracle, manifest/registry
+   byte-compilation, both contract oracles, manifest/registry
    parity), the deterministic unit suite, the integration suite
-   including the fresh-session ten-tool inventory, and the Plugin
+   including the fresh-session thirteen-tool inventory, and the Plugin
    Doctor e2e stage.
 3. `make test-qualify` — the disposable action-level compatibility
    matrix (every advertised public action through the real Hermes
@@ -93,13 +93,13 @@ final clean-clone validation summary to the release rather than making a
 self-referential evidence commit. Any later source change creates a new
 candidate and requires applicable checks again.
 
-After v0.1.0 publication is verified, the approved successor is v0.1.1.
-In a separate commit, add its empty `Unreleased` section and update catalog
-`plugin.version`, the derived manifest, Python project, and lockfile to 0.1.1.
-Catalog `product_version`, the contract directory, and schema URNs remain the
-v0.1.0 API baseline. Validate release-version parity, contracts, and `make test`
-then push main. Do not tag or publish the development version. Preserve the
-v0.1.0 tag and release assets exactly.
+The v0.1.0 to v0.1.1 next-cycle handoff was completed and v0.1.1 was
+published. Its `plugin.version`, derived manifest, Python project, and
+lockfile changed together while the v0.1.0 API baseline stayed frozen.
+For the current development version and contract, consult the
+[roadmap](../roadmap/README.md) and [contract index](../specs/contracts.md).
+Choosing a later release target, tagging, and publication belong to the
+separate release lifecycle.
 
 ## Separate authorization boundary
 

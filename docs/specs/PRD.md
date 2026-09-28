@@ -7,8 +7,9 @@ Canonical language: English
 
 ## Product outcome
 
-Deliver a secure, inspection-only Hermes plugin exposing exactly ten typed
-tools over fixed Agent Dispatch CLI operations. The plugin gives a Hermes user
+Deliver a secure, inspection-only Hermes plugin exposing ten typed tools in
+the v0.1.0 baseline and three additional two-node reads in v0.2.0 over fixed
+Agent Dispatch CLI operations. The plugin gives a Hermes user
 validated and redacted operational evidence without granting database access,
 arbitrary command execution, or mutation authority.
 
@@ -194,11 +195,14 @@ This is an explicit pre-publication rebaseline, not a retrospective waiver.
 `contracts/v0.1.0/`, its schema URNs, and catalog `product_version` identify
 the public contract baseline. Catalog `plugin.version` identifies the plugin
 release and must match the derived manifest, Python project, and lockfile.
-The published v0.1.0 tag is unchanged. The current v0.1.2 development catalog
+The published v0.1.0 tag is unchanged. The v0.1.2 development catalog
 admits Darwin arm64, Linux amd64, and Linux arm64 and derives the schedule
 `--platform` flag from the trusted host. Schema URNs remain under
 `contracts/v0.1.0/` because the ten-tool input and result contracts are
 otherwise unchanged.
+
+The current v0.2.0 development catalog and schema URNs are under
+`contracts/v0.2.0/`, as admitted by the amendment below.
 
 ## Approved v0.2.0 two-node inspection amendment (EPIC-007 / TASK-023)
 

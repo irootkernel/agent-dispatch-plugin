@@ -1,6 +1,6 @@
 # Troubleshooting Runbook
 
-Target: `agent-dispatch-plugin` v0.1.0 installations in a Hermes
+Target: current development source and earlier `agent-dispatch-plugin` installations in a Hermes
 v0.20.5-or-newer profile. Symptom → diagnosis → resolution, each verifiable without
 touching live state. All commands run against the profile under
 diagnosis (`HERMES_HOME=<profile>` for CLI commands).
@@ -16,12 +16,15 @@ directory is missing from `<profile>/plugins/agent-dispatch-plugin`.
 
 ## Tools register but the toolset is unavailable
 
-Diagnosis: the trust gate closed. The five settings under
+Diagnosis: the trust gate closed. The five original settings under
 `plugins.entries.agent-dispatch-plugin.settings` must resolve consistently (three required values and two bounded defaults): `binary_path` and `config_path` must exist as regular files
 with no symlinked path segment, `binary_sha256` must match the
 installed executable's digest exactly, and the executable's
 `version --json` probe must report a version in
-`>=0.1.6,<0.2.0`; v0.1.6 is the recorded reference artifact.
+`>=0.1.6,<0.2.0` or exact v0.2.0 with the platform SHA from the approved
+catalog. The optional sixth setting, `sync_group_id`, must match
+`^[a-z][a-z0-9-]{0,62}$` before any of the three sync reads is available.
+Those reads also require a fresh matching capability and contract digest probe.
 Resolution: restore the documented settings — never loosen the gate.
 A swapped executable with a changed digest is rejected by design;
 update `binary_sha256` only after verifying the new artifact's identity.
@@ -80,8 +83,8 @@ model does not supply `--platform`.
 ## Escalation
 
 Anything not resolved above is a contract question: check
-`docs/specs/contracts.md` first, then the frozen catalog
-(`contracts/v0.1.0/catalog.json`), then the roadmap for the owning work
+`docs/specs/contracts.md` first, then the active catalog
+(`contracts/v0.2.0/catalog.json`; `v0.1.0/` remains the legacy baseline), then the roadmap for the owning work
 unit. A confirmed contract violation is a blocking defect — it goes to
 the maintainers with the transcript captured under the security
 evidence-capture guide.

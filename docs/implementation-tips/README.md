@@ -21,7 +21,7 @@ behavior. Keep qualification profiles disposable.
 
 | Change | Start with |
 |---|---|
-| Tool input, action mapping, or result contract | [Contract reference](../specs/contracts.md), then `contracts/v0.1.0/` and `registry.py` |
+| Tool input, action mapping, or result contract | [Contract reference](../specs/contracts.md), then `contracts/v0.2.0/` and `registry.py` |
 | Input validation | `tools/inputs.py` and its schema cross-check tests |
 | Execution or availability | `runner.py` and trust, process, and security tests |
 | Output validation or redaction | `envelopes.py` and frozen output fixtures |
@@ -59,7 +59,7 @@ old qualification transcript as proof for a new runtime revision.
 
 ## Tool input examples for integration work
 
-Normal users ask Hermes to call tools in conversation. These JSON objects are for contributors inspecting handler inputs; they are not shell commands. The frozen schemas in `contracts/v0.1.0/schemas/tools/` remain authoritative.
+Normal users ask Hermes to call tools in conversation. These JSON objects are for contributors inspecting handler inputs; they are not shell commands. The active schemas in `contracts/v0.2.0/schemas/tools/` are authoritative; `contracts/v0.1.0/` remains the legacy baseline.
 
 `agent_dispatch_status`:
 
