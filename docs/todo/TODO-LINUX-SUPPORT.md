@@ -1,5 +1,10 @@
 # EPIC-006 Linux Support and Existing-Tool Parity
 
+Historical close record: the E26 wait and G09/G10 handoff below were
+superseded by Dispatch ADR-0023 and completed E20-E22. The current Plugin
+position is in the [roadmap](../roadmap/README.md#program-position), and
+the next planned work is the [EPIC-007 dossier](TODO-SYNC-INSPECTION.md).
+
 Status: Closed (EPIC-006 Completed)
 Roadmap: EPIC-006 in docs/roadmap/README.md
 Tasks: TASK-018, TASK-019, TASK-020, TASK-021, TASK-022

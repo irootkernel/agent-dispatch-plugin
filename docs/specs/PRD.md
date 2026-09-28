@@ -193,7 +193,7 @@ This is an explicit pre-publication rebaseline, not a retrospective waiver.
 `contracts/v0.1.0/`, its schema URNs, and catalog `product_version` identify
 the public contract baseline. Catalog `plugin.version` identifies the plugin
 release and must match the derived manifest, Python project, and lockfile.
-The published v0.1.0 tag is unchanged. The living v0.1.1 development catalog
+The published v0.1.0 tag is unchanged. The current v0.1.2 development catalog
 admits Darwin arm64, Linux amd64, and Linux arm64 and derives the schedule
 `--platform` flag from the trusted host. Schema URNs remain under
 `contracts/v0.1.0/` because the ten-tool input and result contracts are
