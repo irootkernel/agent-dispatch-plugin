@@ -76,3 +76,21 @@ pre-publication exception: rebaseline v0.1.0 in place before its first tag.
 Release-only metadata updates to `plugin.version` do not change the contract
 baseline (`product_version`), directory, or schema URNs. Qualification evidence
 may reject these contracts but may not silently adapt them.
+
+## Approved v0.2.0 contract amendment
+
+The [v0.2.0 catalog](../../contracts/v0.2.0/catalog.json) is a new
+versioned baseline. It preserves `contracts/v0.1.0/` for the original ten
+tools and adds three closed empty-input sync reads. The new result schemas
+live under `contracts/v0.2.0/schemas/results/`. The catalog pins the
+provider bundle source, semantic digest, exact binary SHA-256 per host,
+trusted group grammar, command descriptors, and narrow public identity
+paths. The fixed manifest and registry roster is thirteen; availability is
+zero, ten, or thirteen according to the PRD trust and capability gates.
+Neither the provider's semantic fragments nor a version string alone admit
+a binary or validate a full result.
+
+`contracts/validate.py` continues to validate the frozen baseline. Run
+`uv run --frozen contracts/validate_v020.py` for this approved catalog,
+schemas, and positive and negative fixtures. Master approved the PRD
+amendment on 2026-09-29; platform qualification remains a separate gate.

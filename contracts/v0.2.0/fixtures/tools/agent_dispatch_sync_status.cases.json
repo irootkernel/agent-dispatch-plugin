@@ -1,0 +1,26 @@
+{
+  "cases": [
+    {
+      "id": "agent_dispatch_sync_status-valid-empty",
+      "expect": "valid",
+      "instance": {}
+    },
+    {
+      "id": "agent_dispatch_sync_status-invalid-group",
+      "expect": "invalid",
+      "instance": {
+        "group_id": "other"
+      }
+    },
+    {
+      "id": "agent_dispatch_sync_status-invalid-flag",
+      "expect": "invalid",
+      "instance": {
+        "flags": [
+          "--config",
+          "/tmp/x"
+        ]
+      }
+    }
+  ]
+}

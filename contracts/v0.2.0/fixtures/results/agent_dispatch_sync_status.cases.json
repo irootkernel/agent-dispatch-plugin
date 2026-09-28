@@ -1,0 +1,528 @@
+{
+  "cases": [
+    {
+      "id": "sync-status-disabled",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-status/v1",
+        "group_id": "pair",
+        "state": "disabled",
+        "reason": "not_configured_or_disabled",
+        "config_revision": "",
+        "import_acknowledgement_current": false,
+        "health": {
+          "service": {
+            "state": "disabled",
+            "reason": "definition_absent"
+          }
+        },
+        "side_effects": []
+      }
+    },
+    {
+      "id": "sync-status-enabled",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-status/v1",
+        "group_id": "pair",
+        "state": "active",
+        "reason": "operator_enabled",
+        "config_revision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "import_acknowledgement_current": true,
+        "health": {
+          "listener": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "auth": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "membership": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "queue": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "git": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "import": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "verification": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "activation": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "service": {
+            "state": "unknown",
+            "reason": "no_record"
+          }
+        },
+        "side_effects": [],
+        "membership_mode": "normal",
+        "control_revision": 1,
+        "control_config_current": true,
+        "latest_publication": {
+          "present": false
+        },
+        "latest_delivery": {
+          "present": false
+        },
+        "latest_import": {
+          "present": false
+        },
+        "latest_verification": {
+          "present": false
+        },
+        "expected_nodes": [
+          {
+            "instance_id": "node-a",
+            "state_incarnation_id": "one"
+          },
+          {
+            "instance_id": "node-b",
+            "state_incarnation_id": "two"
+          }
+        ],
+        "peer_inbox_pending": 0,
+        "peer_inbox_failed": 0,
+        "peer_inbox_retained": 0,
+        "peer_inbox_retention_limit": 100,
+        "peer_inbox_oldest_received_at": "",
+        "peer_inbox_oldest_reason": "",
+        "recovery_schedule": null,
+        "pre_signature_publications_pending": 0,
+        "pre_signature_oldest_created_at": ""
+      }
+    },
+    {
+      "id": "sync-status-disabled-false-health",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-status/v1",
+        "group_id": "pair",
+        "state": "disabled",
+        "reason": "not_configured_or_disabled",
+        "config_revision": "",
+        "import_acknowledgement_current": false,
+        "health": {
+          "service": {
+            "state": "disabled",
+            "reason": "definition_absent"
+          },
+          "listener": {
+            "state": "ready",
+            "reason": "fake"
+          }
+        },
+        "side_effects": []
+      }
+    },
+    {
+      "id": "sync-status-missing-node",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-status/v1",
+        "group_id": "pair",
+        "state": "active",
+        "reason": "operator_enabled",
+        "config_revision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "import_acknowledgement_current": true,
+        "health": {
+          "listener": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "auth": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "membership": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "queue": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "git": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "import": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "verification": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "activation": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "service": {
+            "state": "unknown",
+            "reason": "no_record"
+          }
+        },
+        "side_effects": [],
+        "membership_mode": "normal",
+        "control_revision": 1,
+        "control_config_current": true,
+        "latest_publication": {
+          "present": false
+        },
+        "latest_delivery": {
+          "present": false
+        },
+        "latest_import": {
+          "present": false
+        },
+        "latest_verification": {
+          "present": false
+        },
+        "expected_nodes": [
+          {
+            "instance_id": "node-a",
+            "state_incarnation_id": "one"
+          }
+        ],
+        "peer_inbox_pending": 0,
+        "peer_inbox_failed": 0,
+        "peer_inbox_retained": 0,
+        "peer_inbox_retention_limit": 100,
+        "peer_inbox_oldest_received_at": "",
+        "peer_inbox_oldest_reason": "",
+        "recovery_schedule": null,
+        "pre_signature_publications_pending": 0,
+        "pre_signature_oldest_created_at": ""
+      }
+    },
+    {
+      "id": "sync-status-nonempty-effects",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-status/v1",
+        "group_id": "pair",
+        "state": "disabled",
+        "reason": "not_configured_or_disabled",
+        "config_revision": "",
+        "import_acknowledgement_current": false,
+        "health": {
+          "service": {
+            "state": "disabled",
+            "reason": "definition_absent"
+          }
+        },
+        "side_effects": [
+          "write"
+        ]
+      }
+    },
+    {
+      "id": "sync-status-invalid-revision",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-status/v1",
+        "group_id": "pair",
+        "state": "active",
+        "reason": "operator_enabled",
+        "config_revision": "Bearer abc",
+        "import_acknowledgement_current": true,
+        "health": {
+          "listener": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "auth": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "membership": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "queue": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "git": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "import": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "verification": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "activation": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "service": {
+            "state": "unknown",
+            "reason": "no_record"
+          }
+        },
+        "side_effects": [],
+        "membership_mode": "normal",
+        "control_revision": 1,
+        "control_config_current": true,
+        "latest_publication": {
+          "present": false
+        },
+        "latest_delivery": {
+          "present": false
+        },
+        "latest_import": {
+          "present": false
+        },
+        "latest_verification": {
+          "present": false
+        },
+        "expected_nodes": [
+          {
+            "instance_id": "node-a",
+            "state_incarnation_id": "one"
+          },
+          {
+            "instance_id": "node-b",
+            "state_incarnation_id": "two"
+          }
+        ],
+        "peer_inbox_pending": 0,
+        "peer_inbox_failed": 0,
+        "peer_inbox_retained": 0,
+        "peer_inbox_retention_limit": 100,
+        "peer_inbox_oldest_received_at": "",
+        "peer_inbox_oldest_reason": "",
+        "recovery_schedule": null,
+        "pre_signature_publications_pending": 0,
+        "pre_signature_oldest_created_at": ""
+      }
+    },
+    {
+      "id": "sync-status-extra-field",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-status/v1",
+        "group_id": "pair",
+        "state": "disabled",
+        "reason": "not_configured_or_disabled",
+        "config_revision": "",
+        "import_acknowledgement_current": false,
+        "health": {
+          "service": {
+            "state": "disabled",
+            "reason": "definition_absent"
+          }
+        },
+        "side_effects": [],
+        "token": "secret"
+      }
+    },
+    {
+      "id": "sync-status-public-commit-with-secret-neighbor",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-status/v1",
+        "group_id": "pair",
+        "state": "active",
+        "reason": "operator_enabled",
+        "config_revision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "import_acknowledgement_current": true,
+        "health": {
+          "listener": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "auth": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "membership": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "queue": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "git": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "import": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "verification": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "activation": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "service": {
+            "state": "unknown",
+            "reason": "no_record"
+          }
+        },
+        "side_effects": [],
+        "membership_mode": "normal",
+        "control_revision": 1,
+        "control_config_current": true,
+        "latest_publication": {
+          "present": false
+        },
+        "latest_delivery": {
+          "present": false
+        },
+        "latest_import": {
+          "present": false
+        },
+        "latest_verification": {
+          "present": true,
+          "job_id": "job-1",
+          "logical_key": "verify:pair",
+          "state": "complete",
+          "updated_at": "2026-09-28T00:00:00Z",
+          "resolved": true,
+          "fence": 1,
+          "claimed": false,
+          "resolved_at": "2026-09-28T00:00:00Z",
+          "target_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "reason": "Bearer secret-shaped-neighbor"
+        },
+        "expected_nodes": [
+          {
+            "instance_id": "node-a",
+            "state_incarnation_id": "one"
+          },
+          {
+            "instance_id": "node-b",
+            "state_incarnation_id": "two"
+          }
+        ],
+        "peer_inbox_pending": 0,
+        "peer_inbox_failed": 0,
+        "peer_inbox_retained": 0,
+        "peer_inbox_retention_limit": 100,
+        "peer_inbox_oldest_received_at": "",
+        "peer_inbox_oldest_reason": "",
+        "recovery_schedule": null,
+        "pre_signature_publications_pending": 0,
+        "pre_signature_oldest_created_at": ""
+      }
+    },
+    {
+      "id": "sync-status-invalid-public-commit",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-status/v1",
+        "group_id": "pair",
+        "state": "active",
+        "reason": "operator_enabled",
+        "config_revision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "import_acknowledgement_current": true,
+        "health": {
+          "listener": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "auth": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "membership": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "queue": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "git": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "import": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "verification": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "activation": {
+            "state": "unknown",
+            "reason": "no_record"
+          },
+          "service": {
+            "state": "unknown",
+            "reason": "no_record"
+          }
+        },
+        "side_effects": [],
+        "membership_mode": "normal",
+        "control_revision": 1,
+        "control_config_current": true,
+        "latest_publication": {
+          "present": false
+        },
+        "latest_delivery": {
+          "present": false
+        },
+        "latest_import": {
+          "present": false
+        },
+        "latest_verification": {
+          "present": true,
+          "job_id": "job-1",
+          "logical_key": "verify:pair",
+          "state": "complete",
+          "updated_at": "2026-09-28T00:00:00Z",
+          "resolved": true,
+          "fence": 1,
+          "claimed": false,
+          "resolved_at": "2026-09-28T00:00:00Z",
+          "target_commit": "Bearer secret-shaped-neighbor",
+          "reason": "Bearer secret-shaped-neighbor"
+        },
+        "expected_nodes": [
+          {
+            "instance_id": "node-a",
+            "state_incarnation_id": "one"
+          },
+          {
+            "instance_id": "node-b",
+            "state_incarnation_id": "two"
+          }
+        ],
+        "peer_inbox_pending": 0,
+        "peer_inbox_failed": 0,
+        "peer_inbox_retained": 0,
+        "peer_inbox_retention_limit": 100,
+        "peer_inbox_oldest_received_at": "",
+        "peer_inbox_oldest_reason": "",
+        "recovery_schedule": null,
+        "pre_signature_publications_pending": 0,
+        "pre_signature_oldest_created_at": ""
+      }
+    }
+  ]
+}

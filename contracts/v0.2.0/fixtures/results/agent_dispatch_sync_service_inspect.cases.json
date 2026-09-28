@@ -1,0 +1,107 @@
+{
+  "cases": [
+    {
+      "id": "sync-service-absent",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-service/v1",
+        "group_id": "pair",
+        "platform": "darwin",
+        "label": "agent-dispatch.sync.pair",
+        "definition_path": "/tmp/sync.plist",
+        "expected_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "present": false,
+        "definition_matches": false,
+        "installed_digest": "",
+        "loaded": false,
+        "enabled": false,
+        "config_available": true,
+        "healthy": false,
+        "side_effects": []
+      }
+    },
+    {
+      "id": "sync-service-loaded",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-service/v1",
+        "group_id": "pair",
+        "platform": "darwin",
+        "label": "agent-dispatch.sync.pair",
+        "definition_path": "/tmp/sync.plist",
+        "expected_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "present": true,
+        "definition_matches": true,
+        "installed_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "loaded": true,
+        "enabled": true,
+        "config_available": true,
+        "healthy": true,
+        "side_effects": []
+      }
+    },
+    {
+      "id": "sync-service-false-healthy",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-service/v1",
+        "group_id": "pair",
+        "platform": "darwin",
+        "label": "agent-dispatch.sync.pair",
+        "definition_path": "/tmp/sync.plist",
+        "expected_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "present": false,
+        "definition_matches": false,
+        "installed_digest": "",
+        "loaded": false,
+        "enabled": false,
+        "config_available": true,
+        "healthy": true,
+        "side_effects": []
+      }
+    },
+    {
+      "id": "sync-service-effects",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-service/v1",
+        "group_id": "pair",
+        "platform": "darwin",
+        "label": "agent-dispatch.sync.pair",
+        "definition_path": "/tmp/sync.plist",
+        "expected_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "present": false,
+        "definition_matches": false,
+        "installed_digest": "",
+        "loaded": false,
+        "enabled": false,
+        "config_available": true,
+        "healthy": false,
+        "side_effects": [
+          "install"
+        ]
+      }
+    },
+    {
+      "id": "sync-service-extra-definition",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-service/v1",
+        "group_id": "pair",
+        "platform": "darwin",
+        "label": "agent-dispatch.sync.pair",
+        "definition_path": "/tmp/sync.plist",
+        "expected_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "present": false,
+        "definition_matches": false,
+        "installed_digest": "",
+        "loaded": false,
+        "enabled": false,
+        "config_available": true,
+        "healthy": false,
+        "side_effects": [],
+        "definition": "secret"
+      }
+    }
+  ]
+}

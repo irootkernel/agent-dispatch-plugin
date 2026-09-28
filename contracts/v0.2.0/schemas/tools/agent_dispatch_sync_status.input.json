@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.2.0:input:agent_dispatch_sync_status",
+  "title": "agent_dispatch_sync_status input",
+  "description": "Closed empty object; the operator alone selects the sync group.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false,
+  "maxProperties": 0
+}

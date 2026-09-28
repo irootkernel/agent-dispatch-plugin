@@ -33,10 +33,11 @@ own implementation, compatibility, and release engineering. The public
 The [PRD](specs/PRD.md) defines product scope and acceptance. Accepted ADRs
 explain technical decisions within that scope. The
 [contract reference](specs/contracts.md) binds the PRD to the executable
-artifacts in `contracts/v0.1.0/`; derived manifest and runtime views must agree
-with them. The roadmap alone owns delivery status. An adopted dossier refines
-its epic without overriding these owners. Operational and implementation
-guidance explains how to execute accepted work.
+artifacts in `contracts/v0.1.0/` and the approved EPIC-007 contract in
+`contracts/v0.2.0/`; derived manifest and runtime views must agree with the
+currently activated version. The roadmap alone owns delivery status. An
+adopted dossier refines its epic without overriding these owners. Operational
+and implementation guidance explains how to execute accepted work.
 
 [TESTING.md](../TESTING.md) retains the testing contract; [Makefile](../Makefile)
 owns executable test orchestration. Neither is moved by this reorganization.
@@ -60,7 +61,7 @@ and Blocked. Every planned or active epic links one Detailed SOT dossier under
 the existing repository convention. All initial dossiers were promoted to the
 canonical outcomes in their roadmap rows and retired. EPIC-006 is
 Completed and keeps [docs/todo/TODO-LINUX-SUPPORT.md](todo/TODO-LINUX-SUPPORT.md)
-as its Detailed SOT. Planned EPIC-007 uses
+as its Detailed SOT. In Progress EPIC-007 uses
 [docs/todo/TODO-SYNC-INSPECTION.md](todo/TODO-SYNC-INSPECTION.md); its
 versioned PRD and contract amendments belong to TASK-023. EPIC-008 is
 Deferred in the roadmap. Child task completion alone does not establish
@@ -73,6 +74,7 @@ with the frozen schemas and implementation. Run these non-writing checks:
 
 ```bash
 uv run contracts/validate.py
+uv run contracts/validate_v020.py
 uv run scripts/manifest_parity.py
 git --no-pager diff --check
 ```

@@ -1,9 +1,9 @@
 # EPIC-007 Two-Node Sync Inspection and Diagnostics
 
-Status: Planned (the roadmap owns lifecycle)
+Status: In Progress (the roadmap owns lifecycle)
 Roadmap: EPIC-007 / TASK-023 through TASK-027 in docs/roadmap/README.md
 Depends on: EPIC-006 Completed; Agent Dispatch E20-E22 Completed
-Next eligible task: TASK-023
+Next eligible task: TASK-024 after TASK-023 commit
 After completion: no automatic next epic; EPIC-008 remains Deferred
 Planned Plugin target: v0.2.0, with a new versioned public contract
 
@@ -125,6 +125,21 @@ Evidence: reviewed amendment and provider checksums/digest; contract oracle
 and negative fixtures for unsupported versions, digest/capability drift,
 SHA allowlist mismatch, invalid group configuration, command mismatch,
 malformed responses, and secret-shaped content outside the identity allowlist.
+
+TASK-023 close record (2026-09-29): Master approved the canonical PRD and
+contract amendment. The v0.2.0 catalog pins Dispatch source candidate
+`6b1c78b19f4cdb69dfd070ea016430f03075b73d`, provider bundle commit
+`48f13a4eef68e219a51d188decb8749a5fba9282`, semantic digest
+`sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b`,
+and the three platform release-artifact checksums. The original v0.1.0
+contract remains unchanged. `make test` passed with 542 unit, 28 integration,
+and one E2E test. Two staged Mulgae assessments completed with passing CI,
+complete coverage, committed publication, and successful findings queries;
+the first four findings were corrected in the second reviewed candidate.
+The second assessment's two Low documentation findings were resolved by an
+isolated three-file delta and `make test-prepare` passed on that delta.
+This is contract admission evidence only; TASK-024 activates registration and
+runtime and TASK-026 owns native platform qualification.
 
 ### TASK-024: Add three fixed inspection tools
 

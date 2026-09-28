@@ -1,4 +1,4 @@
-PY_SOURCES := registry.py schemas.py envelopes.py runner.py __init__.py tools contracts/validate.py scripts tests
+PY_SOURCES := registry.py schemas.py envelopes.py runner.py __init__.py tools contracts/validate.py contracts/validate_v020.py scripts tests
 # The typed runtime subset of PY_SOURCES: the static view checks every
 # guarded runtime module and excludes the registration shim and the pytest
 # tree (TESTING.md documents the same split).
@@ -18,6 +18,7 @@ test-prepare:
 	uv run mypy $(MYPY_SOURCES)
 	uv run python -m compileall -q $(PY_SOURCES)
 	uv run contracts/validate.py
+	uv run contracts/validate_v020.py
 	uv run scripts/manifest_parity.py
 
 test-unit:

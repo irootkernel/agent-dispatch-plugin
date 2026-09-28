@@ -12,7 +12,7 @@ blocking contract defect.
 
 ```bash
 make test           # aggregate: prepare, unit, integration, e2e in order, fail-fast
-make test-prepare   # format, lint, type checking, byte-compilation, contracts gate, parity gate
+make test-prepare   # format, lint, type checking, byte-compilation, two contract gates, parity gate
 make test-unit      # uv run pytest tests/unit
 make test-int       # uv run pytest tests/integration
 make test-e2e       # uv run pytest tests/e2e
@@ -28,8 +28,9 @@ The aggregate calls each stage handler exactly once through recursive
   Python sources, `ruff check` (static analysis), `mypy` (type checking over
   the typed runtime subset, derived from the same source enumeration in the
   Makefile), `python -m compileall`
-  (byte-compilation), then the two deterministic offline gates:
-  `contracts/validate.py` (frozen contract oracle) and
+  (byte-compilation), then three deterministic offline gates:
+  `contracts/validate.py` (frozen v0.1.0 contract oracle),
+  `contracts/validate_v020.py` (approved v0.2.0 contract oracle), and
   `scripts/manifest_parity.py` (manifest/registry/inventory parity through
   the real registration path).
 - `test-unit`: `tests/unit` — one logical unit per test module:

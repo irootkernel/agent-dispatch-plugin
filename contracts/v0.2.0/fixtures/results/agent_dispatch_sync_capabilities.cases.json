@@ -1,0 +1,123 @@
+{
+  "cases": [
+    {
+      "id": "sync-capabilities-valid",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-capabilities/v1",
+        "contract_version": "v1",
+        "contract_digest": "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b",
+        "capabilities": {
+          "contract_read": true,
+          "status_read": true,
+          "publication": true,
+          "reconciliation": true,
+          "pair_verification": true,
+          "peer_service": true,
+          "control": true,
+          "membership_plan": true,
+          "membership_apply": true,
+          "checkpoint_plan": true,
+          "checkpoint_apply": true,
+          "service_render": true,
+          "service_install": true,
+          "service_inspect": true,
+          "service_stop": true,
+          "service_disable": true,
+          "service_uninstall": true
+        },
+        "side_effects": []
+      }
+    },
+    {
+      "id": "sync-capabilities-digest-drift",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-capabilities/v1",
+        "contract_version": "v1",
+        "contract_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "capabilities": {
+          "contract_read": true,
+          "status_read": true,
+          "publication": true,
+          "reconciliation": true,
+          "pair_verification": true,
+          "peer_service": true,
+          "control": true,
+          "membership_plan": true,
+          "membership_apply": true,
+          "checkpoint_plan": true,
+          "checkpoint_apply": true,
+          "service_render": true,
+          "service_install": true,
+          "service_inspect": true,
+          "service_stop": true,
+          "service_disable": true,
+          "service_uninstall": true
+        },
+        "side_effects": []
+      }
+    },
+    {
+      "id": "sync-capabilities-effects",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-capabilities/v1",
+        "contract_version": "v1",
+        "contract_digest": "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b",
+        "capabilities": {
+          "contract_read": true,
+          "status_read": true,
+          "publication": true,
+          "reconciliation": true,
+          "pair_verification": true,
+          "peer_service": true,
+          "control": true,
+          "membership_plan": true,
+          "membership_apply": true,
+          "checkpoint_plan": true,
+          "checkpoint_apply": true,
+          "service_render": true,
+          "service_install": true,
+          "service_inspect": true,
+          "service_stop": true,
+          "service_disable": true,
+          "service_uninstall": true
+        },
+        "side_effects": [
+          "mutation"
+        ]
+      }
+    },
+    {
+      "id": "sync-capabilities-unknown",
+      "expect": "invalid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-capabilities/v1",
+        "contract_version": "v1",
+        "contract_digest": "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b",
+        "capabilities": {
+          "contract_read": true,
+          "status_read": true,
+          "publication": true,
+          "reconciliation": true,
+          "pair_verification": true,
+          "peer_service": true,
+          "control": true,
+          "membership_plan": true,
+          "membership_apply": true,
+          "checkpoint_plan": true,
+          "checkpoint_apply": true,
+          "service_render": true,
+          "service_install": true,
+          "service_inspect": true,
+          "service_stop": true,
+          "service_disable": true,
+          "service_uninstall": true
+        },
+        "side_effects": [],
+        "unexpected": "secret"
+      }
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.2.0:result:agent_dispatch_sync_capabilities",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "agent-dispatch.sync-capabilities/v1"
+    },
+    "contract_version": {
+      "const": "v1"
+    },
+    "contract_digest": {
+      "const": "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b"
+    },
+    "capabilities": {
+      "type": "object",
+      "properties": {
+        "contract_read": {
+          "type": "boolean"
+        },
+        "status_read": {
+          "type": "boolean"
+        },
+        "publication": {
+          "type": "boolean"
+        },
+        "reconciliation": {
+          "type": "boolean"
+        },
+        "pair_verification": {
+          "type": "boolean"
+        },
+        "peer_service": {
+          "type": "boolean"
+        },
+        "control": {
+          "type": "boolean"
+        },
+        "membership_plan": {
+          "type": "boolean"
+        },
+        "membership_apply": {
+          "type": "boolean"
+        },
+        "checkpoint_plan": {
+          "type": "boolean"
+        },
+        "checkpoint_apply": {
+          "type": "boolean"
+        },
+        "service_render": {
+          "type": "boolean"
+        },
+        "service_install": {
+          "type": "boolean"
+        },
+        "service_inspect": {
+          "type": "boolean"
+        },
+        "service_stop": {
+          "type": "boolean"
+        },
+        "service_disable": {
+          "type": "boolean"
+        },
+        "service_uninstall": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "contract_read",
+        "status_read",
+        "publication",
+        "reconciliation",
+        "pair_verification",
+        "peer_service",
+        "control",
+        "membership_plan",
+        "membership_apply",
+        "checkpoint_plan",
+        "checkpoint_apply",
+        "service_render",
+        "service_install",
+        "service_inspect",
+        "service_stop",
+        "service_disable",
+        "service_uninstall"
+      ],
+      "additionalProperties": false
+    },
+    "side_effects": {
+      "type": "array",
+      "maxItems": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_version",
+    "contract_digest",
+    "capabilities",
+    "side_effects"
+  ],
+  "additionalProperties": false
+}

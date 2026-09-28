@@ -1,4 +1,4 @@
-# Agent Dispatch Plugin v0.1.0 Product Requirements
+# Agent Dispatch Plugin Product Requirements
 
 Status: Approved design baseline
 Scope: Single product scope
@@ -169,7 +169,8 @@ Release acceptance requires:
 - Direct Agent Dispatch database access or duplicated domain logic.
 - Generic CLI pass-through, arbitrary command execution, plugin hooks, custom
   Hermes commands, LLM override, or Desktop plugin APIs.
-- Windows, Hermes versions below v0.20.5, or Agent Dispatch 0.2.x.
+- Windows, Hermes versions below v0.20.5, or Agent Dispatch 0.2.x under
+  the frozen v0.1.0 baseline.
 - Automatic installation, activation, publication, tagging, or release.
 
 Worker receipt mutations and administrative mutations are post-v0.1.0
@@ -198,3 +199,61 @@ admits Darwin arm64, Linux amd64, and Linux arm64 and derives the schedule
 `--platform` flag from the trusted host. Schema URNs remain under
 `contracts/v0.1.0/` because the ten-tool input and result contracts are
 otherwise unchanged.
+
+## Approved v0.2.0 two-node inspection amendment (EPIC-007 / TASK-023)
+
+Status: Approved by Master on 2026-09-29 for TASK-023 runtime work. The
+frozen v0.1.0 contract remains valid for Agent Dispatch
+`>=0.1.6,<0.2.0` and its ten tools.
+
+The v0.2.0 contract adds exactly three read-only tools in the existing
+`agent_dispatch` toolset: `agent_dispatch_sync_capabilities` maps to
+`sync capabilities --output json`, `agent_dispatch_sync_status` maps to
+`sync status --group GROUP --output json`, and
+`agent_dispatch_sync_service_inspect` maps to
+`sync service inspect --group GROUP --output json`. Each model input is a
+closed empty object. Only the operator's optional `sync_group_id` setting
+may supply GROUP; it follows `^[a-z][a-z0-9-]{0,62}$`. The runner supplies
+the trusted config path to status and service inspect. Capabilities accepts
+no `--config` flag, although the same trusted path check precedes its call.
+No sync mutation, direct database or network access, arbitrary flags, or
+model-supplied execution setting is admitted.
+
+The catalog, derived manifest, and registry have thirteen fixed names.
+Model-facing availability is zero when the common trust gate fails; ten
+for a qualified legacy binary, or for the exact v0.2.0 binary without a
+configured group or valid capability evidence; and thirteen only when the
+configured group and a bounded capability probe attest `v1`, the pinned
+digest, and `contract_read`, `status_read`, and `service_inspect`. A fresh
+probe precedes each sync read, including direct handler dispatch. Probe
+failure never triggers the requested command. A disabled configured group
+is inspectable and stays disabled in the result.
+
+The v0.2.0 binary is admitted only when its `version --json` reports
+`0.2.0`, the operator SHA-256 matches its bytes, and those bytes match the
+reviewed platform SHA allowlist in `contracts/v0.2.0/catalog.json`.
+Later v0.2.x binaries are not automatically admitted. The pinned provider
+bundle is `docs/contracts/sync-provider-v1/` at core commit
+`48f13a4eef68e219a51d188decb8749a5fba9282`; the exact code candidate
+is `6b1c78b19f4cdb69dfd070ea016430f03075b73d`. The semantic digest is
+`sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b`.
+Platform support remains provisional until native Hermes and service-manager
+qualification on Darwin arm64, Linux amd64, and Linux arm64.
+
+The three new results require command-specific closed validation, including
+empty `side_effects`. Status keeps publication, delivery, import, and
+verification as separate latest local projections; it never infers fresh
+pair convergence from a historical verification. Its expected two nodes
+remain visible even if one is offline. Service definition health does not
+prove listener reachability. The v1 plugin wrapper, CLI envelope, error
+codes, diagnostic bounds, and exit rules remain unchanged.
+
+For these three validated sync results only, exact values at the catalog's
+`public_identity_paths` may bypass token-like redaction after field-specific
+format validation. These paths are the provider contract digest, status
+config revision, and present latest target commits. The current status
+provider does not emit a membership revision; if added later, that requires
+a reviewed contract amendment. All other values and keys, including nearby
+hash-shaped strings, warnings, errors, diagnostics, malformed results, and
+unknown fields follow the existing redaction rules. No whole result object
+or arbitrary hash is exempt.

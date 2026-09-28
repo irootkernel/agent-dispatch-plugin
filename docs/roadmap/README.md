@@ -13,8 +13,11 @@ replaced the proposed N-member/E26 provider with an implemented two-node
 v0.2.0 scope. The current Plugin remains inspection-only and rejects
 Dispatch v0.2.0 until EPIC-007 amends the contract and qualifies its actions.
 
-Active epic: none. EPIC-006 and TASK-018 through TASK-022 are Completed.
-Next eligible work: **EPIC-007 / TASK-023** (Planned). EPIC-008 and
+Active epic: **EPIC-007**. Next eligible task: **TASK-024**. Master authorized
+implementation of the EPIC-007 plan on 2026-09-29. The provider under review
+is core candidate `6b1c78b19f4cdb69dfd070ea016430f03075b73d`, with the
+v1 bundle at `48f13a4eef68e219a51d188decb8749a5fba9282`.
+EPIC-006 and TASK-018 through TASK-022 are Completed. EPIC-008 and
 TASK-028 through TASK-032 retain their reserved identities but are Deferred;
 they are not the successor to EPIC-007. The one-active-epic/task rule still
 applies. Core implementation completion does not establish Plugin
@@ -38,7 +41,7 @@ prerequisite.
 | EPIC-004 | Prove security and compatibility release gates | Completed | Canonical Outcomes: tests/unit/test_security_negatives.py, tests/qualification/test_compatibility_matrix.py, tests/qualification/_hermes_driver.py, docs/implementation-tips/qualification-darwin-arm64.md, tools/__init__.py, TESTING.md, Makefile |
 | EPIC-005 | Prove clean-clone distribution, rollback, and release readiness | Completed | Canonical Outcomes: pyproject.toml, tests/qualification/test_install_lifecycle.py, docs/implementation-tips/clean-clone-verification.md, docs/ops/install-lifecycle-darwin-arm64.md, docs/ops/upgrade-rollback-darwin-arm64.md, docs/implementation-tips/maintainer-guide.md, docs/ops/security-evidence-capture.md, docs/ops/troubleshooting.md, docs/implementation-tips/release-handoff.md, README.md, TESTING.md |
 | EPIC-006 | Linux support and existing-tool parity | Completed | docs/todo/TODO-LINUX-SUPPORT.md |
-| EPIC-007 | Two-node sync inspection and diagnostics | Planned | [docs/todo/TODO-SYNC-INSPECTION.md](../todo/TODO-SYNC-INSPECTION.md) |
+| EPIC-007 | Two-node sync inspection and diagnostics | In Progress | [docs/todo/TODO-SYNC-INSPECTION.md](../todo/TODO-SYNC-INSPECTION.md) |
 | EPIC-008 | Constrained sync management requests | Deferred | Reserved by TASK-018; no implemented request/query provider or approved Plugin mutation authority. Re-admit only through new core and Plugin contracts and separate authorization. |
 
 ## Work units
@@ -67,7 +70,7 @@ prerequisite.
 | TASK-020 | EPIC-006 | Add native schedule mapping and contract parity | Completed | Launchd/systemd argv mapping, wrong-platform and unsupported-host negatives, and close record in [docs/todo/TODO-LINUX-SUPPORT.md](../todo/TODO-LINUX-SUPPORT.md#task-020-close) |
 | TASK-021 | EPIC-006 | Run real platform and existing-action qualification | Completed | Darwin: docs/implementation-tips/qualification-darwin-arm64.md; linux/arm64 v0.1.7 on e7f3375: docs/implementation-tips/qualification-linux-arm64.md; linux/amd64 v0.1.8 on fa6f1cd: docs/implementation-tips/qualification-linux-amd64.md; close in [docs/todo/TODO-LINUX-SUPPORT.md](../todo/TODO-LINUX-SUPPORT.md#task-021-close) |
 | TASK-022 | EPIC-006 | Close Linux operations and hand off to Dispatch | Completed | Linux lifecycle runbooks, cold review, and Dispatch E20 / E20-T1 handoff in [docs/implementation-tips/dispatch-e20-handoff.md](../implementation-tips/dispatch-e20-handoff.md); close in [docs/todo/TODO-LINUX-SUPPORT.md](../todo/TODO-LINUX-SUPPORT.md#task-022-close) |
-| TASK-023 | EPIC-007 | Admit the implemented two-node provider and versioned inspection contract | Planned | Approved PRD/contract amendment and superseding redaction ADR, pinned provider bundle, platform SHA allowlist, and registered/available inventory rules; see [dossier](../todo/TODO-SYNC-INSPECTION.md#task-023-admit-the-provider-and-contract) |
+| TASK-023 | EPIC-007 | Admit the implemented two-node provider and versioned inspection contract | Completed | Approved PRD/contract amendment and superseding redaction ADR, pinned provider bundle, platform SHA allowlist, and registered/available inventory rules; see [dossier](../todo/TODO-SYNC-INSPECTION.md#task-023-admit-the-provider-and-contract) |
 | TASK-024 | EPIC-007 | Add three fixed sync inspection tools | Planned | Fixed commands including config-flag exception, fresh handler capability gate, and thirteen-name registration versus 0/10/13 available-definition evidence; see [dossier](../todo/TODO-SYNC-INSPECTION.md#task-024-add-three-fixed-inspection-tools) |
 | TASK-025 | EPIC-007 | Preserve sync evidence and safe presentation | Planned | Disabled, partial, stale, blocked, and service/listener distinctions plus exact approved identity fields and seeded-secret negatives; see [dossier](../todo/TODO-SYNC-INSPECTION.md#task-025-preserve-evidence-and-safe-presentation) |
 | TASK-026 | EPIC-007 | Qualify the inspection surface through Hermes | Planned | Allowlisted exact-artifact action and failure evidence, including native service-manager inspection, on Darwin arm64, Linux amd64, and Linux arm64; see [dossier](../todo/TODO-SYNC-INSPECTION.md#task-026-qualify-through-hermes) |

@@ -1,0 +1,342 @@
+{
+  "cases": [
+    {
+      "id": "qualified-sync",
+      "instance": {
+        "platform": "darwin/arm64",
+        "version": "0.2.0",
+        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "sync_group_id": "pair",
+        "capability_result": {
+          "schema_version": "agent-dispatch.sync-capabilities/v1",
+          "contract_version": "v1",
+          "contract_digest": "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b",
+          "capabilities": {
+            "contract_read": true,
+            "status_read": true,
+            "publication": true,
+            "reconciliation": true,
+            "pair_verification": true,
+            "peer_service": true,
+            "control": true,
+            "membership_plan": true,
+            "membership_apply": true,
+            "checkpoint_plan": true,
+            "checkpoint_apply": true,
+            "service_render": true,
+            "service_install": true,
+            "service_inspect": true,
+            "service_stop": true,
+            "service_disable": true,
+            "service_uninstall": true
+          },
+          "side_effects": []
+        },
+        "expected_available": 13
+      }
+    },
+    {
+      "id": "legacy-ten",
+      "instance": {
+        "platform": "darwin/arm64",
+        "version": "0.1.8",
+        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "sync_group_id": "pair",
+        "capability_result": {
+          "schema_version": "agent-dispatch.sync-capabilities/v1",
+          "contract_version": "v1",
+          "contract_digest": "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b",
+          "capabilities": {
+            "contract_read": true,
+            "status_read": true,
+            "publication": true,
+            "reconciliation": true,
+            "pair_verification": true,
+            "peer_service": true,
+            "control": true,
+            "membership_plan": true,
+            "membership_apply": true,
+            "checkpoint_plan": true,
+            "checkpoint_apply": true,
+            "service_render": true,
+            "service_install": true,
+            "service_inspect": true,
+            "service_stop": true,
+            "service_disable": true,
+            "service_uninstall": true
+          },
+          "side_effects": []
+        },
+        "expected_available": 10
+      }
+    },
+    {
+      "id": "unsupported-version",
+      "instance": {
+        "platform": "darwin/arm64",
+        "version": "0.2.1",
+        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "sync_group_id": "pair",
+        "capability_result": {
+          "schema_version": "agent-dispatch.sync-capabilities/v1",
+          "contract_version": "v1",
+          "contract_digest": "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b",
+          "capabilities": {
+            "contract_read": true,
+            "status_read": true,
+            "publication": true,
+            "reconciliation": true,
+            "pair_verification": true,
+            "peer_service": true,
+            "control": true,
+            "membership_plan": true,
+            "membership_apply": true,
+            "checkpoint_plan": true,
+            "checkpoint_apply": true,
+            "service_render": true,
+            "service_install": true,
+            "service_inspect": true,
+            "service_stop": true,
+            "service_disable": true,
+            "service_uninstall": true
+          },
+          "side_effects": []
+        },
+        "expected_available": 0
+      }
+    },
+    {
+      "id": "artifact-sha-mismatch",
+      "instance": {
+        "platform": "darwin/arm64",
+        "version": "0.2.0",
+        "binary_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "operator_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "sync_group_id": "pair",
+        "capability_result": {
+          "schema_version": "agent-dispatch.sync-capabilities/v1",
+          "contract_version": "v1",
+          "contract_digest": "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b",
+          "capabilities": {
+            "contract_read": true,
+            "status_read": true,
+            "publication": true,
+            "reconciliation": true,
+            "pair_verification": true,
+            "peer_service": true,
+            "control": true,
+            "membership_plan": true,
+            "membership_apply": true,
+            "checkpoint_plan": true,
+            "checkpoint_apply": true,
+            "service_render": true,
+            "service_install": true,
+            "service_inspect": true,
+            "service_stop": true,
+            "service_disable": true,
+            "service_uninstall": true
+          },
+          "side_effects": []
+        },
+        "expected_available": 0
+      }
+    },
+    {
+      "id": "operator-sha-mismatch",
+      "instance": {
+        "platform": "darwin/arm64",
+        "version": "0.2.0",
+        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "operator_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "sync_group_id": "pair",
+        "capability_result": {
+          "schema_version": "agent-dispatch.sync-capabilities/v1",
+          "contract_version": "v1",
+          "contract_digest": "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b",
+          "capabilities": {
+            "contract_read": true,
+            "status_read": true,
+            "publication": true,
+            "reconciliation": true,
+            "pair_verification": true,
+            "peer_service": true,
+            "control": true,
+            "membership_plan": true,
+            "membership_apply": true,
+            "checkpoint_plan": true,
+            "checkpoint_apply": true,
+            "service_render": true,
+            "service_install": true,
+            "service_inspect": true,
+            "service_stop": true,
+            "service_disable": true,
+            "service_uninstall": true
+          },
+          "side_effects": []
+        },
+        "expected_available": 0
+      }
+    },
+    {
+      "id": "group-missing",
+      "instance": {
+        "platform": "darwin/arm64",
+        "version": "0.2.0",
+        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "sync_group_id": "",
+        "capability_result": {
+          "schema_version": "agent-dispatch.sync-capabilities/v1",
+          "contract_version": "v1",
+          "contract_digest": "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b",
+          "capabilities": {
+            "contract_read": true,
+            "status_read": true,
+            "publication": true,
+            "reconciliation": true,
+            "pair_verification": true,
+            "peer_service": true,
+            "control": true,
+            "membership_plan": true,
+            "membership_apply": true,
+            "checkpoint_plan": true,
+            "checkpoint_apply": true,
+            "service_render": true,
+            "service_install": true,
+            "service_inspect": true,
+            "service_stop": true,
+            "service_disable": true,
+            "service_uninstall": true
+          },
+          "side_effects": []
+        },
+        "expected_available": 10
+      }
+    },
+    {
+      "id": "group-invalid",
+      "instance": {
+        "platform": "darwin/arm64",
+        "version": "0.2.0",
+        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "sync_group_id": "../pair",
+        "capability_result": {
+          "schema_version": "agent-dispatch.sync-capabilities/v1",
+          "contract_version": "v1",
+          "contract_digest": "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b",
+          "capabilities": {
+            "contract_read": true,
+            "status_read": true,
+            "publication": true,
+            "reconciliation": true,
+            "pair_verification": true,
+            "peer_service": true,
+            "control": true,
+            "membership_plan": true,
+            "membership_apply": true,
+            "checkpoint_plan": true,
+            "checkpoint_apply": true,
+            "service_render": true,
+            "service_install": true,
+            "service_inspect": true,
+            "service_stop": true,
+            "service_disable": true,
+            "service_uninstall": true
+          },
+          "side_effects": []
+        },
+        "expected_available": 10
+      }
+    },
+    {
+      "id": "digest-drift",
+      "instance": {
+        "platform": "darwin/arm64",
+        "version": "0.2.0",
+        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "sync_group_id": "pair",
+        "capability_result": {
+          "schema_version": "agent-dispatch.sync-capabilities/v1",
+          "contract_version": "v1",
+          "contract_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "capabilities": {
+            "contract_read": true,
+            "status_read": true,
+            "publication": true,
+            "reconciliation": true,
+            "pair_verification": true,
+            "peer_service": true,
+            "control": true,
+            "membership_plan": true,
+            "membership_apply": true,
+            "checkpoint_plan": true,
+            "checkpoint_apply": true,
+            "service_render": true,
+            "service_install": true,
+            "service_inspect": true,
+            "service_stop": true,
+            "service_disable": true,
+            "service_uninstall": true
+          },
+          "side_effects": []
+        },
+        "expected_available": 10
+      }
+    },
+    {
+      "id": "required-capability-missing",
+      "instance": {
+        "platform": "darwin/arm64",
+        "version": "0.2.0",
+        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "sync_group_id": "pair",
+        "capability_result": {
+          "schema_version": "agent-dispatch.sync-capabilities/v1",
+          "contract_version": "v1",
+          "contract_digest": "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b",
+          "capabilities": {
+            "contract_read": true,
+            "status_read": false,
+            "publication": true,
+            "reconciliation": true,
+            "pair_verification": true,
+            "peer_service": true,
+            "control": true,
+            "membership_plan": true,
+            "membership_apply": true,
+            "checkpoint_plan": true,
+            "checkpoint_apply": true,
+            "service_render": true,
+            "service_install": true,
+            "service_inspect": true,
+            "service_stop": true,
+            "service_disable": true,
+            "service_uninstall": true
+          },
+          "side_effects": []
+        },
+        "expected_available": 10
+      }
+    },
+    {
+      "id": "malformed-capability",
+      "instance": {
+        "platform": "darwin/arm64",
+        "version": "0.2.0",
+        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "sync_group_id": "pair",
+        "capability_result": {
+          "schema_version": "agent-dispatch.sync-capabilities/v1"
+        },
+        "expected_available": 10
+      }
+    }
+  ]
+}

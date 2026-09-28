@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-dispatch-plugin:contracts:v0.2.0:result:agent_dispatch_sync_service_inspect",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "agent-dispatch.sync-service/v1"
+    },
+    "group_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,62}$"
+    },
+    "platform": {
+      "enum": [
+        "darwin",
+        "linux"
+      ]
+    },
+    "label": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "definition_path": {
+      "type": "string",
+      "maxLength": 1024
+    },
+    "expected_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "present": {
+      "type": "boolean"
+    },
+    "definition_matches": {
+      "type": "boolean"
+    },
+    "installed_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        {
+          "const": ""
+        }
+      ]
+    },
+    "loaded": {
+      "type": "boolean"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "config_available": {
+      "type": "boolean"
+    },
+    "healthy": {
+      "type": "boolean"
+    },
+    "side_effects": {
+      "type": "array",
+      "maxItems": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "group_id",
+    "platform",
+    "label",
+    "definition_path",
+    "expected_digest",
+    "present",
+    "definition_matches",
+    "installed_digest",
+    "loaded",
+    "enabled",
+    "config_available",
+    "healthy",
+    "side_effects"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "healthy": {
+            "const": true
+          }
+        },
+        "required": [
+          "healthy"
+        ]
+      },
+      "then": {
+        "properties": {
+          "present": {
+            "const": true
+          },
+          "definition_matches": {
+            "const": true
+          },
+          "loaded": {
+            "const": true
+          },
+          "enabled": {
+            "const": true
+          }
+        }
+      }
+    }
+  ]
+}
