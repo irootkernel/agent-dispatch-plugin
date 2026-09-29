@@ -12,17 +12,20 @@ E20-E22 are Completed in their respective roadmaps. Dispatch ADR-0023
 replaced the proposed N-member/E26 provider with an implemented two-node
 v0.2.0 scope. The current development Plugin remains inspection-only and
 admits exact allowlisted v0.2.0 artifacts for three sync reads. Native
-qualification of that surface is complete on Darwin arm64 and Linux arm64;
-the Linux amd64 v0.2.0 slice remains deferred.
+qualification of that surface is complete on Darwin arm64 and Linux arm64.
+Native Linux amd64 v0.2.0 qualification is separate deferred work.
 
-Active epic: **EPIC-007**. All member tasks are complete; native Linux amd64
-v0.2.0 qualification remains the acceptance gap. Master authorized
+Active epic: **EPIC-007**. All member tasks are complete; ARM-scoped
+whole-Epic validation remains before closeout. Master authorized
 implementation of the EPIC-007 plan on 2026-09-29. The provider under review
 is core candidate `6b1c78b19f4cdb69dfd070ea016430f03075b73d`, with the
-v1 bundle at `48f13a4eef68e219a51d188decb8749a5fba9282`.
+v1 bundle at `48f13a4eef68e219a51d188decb8749a5fba9282`. Master
+approved ARM-only EPIC-007 acceptance on 2026-09-29 and allocated native
+Linux amd64 v0.2.0 qualification to deferred EPIC-009/TASK-033.
 EPIC-006 and TASK-018 through TASK-022 are Completed. EPIC-008 and
 TASK-028 through TASK-032 retain their reserved identities but are Deferred;
-they are not the successor to EPIC-007. The one-active-epic/task rule still
+they are not the successor to EPIC-007. EPIC-009 is also Deferred, with no
+automatic start after EPIC-007. The one-active-epic/task rule still
 applies. Core implementation completion does not establish Plugin
 qualification, release, or production activation.
 
@@ -46,6 +49,7 @@ prerequisite.
 | EPIC-006 | Linux support and existing-tool parity | Completed | docs/todo/TODO-LINUX-SUPPORT.md |
 | EPIC-007 | Two-node sync inspection and diagnostics | In Progress | [docs/todo/TODO-SYNC-INSPECTION.md](../todo/TODO-SYNC-INSPECTION.md) |
 | EPIC-008 | Constrained sync management requests | Deferred | Reserved by TASK-018; no implemented request/query provider or approved Plugin mutation authority. Re-admit only through new core and Plugin contracts and separate authorization. |
+| EPIC-009 | Qualify v0.2.0 sync inspection on native Linux amd64 | Deferred | TASK-033; native host and exact-artifact Hermes/systemd evidence are required before the platform support claim. Detailed SOT is required on re-entry. |
 
 ## Work units
 
@@ -83,6 +87,7 @@ prerequisite.
 | TASK-030 | EPIC-008 | Handle accepted and unknown submissions correctly | Deferred | Reserved identity; no provider request identity or inspection surface |
 | TASK-031 | EPIC-008 | Qualify management security and action-level behavior | Deferred | Reserved identity; management surface has not been admitted |
 | TASK-032 | EPIC-008 | Close management and hand off the paired system | Deferred | Reserved identity; old Dispatch E27 handoff was superseded by ADR-0023 |
+| TASK-033 | EPIC-009 | Run native Linux amd64 v0.2.0 sync inspection qualification | Deferred | On native x86_64 Linux, run `make test` and `make test-qualify` with catalog-pinned v0.1.8/v0.2.0 binaries; record Hermes action/inventory and real systemd user-manager absent/loaded/drifted evidence before a v0.2.0 amd64 support claim |
 
 ## Sequencing
 
@@ -98,9 +103,11 @@ handoff was fulfilled by the different, narrower E20-E22 sequence. EPIC-007
 now proceeds in order from TASK-023 to TASK-027 against that implemented
 provider. Each task's evidence and gate are owned by its adopted dossier.
 Master narrowed TASK-026 completion to Darwin arm64 and Linux arm64 on
-2026-09-29. The deferred Linux amd64 v0.2.0 qualification remains an
-EPIC-007 acceptance gap and must be completed before Epic closure or a
-Linux amd64 v0.2.0 support claim; its owner and re-entry condition are in
+2026-09-29, then approved the same ARM-only EPIC-007 acceptance boundary.
+Whole-Epic audit, cold review, and closeout still gate EPIC-007 completion.
+The v0.2.0 catalog retains the exact Linux amd64 binary SHA, but that does
+not qualify its runtime. EPIC-009/TASK-033 owns native Linux amd64 evidence
+before that platform's v0.2.0 support claim; its re-entry condition is in
 [deferred feedback](../deferred-feedback/README.md#linux-amd64-v020-sync-inspection-qualification).
 EPIC-008 and its five tasks remain Deferred after EPIC-007; completion of
 TASK-027 does not start them. Parallel work is allowed only where a dossier

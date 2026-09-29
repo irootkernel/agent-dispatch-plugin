@@ -54,4 +54,4 @@ after either direction of the swap. A rollback to v0.1.x source registers
 the historical ten tools; retaining `sync_group_id` in profile settings
 does not grant the three sync reads. Native Linux amd64 v0.2.0
 qualification remains open under the
-[EPIC-007 re-entry gate](../deferred-feedback/README.md#linux-amd64-v020-sync-inspection-qualification).
+[EPIC-009/TASK-033 re-entry gate](../deferred-feedback/README.md#linux-amd64-v020-sync-inspection-qualification).

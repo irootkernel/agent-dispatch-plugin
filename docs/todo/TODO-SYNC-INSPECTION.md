@@ -3,9 +3,9 @@
 Status: In Progress (the roadmap owns lifecycle)
 Roadmap: EPIC-007 / TASK-023 through TASK-027 in docs/roadmap/README.md
 Depends on: EPIC-006 Completed; Agent Dispatch E20-E22 Completed
-Next eligible task: none after TASK-027; native Linux amd64 v0.2.0
-qualification remains an EPIC-007 acceptance gap
-After completion: no automatic next epic; EPIC-008 remains Deferred
+Next eligible task: none after TASK-027; ARM-scoped whole-Epic validation
+and closeout remain
+After completion: no automatic next epic; EPIC-008 and EPIC-009 remain Deferred
 Planned Plugin target: v0.2.0, with a new versioned public contract
 
 ## Provenance and admission boundary
@@ -26,8 +26,9 @@ qualification claim.
 At epic intake, the Plugin admitted Agent Dispatch `>=0.1.6,<0.2.0` and
 exactly ten tools. TASK-023 approved the v0.2.0 amendment, and TASK-024
 activates its thirteen-name development surface. Native action-level
-qualification is complete for Darwin arm64 and Linux arm64; Linux amd64
-v0.2.0 remains an EPIC-007 acceptance gap recorded in deferred feedback.
+qualification is complete for Darwin arm64 and Linux arm64. EPIC-007
+acceptance covers these two hosts; Linux amd64 v0.2.0 qualification is
+separately deferred under EPIC-009/TASK-033.
 The checked-in core `dist/` contains v0.1.8 release artifacts, not v0.2.0
 qualification artifacts. A development executable that implements sync but
 reports v0.1.8 cannot stand in for a correctly identified v0.2.0 candidate.
@@ -143,7 +144,7 @@ The second assessment's two Low documentation findings were resolved by an
 isolated three-file delta and `make test-prepare` passed on that delta.
 This is contract admission evidence only; TASK-024 activates registration and
 runtime. TASK-026 qualified Darwin arm64 and Linux arm64; native Linux amd64
-v0.2.0 qualification remains the deferred EPIC-007 acceptance gap.
+v0.2.0 qualification is deferred under EPIC-009/TASK-033.
 
 ### TASK-024: Add three fixed inspection tools
 
@@ -240,7 +241,7 @@ inspect` against a disposable native user service manager and isolated
 managed definition on each platform, including absent, loaded, and drifted
 states. Master narrowed the original three-platform TASK-026 gate on
 2026-09-29: native Linux amd64 v0.2.0 qualification remains deferred and
-unclaimed under the EPIC-007 acceptance gate. ADR-010 scopes OS-derived
+unclaimed under EPIC-009/TASK-033. ADR-010 scopes OS-derived
 HOME and the native Linux user runtime directory to the two service reads;
 ordinary actions retain the fixed PATH/TMPDIR child environment. Prove
 the real command under that amended trust boundary rather than treating
@@ -274,8 +275,8 @@ The prior Linux arm64 v0.1.7 TASK-021 artifact remains historical. This
 run's legacy regression uses the available v0.1.8 Linux arm64 build,
 SHA-256 `3d06d4d35493ce51581bb8c61f4ffc3dfd700499863a492a337ab7fb762ddf8e`,
 under the catalog's highest-compatible-release selection rule. Native Linux
-amd64 Hermes and user-manager qualification is pending. These two slices
-do not establish all-platform support.
+amd64 Hermes and user-manager qualification is pending under
+EPIC-009/TASK-033. These two slices do not establish all-platform support.
 
 #### TASK-026 close
 
@@ -289,9 +290,9 @@ service in absent, loaded, and drifted states. The disposable source and
 service definition were removed after the run.
 
 Master approved TASK-026 completion for the two qualified platforms on
-2026-09-29. The Linux amd64 v0.2.0 matrix is deferred to the plugin
-maintainer; the EPIC-007 acceptance and Linux amd64 support claim remain
-open until native Hermes and user-manager evidence is recorded. See
+2026-09-29 and later narrowed EPIC-007 acceptance to those hosts. The Linux
+amd64 v0.2.0 matrix is deferred to EPIC-009/TASK-033; its support claim
+remains open until native Hermes and user-manager evidence is recorded. See
 [deferred feedback](../deferred-feedback/README.md#linux-amd64-v020-sync-inspection-qualification).
 
 ### TASK-027: Close documentation and handoff
@@ -301,9 +302,9 @@ status meaning, disabled groups, service-definition inspection versus
 listener health, and exact upgrade/rollback behavior. Record the reviewed
 Plugin/core candidate pair, contract digest, all gates, and a bounded cold
 review. Close the epic only when every task and required acceptance check is
-complete. The handoff identifies no automatic successor; EPIC-008 remains
-Deferred. Release, installation, activation, tag, and publication remain
-separate lifecycle actions.
+complete. The handoff identifies no automatic successor; EPIC-008 and
+EPIC-009 remain Deferred. Release, installation, activation, tag, and
+publication remain separate lifecycle actions.
 
 Evidence: accurate examples, links, acceptance traceability, review
 disposition, and exact candidate identities without machine-local secrets.
@@ -323,17 +324,19 @@ contract digest, ARM qualification gates, and acceptance owners. A bounded
 five-role review of the task documentation completed with full coverage
 and a passing backend check. Its one Low platform-wording gap was corrected
 and checked locally. The TASK-027 commit is distinct from release candidate
-selection; native Linux amd64 v0.2.0 qualification and whole-epic validation
-remain open.
+selection; ARM-scoped whole-Epic validation remains open, while native
+Linux amd64 v0.2.0 qualification belongs to EPIC-009/TASK-033.
 
 ## Epic acceptance
 
 - The amended PRD, executable contract, derived manifest, registration,
   fixed commands, platform SHA allowlist, and registered versus available
   inventory agree on the three added read tools.
-- Every advertised action has a successful real Hermes/Dispatch path on each
-  supported host and deterministic negative coverage for trust, parsing,
-  bounds, and redaction. Missing required platform evidence blocks closure.
+- Every advertised action has a successful real Hermes/Dispatch path on
+  Darwin arm64 and Linux arm64, with deterministic negative coverage for
+  trust, parsing, bounds, and redaction. Native Linux amd64 v0.2.0 evidence
+  gates that platform's support claim under EPIC-009/TASK-033, not this
+  ARM-scoped Epic closure.
 - Disabled, incomplete, blocked, stale, and service-only evidence cannot be
   presented as fresh two-node convergence or listener readiness.
 - The existing ten tools retain their qualified behavior; no new mutation,

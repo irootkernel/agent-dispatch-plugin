@@ -44,8 +44,9 @@ follow-up; no new task ID allocated.
 
 ### Linux amd64 v0.2.0 sync inspection qualification
 
-Source: Master narrowed TASK-026 completion on 2026-09-29 after Darwin
-arm64 and native Linux arm64 qualification. Disposition: deferred.
+Source: Master narrowed TASK-026 completion and EPIC-007 acceptance on
+2026-09-29 after Darwin arm64 and native Linux arm64 qualification.
+Disposition: adopted as deferred EPIC-009/TASK-033.
 Owner: Plugin maintainer. Rationale: no accessible native x86_64 Linux
 host was available for the v0.2.0 Hermes and systemd user-manager matrix;
 translated execution does not meet the platform gate. The older
@@ -54,8 +55,8 @@ reads. Revisit: when a native x86_64 Linux host is available, run
 `make test` and `make test-qualify` with the exact catalog-pinned
 v0.1.8 and v0.2.0 binaries, including real absent/loaded/drifted
 service inspection, then record the result before claiming Linux amd64
-v0.2.0 support or closing EPIC-007. Roadmap identity: EPIC-007
-acceptance gap after TASK-026; no new task ID allocated.
+v0.2.0 support. Roadmap identity: EPIC-009/TASK-033; this entry is a
+re-entry pointer, while the roadmap owns lifecycle and acceptance.
 
 ### Linux and multi-platform support
 

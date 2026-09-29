@@ -2,7 +2,7 @@
 
 The recorded matrix below covers the historical v0.1.8 ten-tool surface.
 Native Linux amd64 v0.2.0 Hermes and systemd user-manager qualification is
-still pending. The maintainer re-entry gate is in
+still pending under EPIC-009/TASK-033. The maintainer re-entry gate is in
 [deferred feedback](../deferred-feedback/README.md#linux-amd64-v020-sync-inspection-qualification);
 do not use this historical result as evidence for the three sync reads.
 
@@ -16,13 +16,13 @@ This is maintainer qualification evidence for one advertised platform. It
 does not authorize a release, does not replace Darwin arm64 as the current
 release host, and does not treat a translated amd64 container as this host.
 
-The deferred EPIC-007 v0.2.0 Linux amd64 qualification requires the candidate
-with SHA-256 `59216c7ec8aee4abb9e00377a81686156b08a3235275afcde5b6ec28363bb8d6`,
+Deferred EPIC-009/TASK-033 v0.2.0 Linux amd64 qualification requires the
+candidate with SHA-256 `59216c7ec8aee4abb9e00377a81686156b08a3235275afcde5b6ec28363bb8d6`,
 at `AGENT_DISPATCH_QUALIFY_BINARY_V020`, plus a native systemd user manager.
 The earlier TASK-021 result below remains historical; it does not qualify
 the v0.2.0 Plugin candidate. Master closed TASK-026 for Darwin arm64 and
-Linux arm64 on 2026-09-29; this native Linux amd64 matrix remains an
-EPIC-007 acceptance gap owned by the Plugin maintainer.
+Linux arm64 on 2026-09-29; this native Linux amd64 matrix remains a
+separate platform support gate owned by the Plugin maintainer.
 
 ## Exact artifact identities
 

@@ -13,7 +13,9 @@ until the owning task does so through change control.
 
 EPIC-008 and TASK-028 through TASK-032 are Deferred in the roadmap. Their
 reserved identities do not authorize work without a new provider contract,
-Plugin scope amendment, and separate authority for mutations.
+Plugin scope amendment, and separate authority for mutations. EPIC-009 and
+TASK-033 are separately Deferred for native Linux amd64 v0.2.0
+qualification; they need an adopted Detailed SOT before re-entry.
 
 An adopted dossier must identify its tasks, dependencies, decisions, acceptance
 evidence, non-goals, and handoff conditions. Lifecycle remains authoritative in

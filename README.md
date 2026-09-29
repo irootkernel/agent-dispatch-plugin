@@ -2,7 +2,7 @@
 
 Agent Dispatch Plugin connects [Agent Dispatch](https://github.com/irootkernel/agent-dispatch) to your interactive Hermes conversations. Ask Hermes to inspect routes, follow a dispatch through its recorded history, look up receipts, or explain diagnostic findings without composing Agent Dispatch CLI commands yourself.
 
-The current development source registers thirteen inspection tools. Ten retain the v0.1.0 behavior; three inspect the two-node sync provider when an exact allowlisted v0.2.0 executable and trusted group are configured. The new reads passed native qualification on Darwin arm64 and Linux arm64; Linux amd64 v0.2.0 qualification remains pending under EPIC-007. Agent Dispatch remains responsible for routing, execution, and stored state.
+The current development source registers thirteen inspection tools. Ten retain the v0.1.0 behavior; three inspect the two-node sync provider when an exact allowlisted v0.2.0 executable and trusted group are configured. The new reads passed native qualification on Darwin arm64 and Linux arm64; Linux amd64 v0.2.0 qualification remains deferred under EPIC-009/TASK-033 and has no support claim for these reads. Agent Dispatch remains responsible for routing, execution, and stored state.
 
 ## What you can do
 
