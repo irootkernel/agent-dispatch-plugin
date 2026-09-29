@@ -265,7 +265,9 @@ def test_bounded_probe_failure_denies_command(plugin, broken_catalog, tmp_path, 
     assert not any(line[:2] == ["sync", "status"] for line in _lines(log))
 
 
-@pytest.mark.parametrize("mutation", ["missing", "false", "malformed", "effects"])
+@pytest.mark.parametrize(
+    "mutation", ["missing", "false", "malformed", "effects", "extra_field", "extra_capability"]
+)
 def test_invalid_capability_denies_command(plugin, broken_catalog, tmp_path, mutation):
     def change(result):
         if mutation == "missing":
@@ -274,6 +276,10 @@ def test_invalid_capability_denies_command(plugin, broken_catalog, tmp_path, mut
             result["capabilities"]["service_inspect"] = False
         elif mutation == "malformed":
             result["capabilities"]["publication"] = "yes"
+        elif mutation == "extra_field":
+            result["unapproved"] = True
+        elif mutation == "extra_capability":
+            result["capabilities"]["unapproved"] = True
         else:
             result["side_effects"] = ["mutation"]
 

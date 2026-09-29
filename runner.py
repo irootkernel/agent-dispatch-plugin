@@ -556,6 +556,12 @@ def verify_sync_capabilities(config: Mapping[str, Any]) -> RunnerTrust:
             CONTRACT_MISMATCH, "sync capability probe returned an invalid envelope"
         ) from exc
     result = envelope.get("result")
+    try:
+        envelopes.validate_sync_result(result, action.expected_command)
+    except envelopes.EnvelopeViolation as exc:
+        raise TrustFailure(
+            CONTRACT_MISMATCH, "sync capability probe returned an invalid result"
+        ) from exc
     provider = load_catalog()["sync_provider"]
     if (
         envelope["ok"] is not True
