@@ -4,8 +4,9 @@ Historical handoff (TASK-022): its proposed E26 wait and G09/G10 sequence
 were superseded by Dispatch ADR-0023 and completed E20-E22. The current
 Plugin next position and scope are owned by the
 [roadmap](../roadmap/README.md#program-position) and
-[EPIC-007 dossier](../todo/TODO-SYNC-INSPECTION.md). The original handoff
-below remains as evidence of what TASK-022 transferred at that time.
+[EPIC-007 canonical outcomes](../roadmap/README.md#epic-register). The
+original handoff below remains as evidence of what TASK-022 transferred at
+that time.
 
 Owner after this record: Agent Dispatch, epic **E20**, first task **E20-T1**.
 Plugin program position **G01** (EPIC-006) is complete. Stop plugin

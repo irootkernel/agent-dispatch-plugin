@@ -61,9 +61,9 @@ and Blocked. Every planned or active epic links one Detailed SOT dossier under
 the existing repository convention. All initial dossiers were promoted to the
 canonical outcomes in their roadmap rows and retired. EPIC-006 is
 Completed and keeps [docs/todo/TODO-LINUX-SUPPORT.md](todo/TODO-LINUX-SUPPORT.md)
-as its Detailed SOT. In Progress EPIC-007 uses
-[docs/todo/TODO-SYNC-INSPECTION.md](todo/TODO-SYNC-INSPECTION.md); its
-versioned PRD and contract amendments belong to TASK-023. EPIC-008 is
+as its Detailed SOT. Completed EPIC-007 links its canonical outcomes from
+the [roadmap](roadmap/README.md#epic-register); its versioned PRD and
+contract amendments belong to TASK-023. EPIC-008 is
 Deferred in the roadmap. EPIC-009 is separately Deferred for native Linux
 amd64 v0.2.0 qualification; it needs a Detailed SOT before re-entry.
 Child task completion alone does not establish epic acceptance.

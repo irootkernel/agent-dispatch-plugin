@@ -15,27 +15,26 @@ admits exact allowlisted v0.2.0 artifacts for three sync reads. Native
 qualification of that surface is complete on Darwin arm64 and Linux arm64.
 Native Linux amd64 v0.2.0 qualification is separate deferred work.
 
-Active epic: **EPIC-007**. All member tasks are complete; ARM-scoped
-whole-Epic validation remains before closeout. Master authorized
-implementation of the EPIC-007 plan on 2026-09-29. The provider under review
-is core candidate `6b1c78b19f4cdb69dfd070ea016430f03075b73d`, with the
+EPIC-007 and all five member tasks are Completed. The ARM-scoped whole-Epic
+audit and cold review passed after the committed validation corrections.
+Master authorized implementation of the EPIC-007 plan on 2026-09-29. The
+admitted core candidate is `6b1c78b19f4cdb69dfd070ea016430f03075b73d`, with the
 v1 bundle at `48f13a4eef68e219a51d188decb8749a5fba9282`. Master
 approved ARM-only EPIC-007 acceptance on 2026-09-29 and allocated native
 Linux amd64 v0.2.0 qualification to deferred EPIC-009/TASK-033.
 EPIC-006 and TASK-018 through TASK-022 are Completed. EPIC-008 and
 TASK-028 through TASK-032 retain their reserved identities but are Deferred;
 they are not the successor to EPIC-007. EPIC-009 is also Deferred, with no
-automatic start after EPIC-007. The one-active-epic/task rule still
-applies. Core implementation completion does not establish Plugin
+automatic start after EPIC-007. There is no active epic. The
+one-active-epic/task rule still applies. Core implementation completion does not establish Plugin
 qualification, release, or production activation.
 
-`Planned` identifies the next work unit; it does not approve the v0.2.0
-contract or authorize implementation. Record maintainer authorization to
-begin TASK-023 and the provider identity under review before moving
-EPIC-007 and TASK-023 to In Progress. TASK-023 must then obtain the canonical
-amendment approval before runtime changes. A missing authorization or
-properly stamped candidate keeps the task Planned or Blocked with the unmet
-prerequisite.
+At intake, `Planned` identified the next work unit without approving the
+v0.2.0 contract or authorizing implementation. TASK-023 recorded maintainer
+authorization, the exact provider identity, and canonical amendment
+approval before runtime changes. That admission boundary remains the rule
+for later work; a missing authorization or properly stamped candidate
+keeps a future task Planned or Blocked with the unmet prerequisite.
 
 ## Epic register
 
@@ -47,7 +46,7 @@ prerequisite.
 | EPIC-004 | Prove security and compatibility release gates | Completed | Canonical Outcomes: tests/unit/test_security_negatives.py, tests/qualification/test_compatibility_matrix.py, tests/qualification/_hermes_driver.py, docs/implementation-tips/qualification-darwin-arm64.md, tools/__init__.py, TESTING.md, Makefile |
 | EPIC-005 | Prove clean-clone distribution, rollback, and release readiness | Completed | Canonical Outcomes: pyproject.toml, tests/qualification/test_install_lifecycle.py, docs/implementation-tips/clean-clone-verification.md, docs/ops/install-lifecycle-darwin-arm64.md, docs/ops/upgrade-rollback-darwin-arm64.md, docs/implementation-tips/maintainer-guide.md, docs/ops/security-evidence-capture.md, docs/ops/troubleshooting.md, docs/implementation-tips/release-handoff.md, README.md, TESTING.md |
 | EPIC-006 | Linux support and existing-tool parity | Completed | docs/todo/TODO-LINUX-SUPPORT.md |
-| EPIC-007 | Two-node sync inspection and diagnostics | In Progress | [docs/todo/TODO-SYNC-INSPECTION.md](../todo/TODO-SYNC-INSPECTION.md) |
+| EPIC-007 | Two-node sync inspection and diagnostics | Completed | Canonical Outcomes: [PRD amendment](../specs/PRD.md#approved-v020-two-node-inspection-amendment-epic-007--task-023), [contract reference](../specs/contracts.md), [v0.2.0 catalog](../../contracts/v0.2.0/catalog.json), [development handoff](../implementation-tips/release-handoff.md#epic-007-development-handoff), [testing contract](../../TESTING.md), and [deferred Linux amd64 owner](../deferred-feedback/README.md#linux-amd64-v020-sync-inspection-qualification) |
 | EPIC-008 | Constrained sync management requests | Deferred | Reserved by TASK-018; no implemented request/query provider or approved Plugin mutation authority. Re-admit only through new core and Plugin contracts and separate authorization. |
 | EPIC-009 | Qualify v0.2.0 sync inspection on native Linux amd64 | Deferred | TASK-033; native host and exact-artifact Hermes/systemd evidence are required before the platform support claim. Detailed SOT is required on re-entry. |
 
@@ -77,11 +76,11 @@ prerequisite.
 | TASK-020 | EPIC-006 | Add native schedule mapping and contract parity | Completed | Launchd/systemd argv mapping, wrong-platform and unsupported-host negatives, and close record in [docs/todo/TODO-LINUX-SUPPORT.md](../todo/TODO-LINUX-SUPPORT.md#task-020-close) |
 | TASK-021 | EPIC-006 | Run real platform and existing-action qualification | Completed | Darwin: docs/implementation-tips/qualification-darwin-arm64.md; linux/arm64 v0.1.7 on e7f3375: docs/implementation-tips/qualification-linux-arm64.md; linux/amd64 v0.1.8 on fa6f1cd: docs/implementation-tips/qualification-linux-amd64.md; close in [docs/todo/TODO-LINUX-SUPPORT.md](../todo/TODO-LINUX-SUPPORT.md#task-021-close) |
 | TASK-022 | EPIC-006 | Close Linux operations and hand off to Dispatch | Completed | Linux lifecycle runbooks, cold review, and Dispatch E20 / E20-T1 handoff in [docs/implementation-tips/dispatch-e20-handoff.md](../implementation-tips/dispatch-e20-handoff.md); close in [docs/todo/TODO-LINUX-SUPPORT.md](../todo/TODO-LINUX-SUPPORT.md#task-022-close) |
-| TASK-023 | EPIC-007 | Admit the implemented two-node provider and versioned inspection contract | Completed | Approved PRD/contract amendment and superseding redaction ADR, pinned provider bundle, platform SHA allowlist, and registered/available inventory rules; see [dossier](../todo/TODO-SYNC-INSPECTION.md#task-023-admit-the-provider-and-contract) |
-| TASK-024 | EPIC-007 | Add three fixed sync inspection tools | Completed | Fixed commands including config-flag exception, fresh handler capability gate, and thirteen-name registration versus 0/10/13 available-definition evidence; see [close record](../todo/TODO-SYNC-INSPECTION.md#task-024-close) |
-| TASK-025 | EPIC-007 | Preserve sync evidence and safe presentation | Completed | Closed sync result validation, distinct status and service evidence, exact approved identity fields, and seeded-secret negatives; see [close record](../todo/TODO-SYNC-INSPECTION.md#task-025-close) |
-| TASK-026 | EPIC-007 | Qualify the inspection surface through Hermes | Completed | Exact-artifact Hermes action and failure evidence, including native service-manager inspection, on Darwin arm64 and Linux arm64; Linux amd64 v0.2.0 qualification remains deferred and unclaimed; see [close record](../todo/TODO-SYNC-INSPECTION.md#task-026-close) |
-| TASK-027 | EPIC-007 | Close inspection documentation and handoff | Completed | Public/maintainer guidance, exact ARM-scoped handoff, checks, and bounded cold review; see [close record](../todo/TODO-SYNC-INSPECTION.md#task-027-close) |
+| TASK-023 | EPIC-007 | Admit the implemented two-node provider and versioned inspection contract | Completed | [PRD amendment](../specs/PRD.md#approved-v020-two-node-inspection-amendment-epic-007--task-023), [v0.2.0 catalog](../../contracts/v0.2.0/catalog.json), and [ADR-009](../architecture-decision-records/ADR-009-sync-public-identity-redaction.md); committed as `6dfe4a4` |
+| TASK-024 | EPIC-007 | Add three fixed sync inspection tools | Completed | Fixed commands including config-flag exception, fresh handler capability gate, and thirteen-name registration versus 0/10/13 available-definition evidence; [testing contract](../../TESTING.md), commit `108b896` |
+| TASK-025 | EPIC-007 | Preserve sync evidence and safe presentation | Completed | Closed result validation, distinct status and service evidence, exact approved identity fields, and seeded-secret negatives; [contract reference](../specs/contracts.md), commit `7e8047a` |
+| TASK-026 | EPIC-007 | Qualify the inspection surface through Hermes | Completed | Exact-artifact Hermes action and native service-manager evidence on [Darwin arm64](../implementation-tips/qualification-darwin-arm64.md) and [Linux arm64](../implementation-tips/qualification-linux-arm64.md); Linux amd64 v0.2.0 remains deferred, commit `9382477` |
+| TASK-027 | EPIC-007 | Close inspection documentation and handoff | Completed | [Public guidance](../../README.md#inspect-a-two-node-sync-group), [development handoff](../implementation-tips/release-handoff.md#epic-007-development-handoff), and bounded cold review; commit `f88d0b5` |
 | TASK-028 | EPIC-008 | Define and qualify management authorization | Deferred | Reserved identity; core request contract and separate Plugin authority required before replanning |
 | TASK-029 | EPIC-008 | Implement the one constrained request tool | Deferred | Reserved identity; no current `sync request` provider command |
 | TASK-030 | EPIC-008 | Handle accepted and unknown submissions correctly | Deferred | Reserved identity; no provider request identity or inspection surface |
@@ -100,15 +99,19 @@ TASK-019 precedes TASK-020, TASK-020 precedes TASK-021, and TASK-021 precedes
 TASK-022. TASK-018 reserved EPIC-007, EPIC-008, and TASK-023 through
 TASK-032 without reusing their identities. The historical Dispatch E20
 handoff was fulfilled by the different, narrower E20-E22 sequence. EPIC-007
-now proceeds in order from TASK-023 to TASK-027 against that implemented
-provider. Each task's evidence and gate are owned by its adopted dossier.
+completed TASK-023 through TASK-027 in order against that implemented
+provider. Their outcomes are linked from the task rows above.
 Master narrowed TASK-026 completion to Darwin arm64 and Linux arm64 on
 2026-09-29, then approved the same ARM-only EPIC-007 acceptance boundary.
-Whole-Epic audit, cold review, and closeout still gate EPIC-007 completion.
+The ARM-scoped whole-Epic audit and five-role cold review completed with
+all current findings settled. Validation corrections were committed in
+`ba6e794`; its code candidate passed `make test` (610 unit, 28 integration,
+one E2E). The final documentation-only Low corrections passed local diff
+checks after that gate. The earlier native ARM qualification records apply
+to the TASK-026 candidate; they are not fresh native runs on `ba6e794`.
 The v0.2.0 catalog retains the exact Linux amd64 binary SHA, but that does
 not qualify its runtime. EPIC-009/TASK-033 owns native Linux amd64 evidence
 before that platform's v0.2.0 support claim; its re-entry condition is in
 [deferred feedback](../deferred-feedback/README.md#linux-amd64-v020-sync-inspection-qualification).
 EPIC-008 and its five tasks remain Deferred after EPIC-007; completion of
-TASK-027 does not start them. Parallel work is allowed only where a dossier
-states that contracts and evidence ownership do not overlap.
+TASK-027 does not start them.

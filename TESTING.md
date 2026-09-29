@@ -75,9 +75,10 @@ thirteen only with a valid group and fresh capability evidence. The tests
 check each fixed argv, the capabilities config-flag exception, SHA denial,
 and direct-dispatch failure after a cached visible state. Native Hermes
 qualification of the new reads passed the scoped TASK-026 gate on Darwin
-arm64 and Linux arm64. EPIC-007 acceptance uses these two hosts and still
-requires whole-Epic validation. The Linux amd64 v0.2.0 gate belongs to
-deferred EPIC-009/TASK-033 and must pass before that platform's support claim.
+arm64 and Linux arm64. EPIC-007 acceptance uses these two hosts; its
+whole-Epic validation completed after the ARM qualification. The Linux amd64
+v0.2.0 gate belongs to deferred EPIC-009/TASK-033 and must pass before that
+platform's support claim.
 
 ## Test Frameworks
 

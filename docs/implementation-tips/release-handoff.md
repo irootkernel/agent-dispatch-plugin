@@ -1,8 +1,8 @@
 # Release Handoff Runbook: Exact-Commit Candidate
 
 Target: declaring and verifying an immutable release candidate. The original
-v0.1.0 handoff remains historical; the current EPIC-007 development handoff
-is below.
+v0.1.0 handoff remains historical; the completed EPIC-007 development
+handoff is below.
 Environment: each claimed native host with Hermes (v0.20.5 or newer) on
 `PATH` and its catalog-pinned legacy and v0.2.0 Agent Dispatch artifacts;
 see the [qualification matrices](README.md#verify-and-hand-off).
@@ -62,8 +62,10 @@ and contract digest
 The per-platform executable digests are in the
 [v0.2.0 catalog](../../contracts/v0.2.0/catalog.json). TASK-027 documentation
 was committed at `f88d0b54a17ead57a5745771b24a8f5a0914f3f5`.
-Neither commit selects a release candidate: ARM-scoped whole-Epic validation
-and closeout can change the final revision.
+The whole-Epic validation corrections were committed at
+`ba6e79485527862f1d7fc5e51d6dd39fa6e826fa`. These commits do not
+select a release candidate; final closeout and release QA have distinct
+revision and authorization boundaries.
 
 TASK-026 ran `make test` (605 unit, 28 integration, one E2E) and
 `make test-qualify` (nine Darwin arm64 and seven native Linux arm64 cases)
@@ -71,8 +73,9 @@ on the corrected candidate. The qualification includes real Hermes
 action dispatch, original ten-tool regressions, and native user service
 inspection of absent, loaded, and drifted definitions. The deterministic
 security negatives are included in the aggregate. The
-[TASK-026 close record](../todo/TODO-SYNC-INSPECTION.md#task-026-close)
-states their scope.
+[Darwin](qualification-darwin-arm64.md) and
+[Linux arm64](qualification-linux-arm64.md) runbooks retain the native
+qualification scope and exact artifact identities.
 
 EPIC-007 acceptance covers Darwin arm64 and Linux arm64. Native Linux amd64
 v0.2.0 Hermes and systemd user-manager qualification belongs to deferred
@@ -80,18 +83,22 @@ EPIC-009/TASK-033 and remains required before a Linux amd64 v0.2.0 support
 claim.
 The [deferred feedback owner and re-entry gate](../deferred-feedback/README.md#linux-amd64-v020-sync-inspection-qualification)
 name the exact work. The catalog's amd64 binary SHA identifies an executable;
-it does not qualify that platform. A final ARM-scoped whole-Epic audit, cold
-review, and exact release-candidate gate remain separate. Neither ARM
+it does not qualify that platform. The ARM-scoped whole-Epic audit and
+five-role cold review completed with all current findings settled. The
+corrected code candidate passed `make test` (610 unit, 28 integration,
+one E2E); final documentation-only Low corrections passed local diff checks.
+Those checks did not rerun the native ARM matrix on the corrected commit.
+An exact release-candidate gate remains separate. Neither ARM
 qualification nor this handoff authorizes release, installation, activation,
 or publication.
 
 | EPIC-007 acceptance area | Current authority and result |
 |---|---|
 | Contract, three fixed reads, pins, and inventory | [PRD amendment](../specs/PRD.md#approved-v020-two-node-inspection-amendment-epic-007--task-023), [catalog](../../contracts/v0.2.0/catalog.json), and [manifest parity](../../TESTING.md); thirteen registered, with zero/ten/thirteen available by trust and capability state |
-| Real Hermes actions and failure paths | [TASK-026 close record](../todo/TODO-SYNC-INSPECTION.md#task-026-close) and the [Darwin](qualification-darwin-arm64.md) / [Linux arm64](qualification-linux-arm64.md) qualification runbooks; native Linux amd64 v0.2.0 belongs to EPIC-009/TASK-033 |
+| Real Hermes actions and failure paths | [Darwin](qualification-darwin-arm64.md) and [Linux arm64](qualification-linux-arm64.md) qualification runbooks; native Linux amd64 v0.2.0 belongs to EPIC-009/TASK-033 |
 | Status and service interpretation | [Result contracts](../specs/contracts.md), [public guidance](../../README.md#inspect-a-two-node-sync-group), and [operations diagnosis](../ops/troubleshooting.md#sync-status-and-service-evidence-disagree) distinguish disabled/incomplete groups, local projections, service definitions, and listener evidence |
 | Inspection-only and legacy behavior | [PRD](../specs/PRD.md), frozen v0.1.0 catalog, and TASK-026 original ten-action regressions; no sync mutation is registered |
-| Final Epic and release decision | ARM-scoped whole-Epic cold validation is still required; EPIC-009/TASK-033 gates the Linux amd64 v0.2.0 support claim, and release QA and publication have their own authorization |
+| Final Epic and release decision | ARM-scoped whole-Epic cold validation is complete on the reviewed implementation; EPIC-009/TASK-033 gates the Linux amd64 v0.2.0 support claim, and exact-candidate release QA and publication have their own authorization |
 
 ## Release checklist
 

@@ -12,10 +12,11 @@ not track implementation progress.
 - docs/specs/contracts.md binds the PRD to the frozen v0.1.0 and approved
   v0.2.0 contracts and their deterministic offline gates.
 
-The In Progress EPIC-007 two-node inspection scope is described in
-[its adopted dossier](../todo/TODO-SYNC-INSPECTION.md). TASK-023 owns the
-approved PRD and versioned contract amendment; TASK-024 activates the new
-runtime surface. The dossier does not itself amend either contract.
+The Completed EPIC-007 two-node inspection scope is defined by the
+[PRD amendment](PRD.md#approved-v020-two-node-inspection-amendment-epic-007--task-023)
+and [v0.2.0 contract](contracts.md). TASK-023 owns the approved amendment;
+TASK-024 activated the new runtime surface. The [roadmap](../roadmap/README.md)
+owns delivery lifecycle.
 
 Changes to scope, public tools, fixed command mappings, authority, compatibility
 claims, error contracts, or release gates require explicit maintainer approval.
