@@ -2,7 +2,18 @@
 
 This file records concise shipped outcomes and pending changes.
 
-## v0.1.2 - Unreleased
+## v0.2.0 - Unreleased
+
+### Added
+
+- Add three inspection-only sync reads for the exact Agent Dispatch v0.2.0
+  artifacts admitted on Darwin arm64 and Linux arm64.
+
+### Changed
+
+- Keep the original ten inspection tools available for compatible legacy
+  artifacts, with sync reads available only after trusted group and fresh
+  capability checks.
 
 ## v0.1.1 - 2026-09-16
 

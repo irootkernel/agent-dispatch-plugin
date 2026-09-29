@@ -180,7 +180,9 @@ def _schema_matches(value: Any, schema: Mapping[str, Any]) -> bool:
     if isinstance(value, str):
         if "maxLength" in schema and len(value) > schema["maxLength"]:
             return False
-        if "pattern" in schema and re.search(schema["pattern"], value) is None:
+        # The closed result patterns are end-anchored. Python `$` accepts a
+        # position before a final newline, unlike the intended ECMA boundary.
+        if "pattern" in schema and re.fullmatch(schema["pattern"], value) is None:
             return False
     if type(value) is int and "minimum" in schema and value < schema["minimum"]:
         return False
@@ -203,7 +205,7 @@ def validate_sync_result(result: Any, command: str) -> None:
         valid = _schema_matches(result, _sync_result_schema(command))
     except (OSError, ValueError, KeyError, TypeError, RecursionError):
         valid = False
-    if not valid or result.get("side_effects") != []:
+    if not valid or not isinstance(result, dict) or result.get("side_effects") != []:
         raise EnvelopeViolation(CONTRACT_MISMATCH, "the sync result violates its closed contract")
 
 

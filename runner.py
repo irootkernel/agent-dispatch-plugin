@@ -177,9 +177,17 @@ def _sync_provider_version() -> tuple[int, int, int]:
 
 
 def _sync_capability_action() -> ActionSpec:
-    return next(
-        spec.actions[0] for spec in tool_specs() if spec.name == "agent_dispatch_sync_capabilities"
+    action = next(
+        (
+            spec.actions[0]
+            for spec in tool_specs()
+            if spec.name == "agent_dispatch_sync_capabilities"
+        ),
+        None,
     )
+    if action is None:
+        raise TrustFailure(CONTRACT_MISMATCH, "sync capability action is unavailable")
+    return action
 
 
 def closed_error_result(

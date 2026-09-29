@@ -68,6 +68,36 @@ def test_runtime_matches_result_oracle_and_rejects_invalid_fixtures(plugin, comm
             assert "agent_dispatch" not in wrapped
 
 
+@pytest.mark.parametrize(
+    ("case_id", "path"),
+    [
+        ("sync-status-enabled", ("group_id",)),
+        ("sync-status-enabled", ("config_revision",)),
+        (
+            "sync-status-public-commit-with-secret-neighbor",
+            ("latest_verification", "target_commit"),
+        ),
+    ],
+)
+def test_runtime_rejects_trailing_newline_in_result_identity(plugin, case_id, path):
+    status = copy.deepcopy(_case("agent_dispatch_sync_status", case_id))
+    field = status
+    for key in path[:-1]:
+        field = field[key]
+    field[path[-1]] += "\n"
+    wrapped = _run(plugin, "sync status", status)
+    assert wrapped["ok"] is False
+    assert wrapped["error"]["code"] == "contract_mismatch"
+    assert "agent_dispatch" not in wrapped
+
+
+def test_sync_result_must_be_an_object(plugin):
+    wrapped = _run(plugin, "sync status", [])
+    assert wrapped["ok"] is False
+    assert wrapped["error"]["code"] == "contract_mismatch"
+    assert "agent_dispatch" not in wrapped
+
+
 def test_status_preserves_distinct_projections_and_only_public_identities(plugin):
     status = copy.deepcopy(
         _case("agent_dispatch_sync_status", "sync-status-public-commit-with-secret-neighbor")

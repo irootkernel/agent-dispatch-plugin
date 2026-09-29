@@ -211,6 +211,24 @@ def test_probe_failure_never_spawns_requested_command(
     assert not any(line[:3] == ["sync", "service", "inspect"] for line in _lines(log))
 
 
+def test_missing_sync_capability_action_closes_without_raising(
+    plugin, broken_catalog, tmp_path, monkeypatch
+):
+    config, log, _ = _provider(plugin, broken_catalog, tmp_path)
+    spec = next(s for s in plugin.registry.tool_specs() if s.name == "agent_dispatch_sync_status")
+    monkeypatch.setattr(
+        plugin.runner,
+        "tool_specs",
+        lambda: tuple(
+            s for s in plugin.registry.tool_specs() if s.name != "agent_dispatch_sync_capabilities"
+        ),
+    )
+    wrapped = json.loads(plugin.tools.handler_for(spec, HermesCtxStub(config))({}))
+    assert wrapped["ok"] is False
+    assert wrapped["error"]["code"] == "contract_mismatch"
+    assert not any(line[:2] == ["sync", "status"] for line in _lines(log))
+
+
 def test_unallowlisted_v020_binary_is_unavailable(plugin, tmp_path):
     installation = make_fake_binary(tmp_path, version="v0.2.0")
     assert plugin.runner.probe_availability(installation["config"]) is False

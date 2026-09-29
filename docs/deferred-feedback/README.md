@@ -15,6 +15,67 @@ durable non-goals unless the PRD is amended.
 
 ## Entries
 
+### EPIC-007 result-schema keyword shapes
+
+Source: Mulgae EPIC-007 whole-Epic final composite review
+`r_975f9f7e-56d9-789e-bdd3-8d5587ebbc55`, security F001 (Low).
+Disposition: deferred feedback. Owner: Plugin maintainer. Rationale:
+the three current closed result schemas use only
+`additionalProperties: false` and object-valued recursive keywords,
+which the runtime evaluator handles. Its schema guard checks keyword
+names but does not reject other Draft 2020-12 value forms that the
+evaluator does not implement. This is a future amendment risk, with no
+current schema using those forms. Revisit: before the next result-schema
+amendment, require exactly the supported keyword value shapes in
+`_check_sync_schema` and add rejection cases for schema-valued or true
+`additionalProperties` and non-object recursive keywords. Roadmap
+identity: EPIC-007 hardening follow-up; no new task ID allocated.
+
+### EPIC-007 result-pattern oracle semantics
+
+Source: Mulgae EPIC-007 whole-Epic corrected-target review
+`r_01a0ecdf-c92f-7961-9467-b3e0ab4b047e`, F001 (Low).
+Disposition: deferred feedback. Owner: Plugin maintainer. Rationale:
+the runtime uses whole-string matching and directly rejects trailing LF
+for result identities, while Python `jsonschema` applies `$` through
+`re.search` and would accept that value in the offline fixture oracle.
+The current boundary fails closed; the discrepancy limits future oracle
+fixture coverage rather than current runtime safety. Revisit: before the
+next versioned result-contract amendment, replace bare `$` anchors with
+the portable `(?![\\s\\S])` terminator and add invalid trailing-LF fixtures
+so both validators enforce the same negative. Roadmap identity: EPIC-007
+hardening follow-up; no new task ID allocated.
+
+### EPIC-007 contract-oracle regression coverage
+
+Source: Mulgae EPIC-007 whole-Epic review
+`r_c02aca42-9d72-75ac-9509-494142e0e7cc`, testing Finding 1 (Low).
+Disposition: deferred feedback. Owner: Plugin maintainer. Rationale:
+`make test` already runs the v0.2.0 oracle before the test suites, while
+registry and manifest parity corruption tests cover adjacent boundaries.
+Independent pytest subprocess and corruption cases would improve detection
+when only `test-int` is run or the oracle itself regresses, but are not
+required for this Epic's verified contract behavior. Revisit: before the
+next v0.2.0 contract amendment, add a green subprocess case and focused
+corruption cases for the provider digest, platform allowlist, group grammar,
+and admission expectations. Roadmap identity: EPIC-007 hardening follow-up;
+no new task ID allocated.
+
+### EPIC-007 requested sync read failure-path coverage
+
+Source: Mulgae EPIC-007 whole-Epic review
+`r_c02aca42-9d72-75ac-9509-494142e0e7cc`, testing Finding 2 (Low).
+Disposition: deferred feedback. Owner: Plugin maintainer. Rationale:
+the requested read uses the shared bounded executor already exercised by
+legacy timeout and overflow tests; sync-specific tests cover failures of
+the preceding capability probe and successful requested reads. A fake
+that fails after a passing probe would detect future branch regressions,
+but no current incorrect mapping was found. Revisit: before changing sync
+dispatch or bounded execution, exercise requested-command timeout,
+overflow, and nonzero exit after a passing probe, including the exact
+probe invocation count. Roadmap identity: EPIC-007 hardening follow-up;
+no new task ID allocated.
+
 ### Native service environment contract classification
 
 Source: Mulgae TASK-026 review `r_01a0eb64-73e5-702d-9088-5a916da354bd`

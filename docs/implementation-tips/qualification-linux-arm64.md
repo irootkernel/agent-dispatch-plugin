@@ -98,14 +98,15 @@ wrapper schema, `ok`, exit code 0 (or the documented doctor findings exit 3),
 the action's expected command identity, the seeded synthetic state, and
 schedule inspect `present=false` with systemd descriptor paths.
 
-This host also recorded the hermetic aggregate (`make test-prepare`, unit,
-integration) and Plugin Doctor (`hermes plugins doctor <plugin-directory>
---ci` reporting ten tools and zero hooks) before the qualification stage.
-
 ## Recorded TASK-021 candidate (historical)
 
 Recorded 2026-09-16 on native linux/arm64 host `vnic-doksuri` (uid 1002,
 systemd as PID 1) against plugin source `e7f3375`:
+
+This historical candidate also recorded the hermetic aggregate
+(`make test-prepare`, unit, integration) and Plugin Doctor
+(`hermes plugins doctor <plugin-directory> --ci` reporting ten tools and
+zero hooks) before its qualification stage.
 
 | Component | Identity |
 |---|---|
