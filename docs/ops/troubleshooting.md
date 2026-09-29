@@ -29,6 +29,27 @@ Resolution: restore the documented settings — never loosen the gate.
 A swapped executable with a changed digest is rejected by design;
 update `binary_sha256` only after verifying the new artifact's identity.
 
+For a v0.2.0 sync read, check the current host's artifact against the
+[catalog allowlist](../../contracts/v0.2.0/catalog.json), verify the trusted
+`sync_group_id`, and start a fresh Hermes session. Thirteen registered tool
+names do not imply thirteen available definitions: a qualified legacy
+binary, a missing group, or an unusable fresh capability probe leaves only
+the original ten available. A failed common trust gate leaves none. Do not
+retry a failed read by bypassing the gate or supplying CLI flags through a
+tool argument.
+
+## Sync status and service evidence disagree
+
+`agent_dispatch_sync_status` is local group evidence. Inspect its `state`,
+`reason`, expected nodes, listener health, and separate latest publication,
+delivery, import, and verification projections. A disabled or incomplete
+group and a historical verification do not establish current pair
+convergence. `agent_dispatch_sync_service_inspect` reports the managed
+definition's presence, digest match, and load posture. Its `healthy` value
+does not test listener reachability. Report the two observations separately;
+use Agent Dispatch's own operational procedures outside this plugin for any
+service or sync change.
+
 ## Doctor reports unavailable Watchman
 
 An `ok: true` response with exit code 3 means doctor findings were retrieved

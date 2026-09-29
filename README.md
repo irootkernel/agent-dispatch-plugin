@@ -108,8 +108,9 @@ mkdir "$HERMES_HOME/plugins/agent-dispatch-plugin" &&
   git archive HEAD | tar -x -C "$HERMES_HOME/plugins/agent-dispatch-plugin"
 ```
 
-For an existing installation, use the
-[upgrade and rollback procedure](docs/ops/upgrade-rollback-darwin-arm64.md).
+For an existing installation, use the platform's upgrade and rollback
+procedure: [Darwin arm64](docs/ops/upgrade-rollback-darwin-arm64.md) or
+[Linux](docs/ops/upgrade-rollback-linux.md).
 Directory installation starts disabled. Hermes v0.20.5's `plugins install`
 command rejects this plugin's manifest v2; its directory loader supports it.
 
@@ -217,6 +218,22 @@ Schedule inspection reports what Agent Dispatch observes; it does not install, l
 
 You can also ask for diagnostics with `agent_dispatch_doctor`. Target probing is optional for doctor and configuration validation; request it explicitly when you want it. Probes can refresh capability caches. The known Watchman lookup limitation described below can affect doctor results.
 
+### Inspect a two-node sync group
+
+First configure `sync_group_id` for a group you are authorized to inspect and
+verify the exact v0.2.0 Agent Dispatch artifact. In a fresh Hermes session, ask:
+
+> Use `agent_dispatch_sync_capabilities` to show the provider contract and its read capabilities. Then use `agent_dispatch_sync_status` to summarize the configured group's local state, including both expected nodes and the separate latest publication, delivery, import, and verification evidence.
+
+> Use `agent_dispatch_sync_service_inspect` to report whether this group's managed service definition is present, matches the expected definition, and is loaded. Do not infer listener reachability from that result.
+
+All three inputs are empty objects; the trusted profile setting supplies the
+group for the latter two. The plugin registers thirteen names, but Hermes
+exposes only ten for a qualified legacy binary or when the pinned v0.2.0
+provider lacks a valid group or fresh matching capability evidence. A failed
+common trust gate exposes none. A configured group that is disabled can still
+be inspected; `state: disabled` is not evidence of an active pair.
+
 ## Available tools
 
 | Tool | What you can inspect |
@@ -247,6 +264,13 @@ an unavailable-Watchman finding can describe this inspection environment.
 
 A successful tool call means the inspection completed through the plugin. It does not mean that a dispatch succeeded or that every diagnostic finding is healthy: those conclusions depend on the returned domain values. Likewise, an empty list means the request returned no matching records; check the route and filters before drawing a broader conclusion.
 
+For sync status, read `state`, `reason`, both expected nodes, and the separate
+latest records together. A present historical verification or a healthy
+service definition does not establish current two-node convergence. An
+offline peer, an incomplete group, or a disabled group must be reported as
+such. Service inspection describes the managed definition and load posture;
+use the status result's listener evidence when judging listener state.
+
 If the plugin cannot validate a response, reaches its time or output limit, or cannot trust the configured executable, it returns an error or keeps the tools unavailable. An inspection error does not establish the state of the dispatch you were investigating. The plugin does not automatically retry failed calls.
 
 ## Troubleshooting
@@ -270,7 +294,12 @@ If the problem persists, consult [diagnosis and recovery](docs/ops/troubleshooti
 
 An installed plugin is a source directory at one selected revision. Updating replaces that directory; your settings and enablement belong to the Hermes profile. Keep a record of the previous revision so you can return to it if the update fails.
 
-Use the [upgrade and rollback procedure](docs/ops/upgrade-rollback-darwin-arm64.md) instead of copying a new checkout over the old directory. After a replacement, open a fresh session and repeat the status inspection. If tools become unavailable, check the selected revision and trusted settings before proceeding.
+Use the [Darwin](docs/ops/upgrade-rollback-darwin-arm64.md) or
+[Linux](docs/ops/upgrade-rollback-linux.md) upgrade and rollback procedure
+instead of copying a new checkout over the old directory. After a
+replacement, open a fresh session and repeat the status inspection. If
+tools become unavailable, check the selected revision and trusted settings
+before proceeding.
 
 ## Disable or remove
 

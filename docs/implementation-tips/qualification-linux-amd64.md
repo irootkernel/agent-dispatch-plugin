@@ -1,5 +1,11 @@
 # Qualification Runbook: Linux amd64 Compatibility Matrix
 
+The recorded matrix below covers the historical v0.1.8 ten-tool surface.
+Native Linux amd64 v0.2.0 Hermes and systemd user-manager qualification is
+still pending. The maintainer re-entry gate is in
+[deferred feedback](../deferred-feedback/README.md#linux-amd64-v020-sync-inspection-qualification);
+do not use this historical result as evidence for the three sync reads.
+
 Target: the `agent-dispatch-plugin` public surface on native
 `linux/amd64`.
 Environment: disposable profile on Linux amd64 (this runbook's evidence

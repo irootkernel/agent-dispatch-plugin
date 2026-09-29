@@ -3,7 +3,8 @@
 Status: In Progress (the roadmap owns lifecycle)
 Roadmap: EPIC-007 / TASK-023 through TASK-027 in docs/roadmap/README.md
 Depends on: EPIC-006 Completed; Agent Dispatch E20-E22 Completed
-Next eligible task: TASK-027 after TASK-026 closeout
+Next eligible task: none after TASK-027; native Linux amd64 v0.2.0
+qualification remains an EPIC-007 acceptance gap
 After completion: no automatic next epic; EPIC-008 remains Deferred
 Planned Plugin target: v0.2.0, with a new versioned public contract
 
@@ -306,6 +307,24 @@ separate lifecycle actions.
 
 Evidence: accurate examples, links, acceptance traceability, review
 disposition, and exact candidate identities without machine-local secrets.
+
+#### TASK-027 close
+
+The public sync examples and result guidance distinguish a disabled or
+incomplete group, historical local projections, managed service definition
+health, and listener state. Troubleshooting and both platform rollback
+runbooks explain the zero/ten/thirteen availability boundary and the
+post-swap trust and capability checks. The
+[development handoff](../implementation-tips/release-handoff.md#epic-007-development-handoff)
+identifies Plugin implementation basis
+`938247793115407ae187fc1f64b50e1180d34762`, Agent Dispatch source
+`6b1c78b19f4cdb69dfd070ea016430f03075b73d`, the provider bundle, the
+contract digest, ARM qualification gates, and acceptance owners. A bounded
+five-role review of the task documentation completed with full coverage
+and a passing backend check. Its one Low platform-wording gap was corrected
+and checked locally. The TASK-027 commit is distinct from release candidate
+selection; native Linux amd64 v0.2.0 qualification and whole-epic validation
+remain open.
 
 ## Epic acceptance
 

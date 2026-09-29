@@ -246,8 +246,10 @@ bundle is `docs/contracts/sync-provider-v1/` at core commit
 `48f13a4eef68e219a51d188decb8749a5fba9282`; the exact code candidate
 is `6b1c78b19f4cdb69dfd070ea016430f03075b73d`. The semantic digest is
 `sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b`.
-Platform support remains provisional until native Hermes and service-manager
-qualification on Darwin arm64, Linux amd64, and Linux arm64.
+Native Hermes and service-manager qualification is complete for the v0.2.0
+reads on Darwin arm64 and Linux arm64. Linux amd64 v0.2.0 remains unqualified;
+the [roadmap](../roadmap/README.md) retains it as an EPIC-007 acceptance gap
+before an all-platform support claim or Epic closure.
 
 The three new results require command-specific closed validation, including
 empty `side_effects`. Status keeps publication, delivery, import, and

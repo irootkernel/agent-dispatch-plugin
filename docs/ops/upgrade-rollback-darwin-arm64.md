@@ -51,6 +51,13 @@ A plugin rollback does not reverse an Agent Dispatch store migration; that
 recovery belongs to Agent Dispatch. Escalate unresolved failures to plugin
 maintainers with the previous/target commit identities and a bounded diagnostic.
 
+For a v0.2.0 sync read after a source swap, recheck the executable's exact
+catalog SHA, trusted `sync_group_id`, and fresh capability contract.
+Keeping the group setting across a rollback to v0.1.x does not expose the
+three sync reads. The older source still registers ten tools, while a
+v0.2.0 source registers thirteen with only the trust-qualified subset
+available.
+
 ## Transcript (recorded reproduction)
 
 Rolling one disposable profile between the first two documented pinned

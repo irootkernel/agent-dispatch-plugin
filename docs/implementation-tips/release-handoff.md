@@ -1,10 +1,11 @@
 # Release Handoff Runbook: Exact-Commit Candidate
 
-Target: declaring and verifying an immutable release candidate for
-`agent-dispatch-plugin` v0.1.0.
-Environment: Darwin arm64 with Hermes (v0.20.5 or newer) on `PATH` and both
-pinned Agent Dispatch v0.1.6 and v0.1.7 release artifacts from the
-[qualification matrix](qualification-darwin-arm64.md).
+Target: declaring and verifying an immutable release candidate. The original
+v0.1.0 handoff remains historical; the current EPIC-007 development handoff
+is below.
+Environment: each claimed native host with Hermes (v0.20.5 or newer) on
+`PATH` and its catalog-pinned legacy and v0.2.0 Agent Dispatch artifacts;
+see the [qualification matrices](README.md#verify-and-hand-off).
 
 ## The immutable review target
 
@@ -50,6 +51,43 @@ Together these are exactly the EPIC-004 release gates plus the EPIC-005
 distribution gates; the qualification runbook records the artifact
 identities and adjudicated boundaries they carry.
 
+## EPIC-007 development handoff
+
+The committed Plugin implementation basis after TASK-026 is
+`938247793115407ae187fc1f64b50e1180d34762`. It pairs with Agent
+Dispatch source candidate `6b1c78b19f4cdb69dfd070ea016430f03075b73d`,
+the provider bundle at `48f13a4eef68e219a51d188decb8749a5fba9282`,
+and contract digest
+`sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b`.
+The per-platform executable digests are in the
+[v0.2.0 catalog](../../contracts/v0.2.0/catalog.json). This implementation
+basis is not a selected release candidate: TASK-027 documentation and the
+remaining EPIC-007 acceptance gate can change the final revision.
+
+TASK-026 ran `make test` (605 unit, 28 integration, one E2E) and
+`make test-qualify` (nine Darwin arm64 and seven native Linux arm64 cases)
+on the corrected candidate. The qualification includes real Hermes
+action dispatch, original ten-tool regressions, and native user service
+inspection of absent, loaded, and drifted definitions. The deterministic
+security negatives are included in the aggregate. The
+[TASK-026 close record](../todo/TODO-SYNC-INSPECTION.md#task-026-close)
+states their scope.
+
+Native Linux amd64 v0.2.0 Hermes and systemd user-manager qualification is
+still required before EPIC-007 closure or a Linux amd64 v0.2.0 support claim.
+The [deferred feedback owner and re-entry gate](../deferred-feedback/README.md#linux-amd64-v020-sync-inspection-qualification)
+name the exact work. A final whole-epic audit, cold review, and exact
+release-candidate gate remain separate. Neither ARM qualification nor this
+handoff authorizes release, installation, activation, or publication.
+
+| EPIC-007 acceptance area | Current authority and result |
+|---|---|
+| Contract, three fixed reads, pins, and inventory | [PRD amendment](../specs/PRD.md#approved-v020-two-node-inspection-amendment-epic-007--task-023), [catalog](../../contracts/v0.2.0/catalog.json), and [manifest parity](../../TESTING.md); thirteen registered, with zero/ten/thirteen available by trust and capability state |
+| Real Hermes actions and failure paths | [TASK-026 close record](../todo/TODO-SYNC-INSPECTION.md#task-026-close) and the [Darwin](qualification-darwin-arm64.md) / [Linux arm64](qualification-linux-arm64.md) qualification runbooks; native Linux amd64 v0.2.0 remains open |
+| Status and service interpretation | [Result contracts](../specs/contracts.md), [public guidance](../../README.md#inspect-a-two-node-sync-group), and [operations diagnosis](../ops/troubleshooting.md#sync-status-and-service-evidence-disagree) distinguish disabled/incomplete groups, local projections, service definitions, and listener evidence |
+| Inspection-only and legacy behavior | [PRD](../specs/PRD.md), frozen v0.1.0 catalog, and TASK-026 original ten-action regressions; no sync mutation is registered |
+| Final Epic and release decision | Native Linux amd64 v0.2.0 evidence and whole-epic cold validation are still required; release QA and publication have their own authorization |
+
 ## Release checklist
 
 - [ ] The candidate revision is named by its full commit object ID and
@@ -73,8 +111,10 @@ contract amendment: retrieving doctor findings at exit 3 is a successful
 inspection, not a claim of system health. The previous fake-only success
 and real `contract_mismatch` expectation are no longer acceptable evidence.
 Every new candidate must deliver the findings through real Hermes for both
-doctor variants against v0.1.6 and v0.1.7. A passing historical transcript
-does not establish this requirement.
+doctor variants against each claimed host's catalog-pinned legacy artifacts:
+v0.1.6 and v0.1.7 on Darwin arm64, and the selected highest compatible
+release, v0.1.8, on Linux. A passing historical transcript does not establish
+this requirement for a new candidate.
 
 ## Changelog, publication, and the next cycle
 

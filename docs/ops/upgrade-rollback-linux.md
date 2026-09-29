@@ -3,8 +3,9 @@
 Target: moving an installed `agent-dispatch-plugin` between documented
 pinned revisions inside one Hermes profile on Linux.
 Environment: Hermes (>=0.20.5) on `PATH`, the host-selected pinned Agent
-Dispatch artifact (linux/arm64 v0.1.8 or linux/amd64 v0.1.8), native
-Linux. The procedure is identical for an operator profile and a
+Dispatch artifact (v0.1.8 for the legacy ten tools; v0.2.0 for the three
+sync reads where native qualification is complete), native Linux. The
+procedure is identical for an operator profile and a
 disposable one.
 
 The Darwin model in
@@ -47,3 +48,10 @@ and
 [qualification-linux-amd64.md](../implementation-tips/qualification-linux-amd64.md).
 
 A plugin rollback does not reverse an Agent Dispatch store migration.
+For the v0.2.0 inspection tools, also recheck the configured binary's
+platform SHA, trusted `sync_group_id`, and fresh capability contract
+after either direction of the swap. A rollback to v0.1.x source registers
+the historical ten tools; retaining `sync_group_id` in profile settings
+does not grant the three sync reads. Native Linux amd64 v0.2.0
+qualification remains open under the
+[EPIC-007 re-entry gate](../deferred-feedback/README.md#linux-amd64-v020-sync-inspection-qualification).

@@ -15,7 +15,8 @@ admits exact allowlisted v0.2.0 artifacts for three sync reads. Native
 qualification of that surface is complete on Darwin arm64 and Linux arm64;
 the Linux amd64 v0.2.0 slice remains deferred.
 
-Active epic: **EPIC-007**. Next eligible task: **TASK-027**. Master authorized
+Active epic: **EPIC-007**. All member tasks are complete; native Linux amd64
+v0.2.0 qualification remains the acceptance gap. Master authorized
 implementation of the EPIC-007 plan on 2026-09-29. The provider under review
 is core candidate `6b1c78b19f4cdb69dfd070ea016430f03075b73d`, with the
 v1 bundle at `48f13a4eef68e219a51d188decb8749a5fba9282`.
@@ -76,7 +77,7 @@ prerequisite.
 | TASK-024 | EPIC-007 | Add three fixed sync inspection tools | Completed | Fixed commands including config-flag exception, fresh handler capability gate, and thirteen-name registration versus 0/10/13 available-definition evidence; see [close record](../todo/TODO-SYNC-INSPECTION.md#task-024-close) |
 | TASK-025 | EPIC-007 | Preserve sync evidence and safe presentation | Completed | Closed sync result validation, distinct status and service evidence, exact approved identity fields, and seeded-secret negatives; see [close record](../todo/TODO-SYNC-INSPECTION.md#task-025-close) |
 | TASK-026 | EPIC-007 | Qualify the inspection surface through Hermes | Completed | Exact-artifact Hermes action and failure evidence, including native service-manager inspection, on Darwin arm64 and Linux arm64; Linux amd64 v0.2.0 qualification remains deferred and unclaimed; see [close record](../todo/TODO-SYNC-INSPECTION.md#task-026-close) |
-| TASK-027 | EPIC-007 | Close inspection documentation and handoff | Planned | Accurate operations guidance, complete checks, and bounded cold review; see [dossier](../todo/TODO-SYNC-INSPECTION.md#task-027-close-documentation-and-handoff) |
+| TASK-027 | EPIC-007 | Close inspection documentation and handoff | Completed | Public/maintainer guidance, exact ARM-scoped handoff, checks, and bounded cold review; see [close record](../todo/TODO-SYNC-INSPECTION.md#task-027-close) |
 | TASK-028 | EPIC-008 | Define and qualify management authorization | Deferred | Reserved identity; core request contract and separate Plugin authority required before replanning |
 | TASK-029 | EPIC-008 | Implement the one constrained request tool | Deferred | Reserved identity; no current `sync request` provider command |
 | TASK-030 | EPIC-008 | Handle accepted and unknown submissions correctly | Deferred | Reserved identity; no provider request identity or inspection surface |
