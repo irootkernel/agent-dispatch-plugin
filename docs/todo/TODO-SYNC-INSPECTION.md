@@ -3,7 +3,7 @@
 Status: In Progress (the roadmap owns lifecycle)
 Roadmap: EPIC-007 / TASK-023 through TASK-027 in docs/roadmap/README.md
 Depends on: EPIC-006 Completed; Agent Dispatch E20-E22 Completed
-Next eligible task: TASK-025 after TASK-024 commit
+Next eligible task: TASK-027 after TASK-026 closeout
 After completion: no automatic next epic; EPIC-008 remains Deferred
 Planned Plugin target: v0.2.0, with a new versioned public contract
 
@@ -25,7 +25,8 @@ qualification claim.
 At epic intake, the Plugin admitted Agent Dispatch `>=0.1.6,<0.2.0` and
 exactly ten tools. TASK-023 approved the v0.2.0 amendment, and TASK-024
 activates its thirteen-name development surface. Native action-level
-qualification remains TASK-026 work.
+qualification is complete for Darwin arm64 and Linux arm64; Linux amd64
+v0.2.0 remains an EPIC-007 acceptance gap recorded in deferred feedback.
 The checked-in core `dist/` contains v0.1.8 release artifacts, not v0.2.0
 qualification artifacts. A development executable that implements sync but
 reports v0.1.8 cannot stand in for a correctly identified v0.2.0 candidate.
@@ -140,7 +141,8 @@ the first four findings were corrected in the second reviewed candidate.
 The second assessment's two Low documentation findings were resolved by an
 isolated three-file delta and `make test-prepare` passed on that delta.
 This is contract admission evidence only; TASK-024 activates registration and
-runtime and TASK-026 owns native platform qualification.
+runtime. TASK-026 qualified Darwin arm64 and Linux arm64; native Linux amd64
+v0.2.0 qualification remains the deferred EPIC-007 acceptance gap.
 
 ### TASK-024: Add three fixed inspection tools
 
@@ -226,7 +228,7 @@ and tests. Native Hermes and service-manager qualification remains TASK-026.
 ### TASK-026: Qualify through Hermes
 
 Run `make test` and the required `make test-qualify` matrix on native
-Darwin arm64, Linux amd64, and Linux arm64 using properly version-stamped,
+Darwin arm64 and Linux arm64 using properly version-stamped,
 checksummed v0.2.0 candidates from the reviewed source. Confirm each
 candidate matches the platform SHA allowlist before claiming support. Drive
 every new public read action and the retained ten-tool action matrix through
@@ -235,10 +237,13 @@ enabled group evidence, partial/offline pair evidence, capability mismatch,
 malformed output, time/output limits, and redaction failures. Qualify `sync service
 inspect` against a disposable native user service manager and isolated
 managed definition on each platform, including absent, loaded, and drifted
-states. The current minimal runner environment does not pass HOME/XDG
-variables; prove the real command works under that boundary. If it needs
-more variables, amend the trusted environment contract and requalify rather
-than treating an isolated process fixture as native service evidence.
+states. Master narrowed the original three-platform TASK-026 gate on
+2026-09-29: native Linux amd64 v0.2.0 qualification remains deferred and
+unclaimed under the EPIC-007 acceptance gate. ADR-010 scopes OS-derived
+HOME and the native Linux user runtime directory to the two service reads;
+ordinary actions retain the fixed PATH/TMPDIR child environment. Prove
+the real command under that amended trust boundary rather than treating
+an isolated process fixture as native service evidence.
 Core E22/G18 evidence is the provider baseline, not substitute Plugin/Hermes
 evidence. Missing platform capacity leaves the corresponding support claim
 unqualified. Update the qualification harness and TESTING.md to name the new
@@ -247,6 +252,46 @@ candidate pins and 10/13 inventory cases before claiming the gate passed.
 Evidence: per-platform candidate SHA and Hermes identities, public action
 transcripts, native service-manager observations, deterministic security
 results, and registered versus available inventory counts.
+
+#### TASK-026 qualification progress (2026-09-29)
+
+The reviewed Dispatch source `6b1c78b19f4cdb69dfd070ea016430f03075b73d`
+reproduced all three v0.2.0 catalog checksums. On the initial candidate,
+Darwin arm64 and native Linux arm64 each passed `make test` (599 unit,
+28 integration, one E2E) and the
+host-selected `make test-qualify` suite (nine and seven cases respectively)
+with Hermes v0.21.0. The real Hermes sessions exercised the original ten
+actions, the three sync reads, 13 registered and 10/13 available definitions,
+disabled and active but incomplete groups, and absent, active, and drifted
+managed definitions through launchd and systemd user managers. The service
+fixture uses a unique group, a signed local bootstrap, and cleanup; it does
+not qualify peer delivery or fresh two-node convergence. Deterministic
+capability, malformed-output, time/output-limit, and redaction negatives
+passed in the unit aggregate on both hosts.
+
+The prior Linux arm64 v0.1.7 TASK-021 artifact remains historical. This
+run's legacy regression uses the available v0.1.8 Linux arm64 build,
+SHA-256 `3d06d4d35493ce51581bb8c61f4ffc3dfd700499863a492a337ab7fb762ddf8e`,
+under the catalog's highest-compatible-release selection rule. Native Linux
+amd64 Hermes and user-manager qualification is pending. These two slices
+do not establish all-platform support.
+
+#### TASK-026 close
+
+The scoped Darwin arm64 and Linux arm64 acceptance matrix passed on the
+corrected TASK-026 candidate: `make test` (605 unit, 28 integration, one E2E) and
+`make test-qualify` (nine Darwin and seven Linux arm64 cases). A second
+native Linux arm64 host passed the same gates with Hermes v0.21.2 and
+the catalog-pinned v0.1.8/v0.2.0 artifact digests; its seven qualification
+cases included Hermes inventory/action checks and a real systemd user
+service in absent, loaded, and drifted states. The disposable source and
+service definition were removed after the run.
+
+Master approved TASK-026 completion for the two qualified platforms on
+2026-09-29. The Linux amd64 v0.2.0 matrix is deferred to the plugin
+maintainer; the EPIC-007 acceptance and Linux amd64 support claim remain
+open until native Hermes and user-manager evidence is recorded. See
+[deferred feedback](../deferred-feedback/README.md#linux-amd64-v020-sync-inspection-qualification).
 
 ### TASK-027: Close documentation and handoff
 

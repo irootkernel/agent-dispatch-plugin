@@ -3,7 +3,7 @@
 Target: moving an installed `agent-dispatch-plugin` between documented
 pinned revisions inside one Hermes profile on Linux.
 Environment: Hermes (>=0.20.5) on `PATH`, the host-selected pinned Agent
-Dispatch artifact (linux/arm64 v0.1.7 or linux/amd64 v0.1.8), native
+Dispatch artifact (linux/arm64 v0.1.8 or linux/amd64 v0.1.8), native
 Linux. The procedure is identical for an operator profile and a
 disposable one.
 
@@ -32,10 +32,11 @@ profile enablement and the configured plugin settings survive the swap.
 The recorded Darwin-only pre-release `0c4e70e384bc9891bc15820c4e0b6a42ba700d5a`
 rejects Linux at the platform gate. On linux/arm64 and linux/amd64 the
 qualification lifecycle asserts that rollback to that revision keeps the
-toolset unavailable (`binary_unavailable`) until the Linux-admitting
-candidate is restored. Darwin still expects a successful smoke through
-the same rollback source. Do not treat that closed toolset as a broken
-install.
+toolset unavailable (`binary_unavailable` or
+`unsupported_agent_dispatch_version`) until the Linux-admitting candidate
+is restored. Darwin's legacy v0.1.6/v0.1.7 artifacts still pass that
+rollback smoke; the v0.2.0 artifact remains unavailable under the old source.
+Do not treat that closed toolset as a broken install.
 
 ## Recorded evidence
 

@@ -74,7 +74,9 @@ trusted legacy binary exposes ten and an exact v0.2.0 artifact exposes
 thirteen only with a valid group and fresh capability evidence. The tests
 check each fixed argv, the capabilities config-flag exception, SHA denial,
 and direct-dispatch failure after a cached visible state. Native Hermes
-qualification of the new reads remains the TASK-026 gate.
+qualification of the new reads passed the scoped TASK-026 gate on Darwin
+arm64 and Linux arm64. The Linux amd64 v0.2.0 gate remains deferred under
+EPIC-007 and must pass before that platform's support claim.
 
 ## Test Frameworks
 
@@ -114,9 +116,18 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   driver) and the host-selected pinned Agent Dispatch artifacts: Darwin
   arm64 uses both v0.1.6 and v0.1.7 darwin/arm64 builds
   (`AGENT_DISPATCH_QUALIFY_BINARY` and `AGENT_DISPATCH_QUALIFY_BINARY_V017`);
-  linux/arm64 uses the v0.1.7 linux-arm64 build
-  (`AGENT_DISPATCH_QUALIFY_BINARY_V017`); linux/amd64 uses the v0.1.8
-  linux-amd64 build (`AGENT_DISPATCH_QUALIFY_BINARY_V018`). Each case
+  linux/arm64 uses the v0.1.8 linux-arm64 build
+  (`AGENT_DISPATCH_QUALIFY_BINARY_V018`, SHA-256
+  `3d06d4d35493ce51581bb8c61f4ffc3dfd700499863a492a337ab7fb762ddf8e`);
+  linux/amd64 uses the v0.1.8
+  linux-amd64 build (`AGENT_DISPATCH_QUALIFY_BINARY_V018`). Every host also
+  requires its correctly stamped v0.2.0 binary at
+  `AGENT_DISPATCH_QUALIFY_BINARY_V020`, built from reviewed source
+  `6b1c78b19f4cdb69dfd070ea016430f03075b73d`. The v0.2.0 SHA-256 pins
+  are Darwin arm64 `aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889`,
+  Linux amd64 `59216c7ec8aee4abb9e00377a81686156b08a3235275afcde5b6ec28363bb8d6`,
+  and Linux arm64 `d760586c7db77023b462c940cc8f4904caff5d54b0e767ef29a2e1cf83f85ac8`.
+  Each case
   verifies its pinned SHA-256 before its version probe. PATH is a fallback
   only when its binary matches that exact case; missing or mismatching
   prerequisites fail, never skip. Other hosts fail the platform
@@ -125,10 +136,20 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   (temporary `HERMES_HOME`, temporary Agent Dispatch configuration and
   state, controlled fake downstream Hermes target) and dispatches every
   advertised action through the real Hermes runtime deterministically —
-  no model, no network, no live state.
+  no model, no peer network, no live Agent Dispatch state. The v0.2.0 cases
+  verify 13 registered tools, 10/13 available definitions, disabled and
+  enabled partial two-node status, and absent/loaded/drifted service
+  inspection against the native user manager. The service check uses a
+  unique synthetic group, cleans up its managed definition, and requires
+  an active launchd GUI domain or systemd user manager. A native manager
+  prerequisite failure does not count as a passing platform gate.
+  Only `sync status` and `sync service inspect` receive the OS-derived
+  account home and, when present on Linux, the UID-owned user runtime
+  directory; ordinary actions and the probes keep the original fixed
+  `PATH`/`TMPDIR` child environment.
 - Prerequisite refusal: the stage fails with the exact missing
   prerequisite when the host platform (darwin/arm64, linux/amd64, or
-  linux/arm64), Hermes version, or pinned artifact is absent; there is no
+  linux/arm64), Hermes version, pinned artifact, or native user manager is absent; there is no
   skip path.
 - Credentials: none.
 
@@ -144,8 +165,9 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   class through the public handler boundary with a mechanically complete
   injection sweep over every catalog string binding.
 - `test-qualify`: `tests/qualification` — the disposable action-level
-  compatibility matrix (TASK-012): every advertised public action of all
-  ten tools dispatched through the real Hermes runtime (v0.20.5 or newer)
+  compatibility matrix (TASK-012/TASK-026): every advertised public action of
+  the original ten tools and the three v0.2.0 sync reads dispatched through
+  the real Hermes runtime (v0.20.5 or newer)
   (plugin discovery plus `model_tools.handle_function_call` over a
   disposable `HERMES_HOME`) invoking the host-selected pinned Agent Dispatch
   release artifacts against synthetic state seeded through Agent
@@ -173,10 +195,13 @@ Both doctor variants must return the real validated findings envelope at
 exit 3 when Watchman is unavailable in the fixed child environment. They
 are successful diagnostic retrievals, not expected `contract_mismatch`
 negatives. Unit fixtures cover exit 0, other exits, wrong command identity,
-malformed output, and redaction. Both pinned releases run the complete
-matrix and lifecycle, including a source rollback to pre-release commit
+malformed output, and redaction. Every host-selected pinned artifact,
+including v0.2.0, runs the complete matrix and lifecycle, including a
+source rollback to pre-release commit
 `0c4e70e384bc9891bc15820c4e0b6a42ba700d5a` and restoration of the candidate.
 The lifecycle requires a full Git clone containing that commit; it preserves
-profile settings and proves fresh-session registration and smoke inspection
-after each swap. Archive installation itself is checked separately by Plugin
+profile settings and proves fresh-session registration after each swap.
+Legacy Darwin artifacts pass the rollback smoke; Linux and v0.2.0 artifacts
+remain unavailable under the old source until the candidate returns.
+Archive installation itself is checked separately by Plugin
 Doctor before release publication.

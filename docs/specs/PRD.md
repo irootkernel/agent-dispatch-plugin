@@ -96,6 +96,11 @@ runner.py is the only process-execution boundary. It must:
 - construct fixed argv in code and set shell false;
 - use a neutral trusted working directory, a minimal environment allowlist,
   and closed unexpected file descriptors;
+- only for `sync status` and `sync service inspect`, derive `HOME` from the
+  current UID's OS account record and on Linux include an existing,
+  UID-owned canonical `/run/user/<uid>` as `XDG_RUNTIME_DIR`; inherit neither
+  value from Hermes or the parent environment, while the original actions
+  retain the fixed `PATH`/`TMPDIR` environment;
 - drain stdout and stderr concurrently with bounded buffers;
 - terminate the entire process group on deadline or output overflow;
 - perform no retry and no direct SQLite access;

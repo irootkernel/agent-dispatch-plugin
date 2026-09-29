@@ -1,9 +1,9 @@
-"""Verified release artifacts shared by every real-runtime qualification case.
+"""Verified release artifacts shared by real-runtime qualification cases.
 
-The fixture is host-selected and fail-closed: Darwin arm64 runs both pinned
-Darwin artifacts; linux/arm64 runs the pinned v0.1.7 linux-arm64 artifact;
-linux/amd64 runs the pinned v0.1.8 linux-amd64 artifact. Any other host, a
-missing binary, or a digest mismatch fails the stage. There is no skip path.
+The fixture is host-selected and fail-closed: Darwin arm64 runs v0.1.6 and
+v0.1.7; Linux arm64 and amd64 run v0.1.8. Every host also runs v0.2.0.
+An unsupported host, missing binary, or digest mismatch fails the stage.
+There is no skip path.
 """
 
 from __future__ import annotations
@@ -37,9 +37,9 @@ DARWIN_ARM64_ARTIFACTS = [
 
 LINUX_ARM64_ARTIFACTS = [
     (
-        "v0.1.7",
-        "5493b1a13d28fa28eee850617be7c745d47898b87a7c3c4ea114f5c1cf2481c0",
-        "AGENT_DISPATCH_QUALIFY_BINARY_V017",
+        "v0.1.8",
+        "3d06d4d35493ce51581bb8c61f4ffc3dfd700499863a492a337ab7fb762ddf8e",
+        "AGENT_DISPATCH_QUALIFY_BINARY_V018",
     ),
 ]
 
@@ -50,6 +50,24 @@ LINUX_AMD64_ARTIFACTS = [
         "AGENT_DISPATCH_QUALIFY_BINARY_V018",
     ),
 ]
+
+V020_SHA256 = {
+    "darwin/arm64": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+    "linux/amd64": "59216c7ec8aee4abb9e00377a81686156b08a3235275afcde5b6ec28363bb8d6",
+    "linux/arm64": "d760586c7db77023b462c940cc8f4904caff5d54b0e767ef29a2e1cf83f85ac8",
+}
+V020_SOURCE_COMMIT = "6b1c78b19f4cdb69dfd070ea016430f03075b73d"
+
+
+def _check_v020_catalog_pins() -> None:
+    catalog = json.loads(
+        (Path(__file__).resolve().parents[2] / "contracts/v0.2.0/catalog.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    provider = catalog["sync_provider"]
+    assert provider["source_commit"] == V020_SOURCE_COMMIT
+    assert provider["artifact_sha256"] == V020_SHA256
 
 
 def qualification_host() -> str:
@@ -71,7 +89,9 @@ def artifacts_for_this_host() -> list[tuple[str, str, str]]:
     )
 
 
-ARTIFACTS = artifacts_for_this_host()
+ARTIFACTS = artifacts_for_this_host() + [
+    ("v0.2.0", V020_SHA256[qualification_host()], "AGENT_DISPATCH_QUALIFY_BINARY_V020")
+]
 
 
 def require_qualification_prerequisites() -> tuple[str, Path]:
@@ -119,9 +139,7 @@ def qualification_runtime():
     return require_qualification_prerequisites()
 
 
-@pytest.fixture(params=ARTIFACTS, ids=[entry[0] for entry in ARTIFACTS])
-def qualified_binary(request, tmp_path):
-    version, expected_digest, variable = request.param
+def _copy_verified_binary(tmp_path, version, expected_digest, variable):
     source = os.environ.get(variable) or shutil.which("agent-dispatch")
     assert source, f"missing prerequisite: set {variable} to the {version} release executable"
     binary = tmp_path / "agent-dispatch"
@@ -140,3 +158,21 @@ def qualified_binary(request, tmp_path):
     assert probe.returncode == 0
     assert json.loads(probe.stdout) == {"name": "agent-dispatch", "version": version}
     return Path(binary)
+
+
+@pytest.fixture(params=ARTIFACTS, ids=[entry[0] for entry in ARTIFACTS])
+def qualified_binary(request, tmp_path):
+    if request.param[0] == "v0.2.0":
+        _check_v020_catalog_pins()
+    return _copy_verified_binary(tmp_path, *request.param)
+
+
+@pytest.fixture
+def v020_binary(tmp_path):
+    _check_v020_catalog_pins()
+    return _copy_verified_binary(
+        tmp_path,
+        "v0.2.0",
+        V020_SHA256[qualification_host()],
+        "AGENT_DISPATCH_QUALIFY_BINARY_V020",
+    )

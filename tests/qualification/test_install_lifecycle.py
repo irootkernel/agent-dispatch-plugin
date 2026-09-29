@@ -4,7 +4,7 @@ Proves the distribution lifecycle states the dossier names, through the
 real Hermes CLI and runtime, v0.20.5 or newer, over one disposable
 ``HERMES_HOME``:
 a pinned source-only installation starts disabled (no tool registration),
-explicit plugin enablement registers exactly the ten frozen tools while
+explicit plugin enablement registers the thirteen fixed tools while
 the trust gate keeps the toolset unavailable until the five settings are
 seeded, explicit toolset enablement and disablement round-trip through
 ``hermes tools`` as a state independent of plugin enablement, plugin
@@ -36,9 +36,10 @@ import subprocess
 from pathlib import Path
 
 import runner
+from conftest import V020_SHA256
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-CONTRACTS = ROOT / "contracts" / "v0.1.0"
+CONTRACTS = ROOT / "contracts" / "v0.2.0"
 
 PLUGIN_NAME = "agent-dispatch-plugin"
 TOOLSET = "agent_dispatch"
@@ -172,7 +173,7 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(
 
     catalog = json.loads((CONTRACTS / "catalog.json").read_text(encoding="utf-8"))
     roster = sorted(tool["name"] for tool in catalog["tools"])
-    assert len(roster) == 10
+    assert len(roster) == 13
 
     home = sandbox / "hermes-home"
     (home / "plugins").mkdir(parents=True)
@@ -199,7 +200,7 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(
     # even though registration happened.
     observation = _observe(venv_python, home, driver)
     assert observation["registered"] == roster, (
-        "an enabled plugin registers exactly the ten frozen tools"
+        "an enabled plugin registers the thirteen fixed tools"
     )
     assert observation["toolset_available"] is False, (
         "the toolset must stay unavailable until the five settings are seeded"
@@ -278,16 +279,24 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(
         assert _hermes(hermes, home, "tools", "enable", TOOLSET).returncode == 0
         assert (home / "config.yaml").read_bytes() == profile_before
         observation = _observe(venv_python, home, driver)
-        assert observation["registered"] == roster
-        darwin_only_rollback = revision == "previous" and runner._host_platform().startswith(
-            "linux/"
+        assert observation["registered"] == (
+            sorted(name for name in roster if not name.startswith("agent_dispatch_sync_"))
+            if revision == "previous"
+            else roster
         )
-        if darwin_only_rollback:
+        rollback_unavailable = revision == "previous" and (
+            runner._host_platform().startswith("linux/")
+            or hashlib.sha256(binary.read_bytes()).hexdigest() in V020_SHA256.values()
+        )
+        if rollback_unavailable:
             assert observation["toolset_available"] is False, (
-                f"the Darwin-only rollback source must not open the toolset on Linux: {observation}"
+                f"the rollback source must not open the toolset on this candidate: {observation}"
             )
             assert observation["smoke"].get("ok") is False
-            assert observation["smoke"].get("error") == "binary_unavailable", observation["smoke"]
+            assert observation["smoke"].get("error") in (
+                "binary_unavailable",
+                "unsupported_agent_dispatch_version",
+            ), observation["smoke"]
         else:
             assert observation["toolset_available"] is True
             assert observation["smoke"]["ok"] is True

@@ -33,11 +33,23 @@ def main() -> int:
     # loads the enabled plugins from HERMES_HOME before anything is called.
     import model_tools
 
+    registered = sorted(
+        name for name in model_tools.get_all_tool_names() if name.startswith("agent_dispatch_")
+    )
+    available = sorted(
+        definition["function"]["name"]
+        for definition in model_tools.get_tool_definitions(
+            enabled_toolsets=["agent_dispatch"],
+            quiet_mode=True,
+            skip_tool_search_assembly=True,
+        )
+        if definition["function"]["name"].startswith("agent_dispatch_")
+    )
     results = []
     for case in cases:
         raw = model_tools.handle_function_call(case["tool"], case["args"])
         results.append({"tool": case["tool"], "args": case["args"], "raw": raw})
-    print(json.dumps({"results": results}))
+    print(json.dumps({"registered": registered, "available": available, "results": results}))
     return 0
 
 

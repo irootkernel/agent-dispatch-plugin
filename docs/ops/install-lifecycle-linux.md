@@ -6,7 +6,8 @@ Environment: disposable `HERMES_HOME` on native `linux/arm64` or native
 `linux/amd64` with Hermes (>=0.20.5) on `PATH` and the host-selected
 pinned Agent Dispatch artifact. The procedure never touches the
 operator's live Hermes profile, Agent Dispatch configuration, state
-database, or systemd user units.
+database. The lifecycle cases leave systemd user units alone; the
+TASK-026 qualification case creates and removes one unique managed unit.
 
 This is the Linux counterpart of
 [install-lifecycle-darwin-arm64.md](install-lifecycle-darwin-arm64.md).
@@ -16,8 +17,13 @@ The state machine is the same. The pins and native scheduler differ.
 
 | Host | Agent Dispatch pin | SHA-256 | Env |
 |---|---|---|---|
-| linux/arm64 | v0.1.7 linux-arm64 | `5493b1a13d28fa28eee850617be7c745d47898b87a7c3c4ea114f5c1cf2481c0` | `AGENT_DISPATCH_QUALIFY_BINARY_V017` |
+| linux/arm64 | v0.1.8 linux-arm64 | `3d06d4d35493ce51581bb8c61f4ffc3dfd700499863a492a337ab7fb762ddf8e` | `AGENT_DISPATCH_QUALIFY_BINARY_V018` |
 | linux/amd64 | v0.1.8 linux-amd64 | `ac844117af9cb10d5e7a18b5294336283e03e44bd8ab3c59aa500d0ad4b6ce7d` | `AGENT_DISPATCH_QUALIFY_BINARY_V018` |
+
+Both hosts additionally require their v0.2.0 binary through
+`AGENT_DISPATCH_QUALIFY_BINARY_V020`; see [TESTING.md](../../TESTING.md)
+for its platform SHA. The older v0.1.7 Linux arm64 evidence remains in
+[the historical qualification record](../implementation-tips/qualification-linux-arm64.md).
 
 Plugin installation remains a source-only directory at an exact pinned
 revision. Hermes `plugins install` still rejects manifest 2; copy the
@@ -29,11 +35,13 @@ Translated amd64 (VirtualApple, qemu user-mode) is not this runbook.
 
 ```bash
 # linux/arm64
-export AGENT_DISPATCH_QUALIFY_BINARY_V017=/path/to/agent-dispatch-v0.1.7-linux-arm64
+export AGENT_DISPATCH_QUALIFY_BINARY_V018=/path/to/agent-dispatch-v0.1.8-linux-arm64
+export AGENT_DISPATCH_QUALIFY_BINARY_V020=/path/to/agent-dispatch-v0.2.0-linux-arm64
 make test-qualify
 
 # linux/amd64
 export AGENT_DISPATCH_QUALIFY_BINARY_V018=/path/to/agent-dispatch-v0.1.8-linux-amd64
+export AGENT_DISPATCH_QUALIFY_BINARY_V020=/path/to/agent-dispatch-v0.2.0-linux-amd64
 make test-qualify
 ```
 

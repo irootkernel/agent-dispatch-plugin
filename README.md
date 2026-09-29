@@ -2,7 +2,7 @@
 
 Agent Dispatch Plugin connects [Agent Dispatch](https://github.com/irootkernel/agent-dispatch) to your interactive Hermes conversations. Ask Hermes to inspect routes, follow a dispatch through its recorded history, look up receipts, or explain diagnostic findings without composing Agent Dispatch CLI commands yourself.
 
-The current development source registers thirteen inspection tools. Ten retain the v0.1.0 behavior; three inspect the two-node sync provider when an exact allowlisted v0.2.0 executable and trusted group are configured. Native qualification of the new tools is pending. Agent Dispatch remains responsible for routing, execution, and stored state.
+The current development source registers thirteen inspection tools. Ten retain the v0.1.0 behavior; three inspect the two-node sync provider when an exact allowlisted v0.2.0 executable and trusted group are configured. The new reads passed native qualification on Darwin arm64 and Linux arm64; Linux amd64 v0.2.0 qualification remains pending under EPIC-007. Agent Dispatch remains responsible for routing, execution, and stored state.
 
 ## What you can do
 
@@ -32,14 +32,16 @@ The plugin does not submit jobs, retry or discard dispatches, change routes, or 
 
 | Component | Requirement |
 |---|---|
-| Host | Published v0.1.1: macOS on Apple Silicon (`darwin/arm64`) as the release host; native `linux/amd64` and `linux/arm64` qualified at the recorded artifacts. |
+| Host | Published v0.1.1: macOS on Apple Silicon (`darwin/arm64`) as the release host; native `linux/amd64` and `linux/arm64` qualified at the recorded v0.1.x artifacts. The development v0.2.0 reads are qualified on Darwin arm64 and Linux arm64 only. |
 | Hermes | `>=0.20.5`; interactive CLI sessions only |
 | Agent Dispatch | `>=0.1.6,<0.2.0`, or an exact allowlisted v0.2.0 artifact (which also serves the original ten tools); `agent-dispatch.cli/v1` |
 | Distribution | Source directory; no wheel or bundled Agent Dispatch binary |
 
 The v0.1.1 qualification targets Hermes v0.21.0 and both Agent Dispatch
-v0.1.6 and v0.1.7 Darwin arm64 release artifacts, and records linux/arm64
-against Agent Dispatch v0.1.7 and linux/amd64 against v0.1.8. Version
+v0.1.6 and v0.1.7 Darwin arm64 release artifacts, and historically recorded
+linux/arm64 against Agent Dispatch v0.1.7 and linux/amd64 against v0.1.8.
+The current Linux arm64 development gate selects v0.1.8 and the pinned
+v0.2.0 candidate. Version
 requirements do not mean that every newer combination has been tested; see the
 [Darwin](docs/implementation-tips/qualification-darwin-arm64.md),
 [Linux arm64](docs/implementation-tips/qualification-linux-arm64.md), and

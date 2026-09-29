@@ -26,9 +26,11 @@ import hashlib
 import json
 import os
 import platform as platform_module
+import pwd
 import re
 import select
 import signal
+import stat
 import subprocess
 import sys
 import threading
@@ -69,13 +71,47 @@ NOT_CONFIGURED_MESSAGE = (
     "operator-provided binary_path, binary_sha256, and config_path."
 )
 
-# The execution environment is fixed in code (ADR-005): a system PATH, a
-# writable temp directory, and nothing else — no HOME, no inherited Hermes
-# or agent environment, no proxy or credential variables.
+# The original ten actions and the version/capability probes keep ADR-005's
+# exact two-variable environment. Only the two reads that inspect a native
+# service receive OS-derived user paths (ADR-010).
 MINIMAL_ENVIRONMENT: dict[str, str] = {
     "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
     "TMPDIR": "/tmp",
 }
+
+
+def _owned_user_runtime_dir(path: Path, uid: int) -> bool:
+    try:
+        metadata = path.lstat()
+    except OSError:
+        return False
+    return stat.S_ISDIR(metadata.st_mode) and metadata.st_uid == uid
+
+
+def _native_service_environment() -> dict[str, str]:
+    uid = os.getuid()
+    try:
+        home = pwd.getpwuid(uid).pw_dir
+    except (KeyError, OSError) as exc:
+        raise TrustFailure(
+            EXECUTION_FAILED, "the current user account record is unavailable"
+        ) from exc
+    if not isinstance(home, str) or not home.startswith("/"):
+        raise TrustFailure(EXECUTION_FAILED, "the current user account home is unavailable")
+    environment = {**MINIMAL_ENVIRONMENT, "HOME": home}
+    if sys.platform.startswith("linux"):
+        runtime_dir = Path(f"/run/user/{uid}")
+        if _owned_user_runtime_dir(runtime_dir, uid):
+            environment["XDG_RUNTIME_DIR"] = str(runtime_dir)
+    return environment
+
+
+def _environment_for_action(spec: ActionSpec) -> dict[str, str]:
+    if spec.requires_sync_attestation and spec.trusted_value_bindings:
+        return _native_service_environment()
+    return MINIMAL_ENVIRONMENT
+
+
 NEUTRAL_CWD = PLUGIN_ROOT
 
 _SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
@@ -579,7 +615,9 @@ def run_inspection(
     if spec.append_trusted_config:
         argv += ("--config", os.fspath(trust.config_path))
     try:
-        outcome = _execute_bounded(argv, trust)
+        outcome = _execute_bounded(argv, trust, _environment_for_action(spec))
+    except TrustFailure as failure:
+        return trust_failure_result(operation, failure)
     except OSError:
         return closed_error_result(
             operation,
@@ -819,7 +857,9 @@ def _terminate_process_group(process: subprocess.Popen[Any], grace_seconds: floa
     process.wait()
 
 
-def _execute_bounded(argv: tuple[str, ...], trust: RunnerTrust) -> _Outcome:
+def _execute_bounded(
+    argv: tuple[str, ...], trust: RunnerTrust, environment: Mapping[str, str] = MINIMAL_ENVIRONMENT
+) -> _Outcome:
     """Spawn one fresh process group and drain it under the frozen bounds."""
     limits = _limits()
     termination = limits["termination"]
@@ -834,7 +874,7 @@ def _execute_bounded(argv: tuple[str, ...], trust: RunnerTrust) -> _Outcome:
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         cwd=NEUTRAL_CWD,
-        env=MINIMAL_ENVIRONMENT,
+        env=environment,
         close_fds=True,
         start_new_session=True,
     )

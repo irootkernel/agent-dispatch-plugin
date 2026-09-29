@@ -15,6 +15,48 @@ durable non-goals unless the PRD is amended.
 
 ## Entries
 
+### Native service environment contract classification
+
+Source: Mulgae TASK-026 review `r_01a0eb64-73e5-702d-9088-5a916da354bd`
+finding F001 (Low). Disposition: deferred feedback. Owner: Plugin
+maintainer. Rationale: the current catalog's two group-bound sync reads
+are exactly ADR-010's native-service reads, so the catalog-derived runner
+predicate gives the intended environment today. The equivalence is not
+declared as a per-action contract field or checked as an invariant. Revisit:
+before EPIC-008 adds a group-scoped sync command or any sync read changes
+its group binding, amend the contract and decision record to declare and
+validate the environment class explicitly. Roadmap identity: TASK-026
+hardening follow-up; no new task ID allocated.
+
+### TASK-026 qualification helper consolidation
+
+Source: Mulgae TASK-026 review `r_01a0eb3f-d5e9-7c3f-b2dd-5efc5f40f818`
+findings F002 and F003 (Low). Disposition: deferred feedback.
+Owner: Plugin maintainer. Rationale: the qualification fixture verifies each
+pinned binary digest, while the matrix and lifecycle tests re-identify v0.2.0
+by hashing the same file; the native service test also imports private helpers
+from another test module. Both are maintainability risks independent of the
+current pinned ARM qualification and task acceptance. Revisit: before adding
+another pinned Agent Dispatch version or restructuring the qualification suite,
+carry the fixture's artifact identity to consumers and move shared disposable
+state helpers into a dedicated helper module. Roadmap identity: TASK-026
+follow-up; no new task ID allocated.
+
+### Linux amd64 v0.2.0 sync inspection qualification
+
+Source: Master narrowed TASK-026 completion on 2026-09-29 after Darwin
+arm64 and native Linux arm64 qualification. Disposition: deferred.
+Owner: Plugin maintainer. Rationale: no accessible native x86_64 Linux
+host was available for the v0.2.0 Hermes and systemd user-manager matrix;
+translated execution does not meet the platform gate. The older
+linux/amd64 v0.1.8 qualification does not cover the three v0.2.0 sync
+reads. Revisit: when a native x86_64 Linux host is available, run
+`make test` and `make test-qualify` with the exact catalog-pinned
+v0.1.8 and v0.2.0 binaries, including real absent/loaded/drifted
+service inspection, then record the result before claiming Linux amd64
+v0.2.0 support or closing EPIC-007. Roadmap identity: EPIC-007
+acceptance gap after TASK-026; no new task ID allocated.
+
 ### Linux and multi-platform support
 
 Source: `REQ-PLUGIN-WIKI-SYNC/v1` plugin intake (EPIC-006). Disposition:

@@ -51,7 +51,7 @@ old qualification transcript as proof for a new runtime revision.
 - [Maintainer guide](maintainer-guide.md): frozen surface, review, and change control.
 - [Clean-clone verification](clean-clone-verification.md): exact-revision test reproduction and historical evidence.
 - [Qualification matrix (Darwin arm64)](qualification-darwin-arm64.md): pinned Darwin artifacts and disposable compatibility verification.
-- [Qualification matrix (Linux arm64)](qualification-linux-arm64.md): pinned v0.1.7 linux-arm64 artifact and disposable compatibility verification.
+- [Qualification matrix (Linux arm64)](qualification-linux-arm64.md): pinned v0.1.8 and v0.2.0 linux-arm64 artifacts and disposable compatibility verification.
 - [Qualification matrix (Linux amd64)](qualification-linux-amd64.md): pinned v0.1.8 linux-amd64 artifact and disposable compatibility verification.
 - [Dispatch E20 / E20-T1 handoff](dispatch-e20-handoff.md): EPIC-006 close and next global position.
 - [Release handoff](release-handoff.md): candidate identity and release gates.

@@ -261,7 +261,7 @@ def test_pinned_digest_negatives(plugin, tmp_path, wrapper):
 
 
 def test_the_execution_environment_is_the_fixed_allowlist(plugin, tmp_path, monkeypatch):
-    """The child environment is exactly PATH and TMPDIR: nothing inherited
+    """The child environment uses only trusted OS-derived values: nothing inherited
     from Hermes, the agent, or this process. (The macOS python3 launcher
     shim adds its own six fixed variables after the exec, which the
     runner-level suite already pins; no caller-controlled value appears.)"""

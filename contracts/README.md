@@ -4,7 +4,8 @@
 `v0.2.0/` is the approved EPIC-007 thirteen-tool contract for the exact
 Agent Dispatch v0.2.0 provider candidate. The running development plugin
 derives its manifest and registry from v0.2.0; v0.1.0 remains the frozen
-legacy baseline. TASK-026 owns native platform qualification. The PRD and
+legacy baseline. TASK-026 qualified Darwin arm64 and Linux arm64; the Plugin
+maintainer owns deferred native Linux amd64 v0.2.0 qualification. The PRD and
 `docs/specs/contracts.md` bind both contract versions.
 
 ## Layout

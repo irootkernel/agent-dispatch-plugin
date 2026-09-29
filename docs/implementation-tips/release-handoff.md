@@ -39,9 +39,12 @@ Every candidate must pass, from a full-history clean clone of the exact revision
    Doctor e2e stage.
 3. `make test-qualify` — the disposable action-level compatibility
    matrix (every advertised public action through the real Hermes
-   runtime against both pinned artifacts) and the disposable installation
-   lifecycle (disabled default, explicit plugin and toolset enablement,
-   disablement, rollback/restoration, residue-free removal).
+   runtime against the host-selected legacy artifacts and pinned v0.2.0
+   candidate) and the disposable installation lifecycle (disabled default,
+   explicit plugin and toolset enablement, disablement,
+   rollback/restoration, residue-free removal). The v0.2.0 stage also
+   requires a native user service manager for absent, loaded, and drifted
+   sync-service inspection.
 
 Together these are exactly the EPIC-004 release gates plus the EPIC-005
 distribution gates; the qualification runbook records the artifact
@@ -56,8 +59,8 @@ identities and adjudicated boundaries they carry.
 - [ ] The whole-epic validation review of the candidate is committed
       with complete coverage, a passing CI decision, and every finding
       dispositioned.
-- [ ] The compatibility matrix is current for the pinned artifacts
-      (minimum v0.1.6 and latest compatible v0.1.7).
+- [ ] The compatibility matrix is current for the host-selected legacy
+      artifacts and exact v0.2.0 candidate on each claimed platform.
 - [ ] The doctor acceptance gap below has an explicit resolution.
 - [ ] The operations runbooks form the complete index
       ([operations index](../ops/README.md)) with no required topic unmapped.

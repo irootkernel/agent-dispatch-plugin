@@ -18,6 +18,9 @@ Superseded, and Rejected. A superseding ADR links the record it replaces.
 | ADR-007 | Derived input validation before process creation | Accepted |
 | ADR-008 | Preserve doctor findings at exit code 3 | Accepted |
 | ADR-009 | Validated public sync identities | Accepted |
+| ADR-010 | Trusted OS user environment for native service inspection | Accepted |
 
 ADR-009 supersedes ADR-006 only for the named v0.2.0 sync identity fields;
 the remaining ADR-006 decisions stay accepted.
+ADR-010 adds an OS-derived user-environment exception for the two sync reads
+that inspect native service state; the other ADR-005 decisions remain accepted.

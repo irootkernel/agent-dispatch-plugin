@@ -1,9 +1,14 @@
 # Qualification Runbook: Darwin arm64 Compatibility Matrix
 
-Target: the `agent-dispatch-plugin` v0.1.0 public surface.
+Target: the `agent-dispatch-plugin` public surface.
 Environment: disposable profile on Darwin arm64 (this runbook's evidence
-path never touches the operator's live Agent Dispatch configuration,
-state database, or LaunchAgents).
+path never touches the operator's live Agent Dispatch configuration or
+state database; the current stage uses a unique disposable LaunchAgent).
+
+TASK-026 additionally requires the v0.2.0 Darwin arm64 candidate, SHA-256
+`aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889`,
+at `AGENT_DISPATCH_QUALIFY_BINARY_V020`. The earlier TASK-012/TASK-021
+records below remain historical.
 
 ## Exact artifact identities
 
@@ -36,6 +41,7 @@ identities. Recheck the compatible release inventory before the next release.
 # 1. Provide both pinned Darwin arm64 release builds (verified by SHA-256).
 export AGENT_DISPATCH_QUALIFY_BINARY=/path/to/agent-dispatch-v0.1.6-darwin-arm64
 export AGENT_DISPATCH_QUALIFY_BINARY_V017=/path/to/agent-dispatch-v0.1.7-darwin-arm64
+export AGENT_DISPATCH_QUALIFY_BINARY_V020=/path/to/agent-dispatch-v0.2.0-darwin-arm64
 
 # 2. Ensure hermes on PATH is v0.20.5 or newer, then run the matrix.
 make test-qualify
@@ -53,9 +59,10 @@ Hermes runtime (v0.20.5 or newer) (`model_tools.handle_function_call` — the sa
 dispatcher the agent loop and the Hermes tools MCP server use), with no
 model and no network. Seeding commands run with `HOME` inside the sandbox
 so home-resolved state (including the hermes capability cache) stays
-disposable; through the plugin boundary `HOME` is absent by the frozen
-environment contract, so the capability cache falls back to the
-per-user temp directory under the sandbox's unique target identity.
+disposable. The original ten actions and version/capability probes keep
+the fixed PATH/TMPDIR child environment. Only `sync status` and `sync service
+inspect` derive HOME from the OS account record under ADR-010; they never
+inherit the caller's HOME.
 
 ## Recorded boundaries (historical adjudication)
 
@@ -97,7 +104,7 @@ the action's expected command identity, and the seeded synthetic state surfacing
 actions (`schedule inspect` proving the absent-schedule successful
 inspection with `present=false`).
 
-## Current candidate (TASK-021)
+## Recorded TASK-021 candidate (historical)
 
 Recorded 2026-09-16 on this Darwin arm64 host against plugin source
 `f600363` plus the linux/amd64 qualification-fixture admission in the

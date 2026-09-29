@@ -1,18 +1,22 @@
 # Installation Lifecycle Runbook: Disposable Hermes Profile
 
-Target: the `agent-dispatch-plugin` v0.1.0 distribution lifecycle in a
+Target: the `agent-dispatch-plugin` source-directory distribution lifecycle in a
 disposable Hermes profile.
 Environment: disposable `HERMES_HOME` on Darwin arm64 with Hermes
-(v0.20.5 or newer) on `PATH` and both pinned Agent Dispatch v0.1.6 and
-v0.1.7 darwin/arm64 release artifacts. The procedure never touches the operator's live Hermes profile,
-Agent Dispatch configuration, state database, or LaunchAgents.
+(v0.20.5 or newer) on `PATH`, the pinned Agent Dispatch v0.1.6 and v0.1.7
+release artifacts, and the v0.2.0 candidate. The procedure never touches
+the operator's live Hermes profile, Agent Dispatch configuration, or state
+database. The native-service case creates and removes one unique managed
+LaunchAgent under the current user's account and requires a launchd GUI domain.
 
 ## Exact identities
 
 | Component | Identity |
 |---|---|
 | Hermes | >=0.20.5 on `PATH` (qualified reference: v0.20.5, build 2026.8.19) |
-| Agent Dispatch binary | v0.1.6 release build, SHA-256 `ee1de77d3d4aa67cc1dcc6d7d1510024e4ce793c440b3f3d5c14debc1f424479` |
+| Agent Dispatch v0.1.6 | release build, SHA-256 `ee1de77d3d4aa67cc1dcc6d7d1510024e4ce793c440b3f3d5c14debc1f424479` |
+| Agent Dispatch v0.1.7 | release build, SHA-256 `c949e5c56929332cc102c228bfd9415fee0dbdd0b21c296ac136b9d114efbccf` |
+| Agent Dispatch v0.2.0 | reviewed candidate, SHA-256 `aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889` |
 | Plugin installation | source-only plugin directory at an exact pinned revision of this repository |
 | Host | darwin/arm64 |
 
@@ -36,6 +40,7 @@ compatibility matrix qualify.
 #    hermes on PATH is v0.20.5 or newer.
 export AGENT_DISPATCH_QUALIFY_BINARY=/path/to/agent-dispatch-v0.1.6-darwin-arm64
 export AGENT_DISPATCH_QUALIFY_BINARY_V017=/path/to/agent-dispatch-v0.1.7-darwin-arm64
+export AGENT_DISPATCH_QUALIFY_BINARY_V020=/path/to/agent-dispatch-v0.2.0-darwin-arm64
 
 # 2. Run the lifecycle qualification (with the compatibility matrix).
 make test-qualify
@@ -56,7 +61,7 @@ the profile.
 | State | Command | Recorded result |
 |---|---|---|
 | Installed, disabled by default | directory install | `plugins show` reports `Status: not enabled`; fresh session registers 0 tools |
-| Plugin enabled, settings unseeded | `hermes plugins enable agent-dispatch-plugin --no-allow-tool-override` | exactly the ten frozen tools register; toolset availability stays `false`; one smoke dispatch closes as `binary_unavailable` |
+| Plugin enabled, settings unseeded | `hermes plugins enable agent-dispatch-plugin --no-allow-tool-override` | exactly thirteen fixed tools register; toolset availability stays `false`; one smoke dispatch closes as `binary_unavailable` |
 | Plugin enabled, five settings seeded | profile config `plugins.entries…settings` | toolset availability `true`; the smoke inspection returns `ok: true` through the full boundary |
 | Toolset disabled (plugin still enabled) | `hermes tools disable agent_dispatch` | `tools list` reports `✗ disabled`; the toolset leaves `platform_toolsets.cli` while the plugin stays enabled |
 | Toolset re-enabled | `hermes tools enable agent_dispatch` | `tools list` reports `✓ enabled`; the toolset rejoins `platform_toolsets.cli` |
@@ -97,12 +102,14 @@ not a reason to repeat it against a live profile. Success requires the documente
 fresh-session observations, not directory creation alone. Escalate unresolved
 failures through [troubleshooting](troubleshooting.md#escalation).
 
-## Current release matrix
+## Current development matrix
 
-The current gate runs this lifecycle for both pinned v0.1.6 and v0.1.7
-executables. Set `AGENT_DISPATCH_QUALIFY_BINARY` and
-`AGENT_DISPATCH_QUALIFY_BINARY_V017` as described in the
+The current gate runs this lifecycle for pinned v0.1.6, v0.1.7, and v0.2.0
+executables. Set `AGENT_DISPATCH_QUALIFY_BINARY`,
+`AGENT_DISPATCH_QUALIFY_BINARY_V017`, and
+`AGENT_DISPATCH_QUALIFY_BINARY_V020` as described in the
 [qualification runbook](../implementation-tips/qualification-darwin-arm64.md).
 The gate now also swaps to the pre-release revision and back to the candidate,
-checking that profile settings survive and fresh-session smoke calls succeed.
-Historical identity tables above describe the original run only.
+checking that profile settings survive. The rollback smoke succeeds for the
+legacy artifacts and remains fail-closed for v0.2.0 until the candidate returns.
+The earlier v0.1.x qualification transcripts remain historical.

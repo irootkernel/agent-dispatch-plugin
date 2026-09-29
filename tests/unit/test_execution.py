@@ -12,6 +12,7 @@ import json
 import os
 import time
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -113,9 +114,9 @@ def _raw_echo(plugin, runner, installation):
 _SEEDED_PARENT_SECRETS = {
     "AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
     "SSH_AUTH_SOCK": "/tmp/ssh-secret/agent.sock",
-    "XDG_RUNTIME_DIR": "/run/user/1000",
+    "XDG_RUNTIME_DIR": "/tmp/untrusted-user-bus",
     "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
-    "HOME": "/home/secret-operator",
+    "HOME": "/tmp/untrusted-home",
 }
 
 
@@ -156,6 +157,116 @@ def test_parent_credentials_never_enter_the_child(plugin, runner, fake_agent_dis
         assert key not in raw["env"]
     assert raw["env"]["PATH"] == runner.MINIMAL_ENVIRONMENT["PATH"]
     assert raw["env"]["TMPDIR"] == runner.MINIMAL_ENVIRONMENT["TMPDIR"]
+
+
+def test_native_service_reads_get_only_os_derived_user_paths(
+    plugin, runner, fake_agent_dispatch, monkeypatch
+):
+    for key, value in _SEEDED_PARENT_SECRETS.items():
+        monkeypatch.setenv(key, value)
+    trust = runner.resolve_trust(fake_agent_dispatch["config"])
+    expected_environment = runner._native_service_environment()
+    for command, tool_name in (
+        (("sync", "status"), "agent_dispatch_sync_status"),
+        (("sync", "service", "inspect"), "agent_dispatch_sync_service_inspect"),
+    ):
+        argv = (os.fspath(trust.binary_path), *command, "--output", "json")
+        spec = _action(plugin, tool_name, "inspect")
+        outcome = runner._execute_bounded(argv, trust, runner._environment_for_action(spec))
+        assert not outcome.timed_out and not outcome.overflowed
+        child_env = json.loads(outcome.stdout)["result"]["env"]
+        assert child_env["HOME"] == expected_environment["HOME"]
+        assert child_env["HOME"] != _SEEDED_PARENT_SECRETS["HOME"]
+        assert set(child_env) - _PYTHON3_SHIM_INJECTED == set(expected_environment)
+        if "XDG_RUNTIME_DIR" in expected_environment:
+            assert child_env["XDG_RUNTIME_DIR"] == expected_environment["XDG_RUNTIME_DIR"]
+            assert child_env["XDG_RUNTIME_DIR"] != _SEEDED_PARENT_SECRETS["XDG_RUNTIME_DIR"]
+        assert "DBUS_SESSION_BUS_ADDRESS" not in child_env
+
+    capabilities = runner._execute_bounded(
+        (os.fspath(trust.binary_path), "sync", "capabilities", "--output", "json"), trust
+    )
+    child_env = json.loads(capabilities.stdout)["result"]["env"]
+    assert set(child_env) - _PYTHON3_SHIM_INJECTED == set(runner.MINIMAL_ENVIRONMENT)
+    assert "HOME" not in child_env
+    assert "XDG_RUNTIME_DIR" not in child_env
+    assert (
+        runner._environment_for_action(
+            _action(plugin, "agent_dispatch_sync_capabilities", "inspect")
+        )
+        == runner.MINIMAL_ENVIRONMENT
+    )
+
+
+def test_service_environment_fails_closed_when_account_record_is_missing(
+    plugin, runner, fake_agent_dispatch, monkeypatch
+):
+    trust = runner.resolve_trust(fake_agent_dispatch["config"])
+
+    def missing_account(_uid):
+        raise KeyError("missing account")
+
+    monkeypatch.setattr(runner.pwd, "getpwuid", missing_account)
+    assert (
+        runner._environment_for_action(_action(plugin, "agent_dispatch_status", "inspect"))
+        == runner.MINIMAL_ENVIRONMENT
+    )
+    with pytest.raises(runner.TrustFailure) as failure:
+        runner._environment_for_action(_action(plugin, "agent_dispatch_sync_status", "inspect"))
+    assert failure.value.code == runner.EXECUTION_FAILED
+    assert "missing account" not in failure.value.message
+    monkeypatch.setattr(runner, "verify_sync_capabilities", lambda _config: trust)
+    config = {**fake_agent_dispatch["config"], "sync_group_id": "qual-group"}
+    result = runner.run_inspection(
+        _action(plugin, "agent_dispatch_sync_status", "inspect"),
+        "agent_dispatch_sync_status",
+        {},
+        config,
+    )
+    assert result["ok"] is False
+    assert result["error"]["code"] == runner.EXECUTION_FAILED
+    assert "missing account" not in json.dumps(result)
+
+
+@pytest.mark.parametrize("home", [None, "", "relative/home"])
+def test_service_environment_rejects_unusable_account_home(
+    plugin, runner, fake_agent_dispatch, monkeypatch, home
+):
+    trust = runner.resolve_trust(fake_agent_dispatch["config"])
+    monkeypatch.setattr(runner.pwd, "getpwuid", lambda _uid: SimpleNamespace(pw_dir=home))
+    monkeypatch.setattr(runner, "verify_sync_capabilities", lambda _config: trust)
+    config = {**fake_agent_dispatch["config"], "sync_group_id": "qual-group"}
+    result = runner.run_inspection(
+        _action(plugin, "agent_dispatch_sync_status", "inspect"),
+        "agent_dispatch_sync_status",
+        {},
+        config,
+    )
+    assert result["ok"] is False
+    assert result["error"]["code"] == runner.EXECUTION_FAILED
+    assert result["error"]["message"] == "the current user account home is unavailable"
+
+
+def test_service_environment_refreshes_linux_runtime_directory(runner, monkeypatch):
+    monkeypatch.setattr(runner, "sys", SimpleNamespace(platform="linux"))
+    monkeypatch.setattr(runner, "_owned_user_runtime_dir", lambda _path, _uid: True)
+    assert "XDG_RUNTIME_DIR" in runner._native_service_environment()
+    monkeypatch.setattr(runner, "_owned_user_runtime_dir", lambda _path, _uid: False)
+    assert "XDG_RUNTIME_DIR" not in runner._native_service_environment()
+
+
+def test_only_owned_real_directories_qualify_as_user_runtime(tmp_path, runner):
+    directory = tmp_path / "runtime"
+    directory.mkdir()
+    (tmp_path / "link").symlink_to(directory, target_is_directory=True)
+    file = tmp_path / "file"
+    file.write_text("not a directory", encoding="utf-8")
+
+    assert runner._owned_user_runtime_dir(directory, os.getuid())
+    assert not runner._owned_user_runtime_dir(directory, os.getuid() + 1)
+    assert not runner._owned_user_runtime_dir(tmp_path / "link", os.getuid())
+    assert not runner._owned_user_runtime_dir(file, os.getuid())
+    assert not runner._owned_user_runtime_dir(tmp_path / "missing", os.getuid())
 
 
 def test_both_popen_sites_use_the_frozen_isolation_contract(

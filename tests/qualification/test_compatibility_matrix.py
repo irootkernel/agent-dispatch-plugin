@@ -1,12 +1,12 @@
-"""The disposable action-level compatibility matrix (TASK-012, EPIC-004).
+"""The disposable action-level compatibility matrix (TASK-012/TASK-026).
 
-Qualifies every advertised public action of all ten tools through the real
+Qualifies every advertised original action and the v0.2.0 sync reads through the real
 Hermes runtime, v0.20.5 or newer (plugin discovery plus ``handle_function_call``
 dispatch over a disposable ``HERMES_HOME``) invoking the host-selected pinned
-Agent Dispatch release artifacts (Darwin arm64: v0.1.6 and v0.1.7; linux/arm64:
-v0.1.7; linux/amd64: v0.1.8), against synthetic state seeded through Agent Dispatch's own commands
+Agent Dispatch release artifacts (Darwin arm64: v0.1.6 and v0.1.7; Linux:
+v0.1.8; all hosts: v0.2.0), against synthetic state seeded through Agent Dispatch's own commands
 inside one disposable profile. The suite never touches the operator's live
-Agent Dispatch configuration, state database, or native scheduler: the state
+Agent Dispatch configuration or state database: the state
 directory, configuration, resource root, and HOME that Agent Dispatch resolves
 are pinned into the sandbox (seeding commands otherwise run with an inherited
 environment), and the downstream Hermes target is a controlled fake answering
@@ -30,6 +30,8 @@ import subprocess
 from pathlib import Path
 
 import runner
+from conftest import V020_SHA256
+import yaml
 
 from jsonschema import Draft202012Validator
 from referencing import Registry as RefRegistry
@@ -37,6 +39,7 @@ from referencing import Resource
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 CONTRACTS = ROOT / "contracts" / "v0.1.0"
+CONTRACTS_V020 = ROOT / "contracts" / "v0.2.0"
 
 ROUTE_ID = "wiki-maintenance"
 PROFILE = "wiki-maintainer"
@@ -299,7 +302,9 @@ def _seed_disposable_state(binary: Path, sandbox: Path) -> dict[str, str]:
     }
 
 
-def _disposable_hermes_home(sandbox: Path, binary: Path, config: Path) -> Path:
+def _disposable_hermes_home(
+    sandbox: Path, binary: Path, config: Path, *, sync_group_id: str | None = None
+) -> Path:
     home = sandbox / "hermes-home"
     plugins = home / "plugins"
     plugins.mkdir(parents=True)
@@ -317,6 +322,8 @@ def _disposable_hermes_home(sandbox: Path, binary: Path, config: Path) -> Path:
         "config_path": str(config),
         "timeout_seconds": 30,
     }
+    if sync_group_id is not None:
+        settings["sync_group_id"] = sync_group_id
     # Write through the entries block with correct indentation.
     config_text = (
         "plugins:\n"
@@ -328,13 +335,14 @@ def _disposable_hermes_home(sandbox: Path, binary: Path, config: Path) -> Path:
         f"        binary_sha256: {json.dumps(settings['binary_sha256'])}\n"
         f"        config_path: {json.dumps(settings['config_path'])}\n"
         f"        timeout_seconds: {settings['timeout_seconds']}\n"
+        + (f"        sync_group_id: {json.dumps(sync_group_id)}\n" if sync_group_id else "")
     )
     (home / "config.yaml").write_text(config_text, encoding="utf-8")
     return home
 
 
-def _expected_commands() -> dict[tuple[str, str | None], str]:
-    catalog = json.loads((CONTRACTS / "catalog.json").read_text(encoding="utf-8"))
+def _expected_commands(contracts: Path = CONTRACTS) -> dict[tuple[str, str | None], str]:
+    catalog = json.loads((contracts / "catalog.json").read_text(encoding="utf-8"))
     commands: dict[tuple[str, str | None], str] = {}
     for tool in catalog["tools"]:
         for action in tool["actions"]:
@@ -343,12 +351,12 @@ def _expected_commands() -> dict[tuple[str, str | None], str]:
     return commands
 
 
-def _wrapper_validator() -> Draft202012Validator:
+def _wrapper_validator(contracts: Path = CONTRACTS) -> Draft202012Validator:
     ref_registry = RefRegistry()
-    for schema_file in sorted(CONTRACTS.glob("schemas/*.json")):
+    for schema_file in sorted(contracts.glob("schemas/*.json")):
         schema = json.loads(schema_file.read_text(encoding="utf-8"))
         ref_registry = ref_registry.with_resource(schema["$id"], Resource.from_contents(schema))
-    schema = json.loads((CONTRACTS / "schemas" / "wrapper.schema.json").read_text(encoding="utf-8"))
+    schema = json.loads((contracts / "schemas" / "wrapper.schema.json").read_text(encoding="utf-8"))
     return Draft202012Validator(schema, registry=ref_registry)
 
 
@@ -360,9 +368,13 @@ def test_compatibility_matrix_qualifies_every_public_action(
     sandbox.mkdir()
 
     binary = qualified_binary
+    v020 = hashlib.sha256(binary.read_bytes()).hexdigest() == V020_SHA256[runner._host_platform()]
     _fake_hermes_target(sandbox)
     ids = _seed_disposable_state(binary, sandbox)
-    home = _disposable_hermes_home(sandbox, binary, sandbox / "config.yaml")
+    sync_group_id = "qual-" + hashlib.sha256(str(sandbox).encode()).hexdigest()[:16]
+    home = _disposable_hermes_home(
+        sandbox, binary, sandbox / "config.yaml", sync_group_id=sync_group_id if v020 else None
+    )
 
     success_cases = [
         ("agent_dispatch_status", {}),
@@ -392,6 +404,12 @@ def test_compatibility_matrix_qualifies_every_public_action(
         ("agent_dispatch_doctor", {"probe_targets": True}),
         ("agent_dispatch_doctor", {}),
     ]
+    if v020:
+        success_cases += [
+            ("agent_dispatch_sync_capabilities", {}),
+            ("agent_dispatch_sync_status", {}),
+            ("agent_dispatch_sync_service_inspect", {}),
+        ]
 
     manifest = sandbox / "manifest.json"
     manifest.write_text(
@@ -413,14 +431,21 @@ def test_compatibility_matrix_qualifies_every_public_action(
         cwd=str(sandbox),
     )
     assert driven.returncode == 0, driven.stdout[-2000:] + driven.stderr[-2000:]
+    driven_data = json.loads(driven.stdout)
+    registered = driven_data["registered"]
+    available = driven_data["available"]
+    assert len(registered) == 13
+    assert len(available) == (13 if v020 else 10)
+    assert set(available).issubset(registered)
     results = {
         (entry["tool"], json.dumps(entry["args"], sort_keys=True)): json.loads(entry["raw"])
-        for entry in json.loads(driven.stdout)["results"]
+        for entry in driven_data["results"]
     }
     assert len(results) == len(success_cases)
 
-    wrapper = _wrapper_validator()
-    commands = _expected_commands()
+    contracts = CONTRACTS_V020 if v020 else CONTRACTS
+    wrapper = _wrapper_validator(contracts)
+    commands = _expected_commands(contracts)
     for tool, args in success_cases:
         result = results[(tool, json.dumps(args, sort_keys=True))]
         wrapper.validate(result)
@@ -492,3 +517,152 @@ def test_compatibility_matrix_qualifies_every_public_action(
         assert ".config/systemd/user/" in service
         assert ".config/systemd/user/" in timer
         assert Path(service).stem == Path(timer).stem == label
+    if v020:
+        status = results[("agent_dispatch_sync_status", "{}")]["agent_dispatch"]["result"]
+        assert status["state"] == "disabled"
+        assert status["group_id"] == sync_group_id
+        assert status["side_effects"] == []
+        service = results[("agent_dispatch_sync_service_inspect", "{}")]["agent_dispatch"]["result"]
+        assert service["present"] is False and service["loaded"] is False
+        assert service["side_effects"] == []
+
+
+def _enable_disposable_sync(config: Path, group_id: str) -> None:
+    """Configure two synthetic members without resolving credentials or peers."""
+    document = yaml.safe_load(config.read_text(encoding="utf-8"))
+    local = document["instance"]["id"]
+    document["resources"]["vault-main"]["git"]["mode"] = "optional"
+    document["sync"] = {
+        "enabled": True,
+        "group_id": group_id,
+        "resource": "vault-main",
+        "remote_name": "origin",
+        "remote_repository_digest": "sha256:" + "a" * 64,
+        "content_ref": "refs/heads/wiki-sync",
+        "membership_ref": f"refs/agent-dispatch/membership/{group_id}",
+        "local_instance_id": local,
+        "administrator_key": "SHA256:" + "A" * 43,
+        "publisher_signing_key_ref": "env:QUAL_PUBLISHER_KEY",
+        "administrator_signing_key_ref": "env:QUAL_ADMINISTRATOR_KEY",
+        "nodes": [
+            {
+                "instance_id": local,
+                "state_incarnation_id": f"{local}-state-001",
+                "endpoint": "https://qual-local.ts.net",
+                "publisher_key": "SHA256:" + "B" * 42 + "A",
+                "credential_ref": "env:QUAL_LOCAL_PEER_KEY",
+            },
+            {
+                "instance_id": "qual-peer",
+                "state_incarnation_id": "qual-peer-state-001",
+                "endpoint": "https://qual-peer.ts.net",
+                "publisher_key": "SHA256:" + "C" * 42 + "A",
+                "credential_ref": "env:QUAL_REMOTE_PEER_KEY",
+            },
+        ],
+        "bounds": {
+            "queue": 1000,
+            "history_commits": 1000,
+            "subprocess_seconds": 120,
+            "subprocess_bytes": 1048576,
+        },
+    }
+    config.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+
+
+def test_v020_enabled_partial_pair_via_fresh_hermes(tmp_path, v020_binary, qualification_runtime):
+    _hermes, venv_python = qualification_runtime
+    sandbox = tmp_path / "enabled-pair"
+    sandbox.mkdir()
+    _fake_hermes_target(sandbox)
+    _seed_disposable_state(v020_binary, sandbox)
+    config = sandbox / "config.yaml"
+    group_id = "qual-" + hashlib.sha256(str(sandbox).encode()).hexdigest()[:16]
+    _enable_disposable_sync(config, group_id)
+    checked = _run(
+        [str(v020_binary), "config", "validate", "--config", str(config), "--output", "json"],
+        env={**os.environ, "HOME": str(sandbox / "home")},
+    )
+    assert checked.returncode == 0, checked.stderr
+    home = _disposable_hermes_home(sandbox, v020_binary, config, sync_group_id=group_id)
+    cases = [
+        {"tool": "agent_dispatch_sync_capabilities", "args": {}},
+        {"tool": "agent_dispatch_sync_status", "args": {}},
+        {"tool": "agent_dispatch_sync_service_inspect", "args": {}},
+    ]
+    manifest = sandbox / "manifest.json"
+    manifest.write_text(json.dumps(cases), encoding="utf-8")
+    driven = _run(
+        [str(venv_python), str(Path(__file__).with_name("_hermes_driver.py")), str(manifest)],
+        env={
+            **os.environ,
+            "HERMES_HOME": str(home),
+            "HERMES_BUNDLED_PLUGINS": str(home / "bundled"),
+            "HERMES_ENABLE_PROJECT_PLUGINS": "0",
+            "HERMES_QUIET": "1",
+        },
+        timeout=180,
+        cwd=str(sandbox),
+    )
+    assert driven.returncode == 0, driven.stdout[-2000:] + driven.stderr[-2000:]
+    output = json.loads(driven.stdout)
+    assert len(output["registered"]) == len(output["available"]) == 13
+    wrapper = _wrapper_validator(CONTRACTS_V020)
+    for entry in output["results"]:
+        result = json.loads(entry["raw"])
+        wrapper.validate(result)
+        assert result["ok"] is True, result
+        assert result["agent_dispatch"]["result"]["side_effects"] == []
+    status = json.loads(output["results"][1]["raw"])["agent_dispatch"]["result"]
+    assert status["state"] == "active"
+    assert status["import_acknowledgement_current"] is False
+    assert status["health"]["verification"]["state"] == "unknown"
+    assert status["health"]["listener"]["state"] == "unavailable"
+    assert len(status["expected_nodes"]) == 2
+    assert all(
+        status[f"latest_{kind}"]["present"] is False
+        for kind in ("publication", "delivery", "import", "verification")
+    )
+
+
+def test_v020_without_group_keeps_ten_available(tmp_path, v020_binary, qualification_runtime):
+    _hermes, venv_python = qualification_runtime
+    sandbox = tmp_path / "without-group"
+    sandbox.mkdir()
+    config = sandbox / "config.yaml"
+    seed = _run(
+        [
+            str(v020_binary),
+            "init",
+            "--resource-root",
+            str(sandbox / "resources"),
+            "--instance-id",
+            "qual-no-group",
+            "--state-dir",
+            str(sandbox / "state"),
+            "--config",
+            str(config),
+        ],
+        env={**os.environ, "HOME": str(sandbox)},
+    )
+    assert seed.returncode == 0, seed.stderr
+    home = _disposable_hermes_home(sandbox, v020_binary, config)
+    manifest = sandbox / "manifest.json"
+    manifest.write_text("[]", encoding="utf-8")
+    driven = _run(
+        [str(venv_python), str(Path(__file__).with_name("_hermes_driver.py")), str(manifest)],
+        env={
+            **os.environ,
+            "HERMES_HOME": str(home),
+            "HERMES_BUNDLED_PLUGINS": str(home / "bundled"),
+            "HERMES_ENABLE_PROJECT_PLUGINS": "0",
+            "HERMES_QUIET": "1",
+        },
+        timeout=120,
+        cwd=str(sandbox),
+    )
+    assert driven.returncode == 0, driven.stdout[-2000:] + driven.stderr[-2000:]
+    inventory = json.loads(driven.stdout)
+    assert len(inventory["registered"]) == 13
+    assert len(inventory["available"]) == 10
+    assert all(not name.startswith("agent_dispatch_sync_") for name in inventory["available"])
