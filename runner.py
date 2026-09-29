@@ -635,11 +635,11 @@ def _map_completed_process(
 ) -> dict[str, Any]:
     """Map one completed process onto the closed wrapper shape.
 
-    The envelope is validated against the frozen closed boundary with the
-    action's expected command identity, every string inside it is redacted
-    under the five frozen rules, and diagnostics are bounded and redacted;
-    a failure inside the redaction pipeline itself closes as
-    redaction_failure.
+    The envelope and expected command are validated before redaction. The
+    three sync successes also require closed result validation; only their
+    schema-validated public identity paths skip token-like redaction under
+    ADR-009. Other strings and bounded diagnostics retain ADR-006 redaction.
+    A redaction pipeline failure closes as redaction_failure.
     """
     exit_code = outcome.exit_code if outcome.exit_code is not None else -1
     try:
@@ -660,7 +660,18 @@ def _map_completed_process(
                 CONTRACT_MISMATCH,
                 "the envelope reports success while the process exited with a failure status",
             )
-        redacted, changed = envelopes.redact_envelope(envelope, _display_policy_paths(trust))
+        public_identities: frozenset[tuple[str, ...]] = frozenset()
+        if envelope["ok"] and spec.expected_command.startswith("sync "):
+            envelopes.validate_sync_result(envelope["result"], spec.expected_command)
+            prefix = f"{spec.expected_command}."
+            public_identities = frozenset(
+                tuple(path.removeprefix(prefix).split("."))
+                for path in load_catalog()["sync_provider"]["public_identity_paths"]
+                if path.startswith(prefix)
+            )
+        redacted, changed = envelopes.redact_envelope(
+            envelope, _display_policy_paths(trust), public_identities
+        )
     except envelopes.EnvelopeViolation as violation:
         return _malformed_with_stderr_tail(
             operation, exit_code, outcome, trust, violation.message, violation.code

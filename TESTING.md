@@ -57,7 +57,9 @@ The aggregate calls each stage handler exactly once through recursive
   against behavior-scripted fakes
   (`test_execution.py`), and the closed output boundary — frozen-fixture
   envelope validation, carrier rules, diagnostic bounds, and seeded-secret
-  redaction (`test_validation.py`).
+  redaction (`test_validation.py`), and the three sync result schemas,
+  distinct status evidence, public identity exceptions, and secret-neighbor
+  negatives (`test_sync_results.py`, `test_sync_tools.py`).
 - `test-int`: `tests/integration` — cross-module cooperation: registering
   the plugin through the Hermes-style directory loader, a fresh-interpreter
   session registering the thirteen-tool inventory and completing one smoke

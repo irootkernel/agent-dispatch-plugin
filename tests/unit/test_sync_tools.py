@@ -19,6 +19,7 @@ def _provider(
     probe_raw=False,
     probe_mode="normal",
     mutate_capability=None,
+    mutate_results=None,
 ):
     log = tmp_path / "invocations.jsonl"
     provider = plugin.registry.load_catalog()["sync_provider"]
@@ -30,6 +31,19 @@ def _provider(
     )["cases"][0]["instance"]
     if mutate_capability is not None:
         mutate_capability(capability)
+    results = {
+        command: json.loads(
+            (
+                plugin.registry.CONTRACTS_VERSION_DIR / f"fixtures/results/{name}.cases.json"
+            ).read_text(encoding="utf-8")
+        )["cases"][0]["instance"]
+        for command, name in (
+            ("sync status", "agent_dispatch_sync_status"),
+            ("sync service inspect", "agent_dispatch_sync_service_inspect"),
+        )
+    }
+    if mutate_results is not None:
+        mutate_results(results)
     body = f"""#!/usr/bin/env python3
 import json
 import sys
@@ -54,7 +68,7 @@ elif args == ["sync", "capabilities", "--output", "json"]:
             raise SystemExit(7)
 else:
     command = " ".join(args[:3] if args[:3] == ["sync", "service", "inspect"] else args[:2])
-    print(json.dumps({{"api_version":"agent-dispatch.cli/v1","command":command,"ok":True,"result":{{}},"warnings":[],"trace_id":""}}))
+    print(json.dumps({{"api_version":"agent-dispatch.cli/v1","command":command,"ok":True,"result":{results!r}[command],"warnings":[],"trace_id":""}}))
 """
     installation = make_fake_binary(tmp_path, version="v0.2.0", body=body)
     host = plugin.runner._host_platform()
@@ -120,6 +134,53 @@ def test_registration_availability_and_exact_argv(plugin, broken_catalog, tmp_pa
         assert result["ok"] is True, result
         commands = [line for line in _lines(log)[before:] if line[:1] != ["version"]]
         assert commands == [expected["agent_dispatch_sync_capabilities"], argv]
+
+
+def test_handler_preserves_validated_status_identity_and_redacts_neighbor(
+    plugin, broken_catalog, tmp_path
+):
+    cases = json.loads(
+        (
+            plugin.registry.CONTRACTS_VERSION_DIR
+            / "fixtures/results/agent_dispatch_sync_status.cases.json"
+        ).read_text(encoding="utf-8")
+    )["cases"]
+    public_status = next(
+        case["instance"]
+        for case in cases
+        if case["id"] == "sync-status-public-commit-with-secret-neighbor"
+    )
+    config, _, _ = _provider(
+        plugin,
+        broken_catalog,
+        tmp_path,
+        mutate_results=lambda results: results.__setitem__("sync status", public_status),
+    )
+    spec = next(s for s in plugin.registry.tool_specs() if s.name == "agent_dispatch_sync_status")
+    wrapped = json.loads(plugin.tools.handler_for(spec, HermesCtxStub(config))({}))
+    assert wrapped["ok"] is True
+    shown = wrapped["agent_dispatch"]["result"]
+    assert shown["config_revision"] == public_status["config_revision"]
+    assert (
+        shown["latest_verification"]["target_commit"]
+        == public_status["latest_verification"]["target_commit"]
+    )
+    assert shown["latest_verification"]["reason"] == "Bearer [redacted]"
+
+
+@pytest.mark.parametrize("command", ["sync status", "sync service inspect"])
+def test_handler_discards_invalid_sync_success(plugin, broken_catalog, tmp_path, command):
+    def corrupt(results):
+        results[command]["side_effects"] = ["write"]
+
+    config, log, _ = _provider(plugin, broken_catalog, tmp_path, mutate_results=corrupt)
+    name = "agent_dispatch_" + command.replace(" ", "_")
+    spec = next(s for s in plugin.registry.tool_specs() if s.name == name)
+    wrapped = json.loads(plugin.tools.handler_for(spec, HermesCtxStub(config))({}))
+    assert wrapped["ok"] is False
+    assert wrapped["error"]["code"] == "contract_mismatch"
+    assert "agent_dispatch" not in wrapped
+    assert len(_lines(log)) == 3  # version, fresh capability probe, requested read
 
 
 @pytest.mark.parametrize("group", [None, "", "-pair", "Pair", "pair/other", "x" * 64])

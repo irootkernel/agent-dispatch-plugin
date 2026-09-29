@@ -1,18 +1,20 @@
 """Closed output validation and defense-in-depth redaction (EPIC-002).
 
-This module owns everything the runner does with a completed Agent Dispatch
-process: the closed envelope validation mirroring the frozen
-``contracts/v0.1.0`` schemas (no runtime dependency — the schemas remain
-the authority this code is derived from), the closed wrapper carrier rule,
-the bounded diagnostics pipeline, and the five frozen redaction rules. It
-never creates a process and never raises into Hermes; violations are
-closed :class:`EnvelopeViolation` values the runner maps onto the frozen
-error set.
+This module validates completed Agent Dispatch output: the closed envelope
+boundary derived from ``contracts/v0.1.0`` schemas, the closed wrapper carrier
+rule, the bounded diagnostics pipeline, and redaction. For the three v0.2.0
+sync reads, it loads and checks the closed result schemas from
+``contracts/v0.2.0`` at runtime and fails closed if they are unavailable or
+unsupported. It never creates a process or raises into Hermes; violations
+become closed :class:`EnvelopeViolation` values mapped by the runner.
 """
 
 from __future__ import annotations
 
+import json
 import re
+from functools import lru_cache
+from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 ENVELOPE_API_VERSION = "agent-dispatch.cli/v1"
@@ -32,6 +34,38 @@ _ENVELOPE_ERROR_MEMBERS = frozenset({"code", "category", "message", "retryable"}
 
 _REDACTED = "[redacted]"
 _REDACTED_URL = "[redacted-url]"
+_SYNC_RESULT_SCHEMAS = {
+    "sync capabilities": "agent_dispatch_sync_capabilities.result.json",
+    "sync status": "agent_dispatch_sync_status.result.json",
+    "sync service inspect": "agent_dispatch_sync_service_inspect.result.json",
+}
+_SYNC_SCHEMA_KEYWORDS = frozenset(
+    {
+        "$schema",
+        "$id",
+        "title",
+        "description",
+        "type",
+        "const",
+        "enum",
+        "properties",
+        "required",
+        "additionalProperties",
+        "maxProperties",
+        "items",
+        "minItems",
+        "maxItems",
+        "maxLength",
+        "pattern",
+        "minimum",
+        "allOf",
+        "anyOf",
+        "not",
+        "if",
+        "then",
+        "else",
+    }
+)
 
 # The five frozen redaction rules, expressed as deterministic patterns:
 # authorization values, secret references that reveal protected paths,
@@ -68,6 +102,109 @@ class EnvelopeViolation(Exception):
         super().__init__(message)
         self.code = code
         self.message = message
+
+
+@lru_cache(maxsize=3)
+def _sync_result_schema(command: str) -> Mapping[str, Any]:
+    path = (
+        Path(__file__).resolve().parent
+        / "contracts"
+        / "v0.2.0"
+        / "schemas"
+        / "results"
+        / _SYNC_RESULT_SCHEMAS[command]
+    )
+    with path.open(encoding="utf-8") as handle:
+        schema = json.load(handle)
+    _check_sync_schema(schema)
+    return schema
+
+
+def _check_sync_schema(schema: Mapping[str, Any]) -> None:
+    if not isinstance(schema, dict) or schema.keys() - _SYNC_SCHEMA_KEYWORDS:
+        raise ValueError("unsupported sync result schema")
+    for branch in schema.get("properties", {}).values():
+        _check_sync_schema(branch)
+    for name in ("items", "not", "if", "then", "else"):
+        if name in schema:
+            _check_sync_schema(schema[name])
+    for name in ("allOf", "anyOf"):
+        for branch in schema.get(name, ()):
+            _check_sync_schema(branch)
+
+
+def _schema_matches(value: Any, schema: Mapping[str, Any]) -> bool:
+    """Evaluate the closed keyword subset used by the three frozen result schemas."""
+    kind = schema.get("type")
+    if (
+        kind is not None
+        and not {
+            "object": lambda: isinstance(value, dict),
+            "array": lambda: isinstance(value, list),
+            "string": lambda: isinstance(value, str),
+            "integer": lambda: type(value) is int,
+            "boolean": lambda: type(value) is bool,
+            "null": lambda: value is None,
+        }[kind]()
+    ):
+        return False
+    if "const" in schema and not (
+        type(value) is type(schema["const"]) and value == schema["const"]
+    ):
+        return False
+    if "enum" in schema and not any(
+        type(value) is type(member) and value == member for member in schema["enum"]
+    ):
+        return False
+    if isinstance(value, dict):
+        if any(name not in value for name in schema.get("required", ())):
+            return False
+        if "maxProperties" in schema and len(value) > schema["maxProperties"]:
+            return False
+        properties = schema.get("properties", {})
+        if schema.get("additionalProperties") is False and value.keys() - properties.keys():
+            return False
+        if any(
+            not _schema_matches(item, properties[name])
+            for name, item in value.items()
+            if name in properties
+        ):
+            return False
+    if isinstance(value, list):
+        if "minItems" in schema and len(value) < schema["minItems"]:
+            return False
+        if "maxItems" in schema and len(value) > schema["maxItems"]:
+            return False
+        if "items" in schema and any(not _schema_matches(item, schema["items"]) for item in value):
+            return False
+    if isinstance(value, str):
+        if "maxLength" in schema and len(value) > schema["maxLength"]:
+            return False
+        if "pattern" in schema and re.search(schema["pattern"], value) is None:
+            return False
+    if type(value) is int and "minimum" in schema and value < schema["minimum"]:
+        return False
+    if "allOf" in schema and not all(_schema_matches(value, branch) for branch in schema["allOf"]):
+        return False
+    if "anyOf" in schema and not any(_schema_matches(value, branch) for branch in schema["anyOf"]):
+        return False
+    if "not" in schema and _schema_matches(value, schema["not"]):
+        return False
+    if "if" in schema:
+        branch = "then" if _schema_matches(value, schema["if"]) else "else"
+        if branch in schema and not _schema_matches(value, schema[branch]):
+            return False
+    return True
+
+
+def validate_sync_result(result: Any, command: str) -> None:
+    """Reject an invalid successful sync result before any identity exemption."""
+    try:
+        valid = _schema_matches(result, _sync_result_schema(command))
+    except (OSError, ValueError, KeyError, TypeError, RecursionError):
+        valid = False
+    if not valid or result.get("side_effects") != []:
+        raise EnvelopeViolation(CONTRACT_MISMATCH, "the sync result violates its closed contract")
 
 
 def validate_envelope(payload: Any, expected_command: str) -> Mapping[str, Any]:
@@ -158,11 +295,14 @@ def _validate_envelope_error(error: Any) -> None:
         )
 
 
-def redact_text(text: str, allowed_paths: Iterable[str] = ()) -> str:
-    """Apply the five frozen redaction rules to one string.
+def redact_text(
+    text: str, allowed_paths: Iterable[str] = (), *, public_identity: bool = False
+) -> str:
+    """Redact one string under ADR-006 and the narrow ADR-009 exception.
 
     Allowed display-policy paths are masked first and restored last so their
-    own characters are never partially rewritten by the other rules.
+    own characters are never partially rewritten by the other rules. Only a
+    schema-validated sync public identity skips the two token-like patterns.
     """
     allowed = [path for path in allowed_paths if path]
     masks: dict[str, str] = {}
@@ -175,8 +315,9 @@ def redact_text(text: str, allowed_paths: Iterable[str] = ()) -> str:
     masked = _RE_AUTHORIZATION.sub(lambda m: m[0].split(None, 1)[0] + " " + _REDACTED, masked)
     masked = _RE_WEBHOOK_URL.sub(_REDACTED_URL, masked)
     masked = _RE_SECRET_REFERENCE.sub(lambda m: m[0].split(None, 1)[0] + " " + _REDACTED, masked)
-    masked = _RE_TOKEN_HEX.sub(_REDACTED, masked)
-    masked = _RE_TOKEN_BASE64.sub(_REDACTED, masked)
+    if not public_identity:
+        masked = _RE_TOKEN_HEX.sub(_REDACTED, masked)
+        masked = _RE_TOKEN_BASE64.sub(_REDACTED, masked)
     masked = _redact_protected_paths(masked)
     for mask, path in masks.items():
         masked = masked.replace(mask, path)
@@ -201,29 +342,38 @@ def _redact_protected_paths(text: str) -> str:
     return _RE_ABSOLUTE_PATH.sub(replace, text)
 
 
-def redact_value(value: Any, allowed_paths: Iterable[str] = ()) -> Any:
+def redact_value(
+    value: Any,
+    allowed_paths: Iterable[str] = (),
+    public_identity_paths: frozenset[tuple[str, ...]] = frozenset(),
+    path: tuple[str, ...] = (),
+) -> Any:
     """Recursively redact every string inside one parsed envelope.
 
     Object keys are redacted like values: a secret surfacing in a JSON key
     position must not survive the boundary either.
     """
     if isinstance(value, str):
-        return redact_text(value, allowed_paths)
+        return redact_text(value, allowed_paths, public_identity=path in public_identity_paths)
     if isinstance(value, dict):
         return {
-            redact_value(key, allowed_paths): redact_value(item, allowed_paths)
+            redact_value(key, allowed_paths): redact_value(
+                item, allowed_paths, public_identity_paths, (*path, key)
+            )
             for key, item in value.items()
         }
     if isinstance(value, list):
-        return [redact_value(item, allowed_paths) for item in value]
+        return [redact_value(item, allowed_paths, public_identity_paths, path) for item in value]
     return value
 
 
 def redact_envelope(
-    envelope: Mapping[str, Any], allowed_paths: Iterable[str] = ()
+    envelope: Mapping[str, Any],
+    allowed_paths: Iterable[str] = (),
+    public_identity_paths: frozenset[tuple[str, ...]] = frozenset(),
 ) -> tuple[dict[str, Any], bool]:
     """Return the redacted envelope and whether any string changed."""
-    redacted = redact_value(dict(envelope), allowed_paths)
+    redacted = redact_value(dict(envelope), allowed_paths, public_identity_paths)
     return redacted, redacted != envelope
 
 

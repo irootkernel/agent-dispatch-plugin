@@ -33,7 +33,7 @@ Paths below are relative to the repository root.
 | Binary and config identity | Advertised-platform gate (darwin/arm64, linux/amd64, linux/arm64), absolute regular paths without symlinked components, executable SHA-256 and version verification | `runner.py`; `tests/unit/test_runner.py`; ADR-004 |
 | Process isolation | No shell, neutral working directory, fixed PATH and TMPDIR without inherited HOME or credentials, closed extra descriptors | `runner.py`; `tests/unit/test_execution.py`, `tests/unit/test_security_negatives.py`; ADR-005 |
 | Resource bounds | Concurrent draining, bounded stdout/stderr and combined bytes, deadline, process-group TERM then kill, no automatic retry | `runner.py`; `tests/unit/test_execution.py`, `tests/unit/test_security_negatives.py`; ADR-005 |
-| Result integrity | Closed envelope and wrapper validation, expected command and exit consistency, bounded diagnostics, redaction, no raw partial output on failure | `envelopes.py`, `runner.py`; `tests/unit/test_validation.py`, `tests/unit/test_security_negatives.py`; ADR-003 and ADR-006 |
+| Result integrity | Closed envelope and wrapper validation, expected command and exit consistency, three closed sync result schemas with empty side effects, exact validated public identity paths, bounded diagnostics, redaction, no raw partial output on failure | `envelopes.py`, `runner.py`; `tests/unit/test_validation.py`, `tests/unit/test_sync_results.py`, `tests/unit/test_security_negatives.py`; ADR-003, ADR-006, and ADR-009 |
 | Hermes integration | Thirteen declared tools, separate plugin/toolset activation, availability checks, JSON-string handler results | `__init__.py`, `tools/__init__.py`; `tests/integration/test_fresh_session_inventory.py` |
 
 ## Limits and operational effects
@@ -51,7 +51,10 @@ recorded in the [qualification guide](../implementation-tips/qualification-darwi
 consult the [release acceptance gap](../implementation-tips/release-handoff.md#compatibility-acceptance-gap)
 before interpreting historical qualification as release readiness.
 
-Output redaction is bounded by the frozen rules. See
+Sync result validation preserves the provider's separate latest publication,
+delivery, import, and verification projections. A historical target or a
+matching loaded service definition does not establish fresh pair verification
+or listener reachability. Output redaction is bounded by the frozen rules. See
 [deferred feedback](../deferred-feedback/README.md) for the known protected-path
 filename limitation, and [evidence capture](../ops/security-evidence-capture.md)
 for operator-side handling. Never copy raw process streams, credentials, or

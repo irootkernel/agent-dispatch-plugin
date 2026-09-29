@@ -205,6 +205,24 @@ absent/pruned latest record, service-drift, exact public identity, and
 seeded-secret fixtures, including token-like data in nearby fields.
 Malformed or stronger-than-supported provider results fail closed.
 
+#### TASK-025 close
+
+The three sync success results are checked against their closed v0.2.0 result
+schemas before presentation, including empty `side_effects`; unavailable or
+unsupported result schemas fail closed. Status and service results retain
+reported disabled, incomplete, blocked, stale, offline, historical, drifted,
+and listener-unknown distinctions. Only schema-validated public identity
+paths preserve exact values; neighboring token-like strings and diagnostics
+remain redacted.
+
+The service-drift fixture, schema-boundary negatives, missing and corrupt
+schema negatives, direct handler cases, and seeded-secret cases pass.
+`make test` passed 598 unit, 28 integration, and 1 E2E tests, together with the
+contract and manifest parity gates. The completion review covered the
+corrected implementation; its remaining docstring findings were settled by
+a locally checked documentation-only change. This closes TASK-025 behavior
+and tests. Native Hermes and service-manager qualification remains TASK-026.
+
 ### TASK-026: Qualify through Hermes
 
 Run `make test` and the required `make test-qualify` matrix on native

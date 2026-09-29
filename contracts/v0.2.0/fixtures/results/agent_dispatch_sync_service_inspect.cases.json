@@ -41,6 +41,26 @@
       }
     },
     {
+      "id": "sync-service-drift",
+      "expect": "valid",
+      "instance": {
+        "schema_version": "agent-dispatch.sync-service/v1",
+        "group_id": "pair",
+        "platform": "darwin",
+        "label": "agent-dispatch.sync.pair",
+        "definition_path": "/tmp/sync.plist",
+        "expected_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "present": true,
+        "definition_matches": false,
+        "installed_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "loaded": true,
+        "enabled": true,
+        "config_available": true,
+        "healthy": false,
+        "side_effects": []
+      }
+    },
+    {
       "id": "sync-service-false-healthy",
       "expect": "invalid",
       "instance": {
