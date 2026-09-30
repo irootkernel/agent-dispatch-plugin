@@ -25,9 +25,9 @@ COMMANDS = (
 )
 DIGEST = "sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b"
 ARTIFACTS = {
-    "darwin/arm64": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
-    "linux/amd64": "59216c7ec8aee4abb9e00377a81686156b08a3235275afcde5b6ec28363bb8d6",
-    "linux/arm64": "d760586c7db77023b462c940cc8f4904caff5d54b0e767ef29a2e1cf83f85ac8",
+    "darwin/arm64": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
+    "linux/amd64": "83f82ff94bb94d6897df1dbfb9eafe86c3dae7d9a502580bb1cc8650179a60ed",
+    "linux/arm64": "3465c6f54460d59ab95e83784b2e9bb4920566c4cfa30865d4618e8fc6c6d280",
 }
 IDENTITY_PATHS = [
     "sync capabilities.result.contract_digest",

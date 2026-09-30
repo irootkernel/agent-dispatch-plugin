@@ -12,13 +12,16 @@ E20-E22 are Completed in their respective roadmaps. Dispatch ADR-0023
 replaced the proposed N-member/E26 provider with an implemented two-node
 v0.2.0 scope. The current development Plugin remains inspection-only and
 admits exact allowlisted v0.2.0 artifacts for three sync reads. Native
-qualification of that surface is complete on Darwin arm64 and Linux arm64.
+qualification of the original TASK-026 artifacts completed on Darwin arm64
+and Linux arm64. The selected release pair requires fresh qualification on
+those hosts before publication; its current pins are in the
+[v0.2.0 catalog](../../contracts/v0.2.0/catalog.json).
 Native Linux amd64 v0.2.0 qualification is separate deferred work.
 
 EPIC-007 and all five member tasks are Completed. The ARM-scoped whole-Epic
 audit and cold review passed after the committed validation corrections.
 Master authorized implementation of the EPIC-007 plan on 2026-09-29. The
-admitted core candidate is `6b1c78b19f4cdb69dfd070ea016430f03075b73d`, with the
+original EPIC-007 admitted core candidate was `6b1c78b19f4cdb69dfd070ea016430f03075b73d`, with the
 v1 bundle at `48f13a4eef68e219a51d188decb8749a5fba9282`. Master
 approved ARM-only EPIC-007 acceptance on 2026-09-29 and allocated native
 Linux amd64 v0.2.0 qualification to deferred EPIC-009/TASK-033.

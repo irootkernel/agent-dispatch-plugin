@@ -5,8 +5,8 @@
       "instance": {
         "platform": "darwin/arm64",
         "version": "0.2.0",
-        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
-        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "binary_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
+        "operator_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
         "sync_group_id": "pair",
         "capability_result": {
           "schema_version": "agent-dispatch.sync-capabilities/v1",
@@ -41,8 +41,8 @@
       "instance": {
         "platform": "darwin/arm64",
         "version": "0.1.8",
-        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
-        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "binary_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
+        "operator_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
         "sync_group_id": "pair",
         "capability_result": {
           "schema_version": "agent-dispatch.sync-capabilities/v1",
@@ -77,8 +77,8 @@
       "instance": {
         "platform": "darwin/arm64",
         "version": "0.2.1",
-        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
-        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "binary_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
+        "operator_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
         "sync_group_id": "pair",
         "capability_result": {
           "schema_version": "agent-dispatch.sync-capabilities/v1",
@@ -149,7 +149,7 @@
       "instance": {
         "platform": "darwin/arm64",
         "version": "0.2.0",
-        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "binary_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
         "operator_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
         "sync_group_id": "pair",
         "capability_result": {
@@ -185,8 +185,8 @@
       "instance": {
         "platform": "darwin/arm64",
         "version": "0.2.0",
-        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
-        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "binary_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
+        "operator_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
         "sync_group_id": "",
         "capability_result": {
           "schema_version": "agent-dispatch.sync-capabilities/v1",
@@ -221,8 +221,8 @@
       "instance": {
         "platform": "darwin/arm64",
         "version": "0.2.0",
-        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
-        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "binary_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
+        "operator_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
         "sync_group_id": "../pair",
         "capability_result": {
           "schema_version": "agent-dispatch.sync-capabilities/v1",
@@ -257,8 +257,8 @@
       "instance": {
         "platform": "darwin/arm64",
         "version": "0.2.0",
-        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
-        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "binary_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
+        "operator_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
         "sync_group_id": "pair",
         "capability_result": {
           "schema_version": "agent-dispatch.sync-capabilities/v1",
@@ -293,8 +293,8 @@
       "instance": {
         "platform": "darwin/arm64",
         "version": "0.2.0",
-        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
-        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "binary_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
+        "operator_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
         "sync_group_id": "pair",
         "capability_result": {
           "schema_version": "agent-dispatch.sync-capabilities/v1",
@@ -329,8 +329,8 @@
       "instance": {
         "platform": "darwin/arm64",
         "version": "0.2.0",
-        "binary_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
-        "operator_sha256": "aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889",
+        "binary_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
+        "operator_sha256": "20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9",
         "sync_group_id": "pair",
         "capability_result": {
           "schema_version": "agent-dispatch.sync-capabilities/v1"

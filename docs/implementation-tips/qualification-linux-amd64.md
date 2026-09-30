@@ -16,13 +16,19 @@ This is maintainer qualification evidence for one advertised platform. It
 does not authorize a release, does not replace Darwin arm64 as the current
 release host, and does not treat a translated amd64 container as this host.
 
-Deferred EPIC-009/TASK-033 v0.2.0 Linux amd64 qualification requires the
-candidate with SHA-256 `59216c7ec8aee4abb9e00377a81686156b08a3235275afcde5b6ec28363bb8d6`,
-at `AGENT_DISPATCH_QUALIFY_BINARY_V020`, plus a native systemd user manager.
+The earlier candidate nominated for deferred EPIC-009/TASK-033 v0.2.0
+Linux amd64 qualification had SHA-256 `59216c7ec8aee4abb9e00377a81686156b08a3235275afcde5b6ec28363bb8d6`.
+New qualification requires `AGENT_DISPATCH_QUALIFY_BINARY_V020` to match the
+current catalog, plus a native systemd user manager.
 The earlier TASK-021 result below remains historical; it does not qualify
 the v0.2.0 Plugin candidate. Master closed TASK-026 for Darwin arm64 and
 Linux arm64 on 2026-09-29; this native Linux amd64 matrix remains a
 separate platform support gate owned by the Plugin maintainer.
+
+The earlier candidate identities in this record are historical. For a new
+release candidate, use the current [catalog](../../contracts/v0.2.0/catalog.json)
+and [qualification environment](../../TESTING.md#qualification-environment),
+then qualify that exact pair. Historical success does not admit rebuilt bytes.
 
 ## Exact artifact identities
 

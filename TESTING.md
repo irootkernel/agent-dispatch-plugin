@@ -73,10 +73,10 @@ TASK-024 adds `test_sync_tools.py`: all thirteen names register, while a
 trusted legacy binary exposes ten and an exact v0.2.0 artifact exposes
 thirteen only with a valid group and fresh capability evidence. The tests
 check each fixed argv, the capabilities config-flag exception, SHA denial,
-and direct-dispatch failure after a cached visible state. Native Hermes
-qualification of the new reads passed the scoped TASK-026 gate on Darwin
-arm64 and Linux arm64. EPIC-007 acceptance uses these two hosts; its
-whole-Epic validation completed after the ARM qualification. The Linux amd64
+and direct-dispatch failure after a cached visible state. TASK-026 native
+Hermes qualification passed on Darwin arm64 and Linux arm64 for the
+artifacts recorded in that historical gate. EPIC-007 acceptance uses those
+two hosts; its whole-Epic validation completed after the ARM qualification. The Linux amd64
 v0.2.0 gate belongs to deferred EPIC-009/TASK-033 and must pass before that
 platform's support claim.
 
@@ -125,10 +125,10 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   linux-amd64 build (`AGENT_DISPATCH_QUALIFY_BINARY_V018`). Every host also
   requires its correctly stamped v0.2.0 binary at
   `AGENT_DISPATCH_QUALIFY_BINARY_V020`, built from reviewed source
-  `6b1c78b19f4cdb69dfd070ea016430f03075b73d`. The v0.2.0 SHA-256 pins
-  are Darwin arm64 `aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889`,
-  Linux amd64 `59216c7ec8aee4abb9e00377a81686156b08a3235275afcde5b6ec28363bb8d6`,
-  and Linux arm64 `d760586c7db77023b462c940cc8f4904caff5d54b0e767ef29a2e1cf83f85ac8`.
+  `ff0ae56a1087d3db9380743d907ce701314b5371`. The v0.2.0 SHA-256 pins
+  are Darwin arm64 `20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9`,
+  Linux amd64 `83f82ff94bb94d6897df1dbfb9eafe86c3dae7d9a502580bb1cc8650179a60ed`,
+  and Linux arm64 `3465c6f54460d59ab95e83784b2e9bb4920566c4cfa30865d4618e8fc6c6d280`.
   Each case
   verifies its pinned SHA-256 before its version probe. PATH is a fallback
   only when its binary matches that exact case; missing or mismatching

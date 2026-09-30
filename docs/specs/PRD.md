@@ -241,18 +241,36 @@ is inspectable and stays disabled in the result.
 The v0.2.0 binary is admitted only when its `version --json` reports
 `0.2.0`, the operator SHA-256 matches its bytes, and those bytes match the
 reviewed platform SHA allowlist in `contracts/v0.2.0/catalog.json`.
-Later v0.2.x binaries are not automatically admitted. The pinned provider
-bundle is `docs/contracts/sync-provider-v1/` at core commit
-`48f13a4eef68e219a51d188decb8749a5fba9282`; the exact code candidate
-is `6b1c78b19f4cdb69dfd070ea016430f03075b73d`. The semantic digest is
+Later v0.2.x binaries are not automatically admitted. The initial TASK-023
+provider bundle was `docs/contracts/sync-provider-v1/` at core commit
+`48f13a4eef68e219a51d188decb8749a5fba9282`; the initial code candidate
+was `6b1c78b19f4cdb69dfd070ea016430f03075b73d`. The semantic digest is
 `sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b`.
-Native Hermes and service-manager qualification is complete for the v0.2.0
-reads on Darwin arm64 and Linux arm64. EPIC-007 acceptance is limited to
-those two hosts, subject to its whole-Epic audit and closeout. Linux amd64
+Historical TASK-026 native Hermes and service-manager qualification covers
+the original v0.2.0 artifacts on Darwin arm64 and Linux arm64. EPIC-007
+acceptance is limited to those two hosts, subject to its whole-Epic audit
+and closeout. Linux amd64
 v0.2.0 remains unqualified under deferred EPIC-009/TASK-033 in the
 [roadmap](../roadmap/README.md); its catalog-pinned SHA permits exact-binary
 identification, not a support claim. Native qualification remains required
 before claiming the three sync reads on Linux amd64.
+
+### v0.2.0 release artifact allowance
+
+The paired release preparation selects Core commit
+`ff0ae56a1087d3db9380743d907ce701314b5371` for the source and unchanged provider bundle.
+The semantic digest remains
+`sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b`.
+The current [catalog](../../contracts/v0.2.0/catalog.json) names the three
+release binary digests and checksum-file digest. The contract oracle,
+admission fixtures, and qualification prerequisites use those exact
+executable pins.
+The manifest continues to derive from the catalog's tool roster and
+configuration. The TASK-023/TASK-026 identities above remain historical.
+Fresh qualification of the selected pair on Darwin arm64 and native Linux
+arm64 is required before publication. Linux amd64 v0.2.0 qualification
+remains under EPIC-009/TASK-033. A later Core rebuild or source-commit change
+requires a new allowance and qualification even if the version is unchanged.
 
 The three new results require command-specific closed validation, including
 empty `side_effects`. Status keeps publication, delivery, import, and

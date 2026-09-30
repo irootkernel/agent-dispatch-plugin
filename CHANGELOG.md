@@ -2,7 +2,7 @@
 
 This file records concise shipped outcomes and pending changes.
 
-## v0.2.0 - Unreleased
+## v0.2.0 - 2026-10-01
 
 ### Added
 
@@ -14,6 +14,11 @@ This file records concise shipped outcomes and pending changes.
 - Keep the original ten inspection tools available for compatible legacy
   artifacts, with sync reads available only after trusted group and fresh
   capability checks.
+
+### Fixed
+
+- Reject malformed sync capability and result evidence with a closed
+  `contract_mismatch` response before admitting an inspection read.
 
 ## v0.1.1 - 2026-09-16
 

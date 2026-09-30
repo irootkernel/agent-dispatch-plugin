@@ -59,8 +59,10 @@ Dispatch source candidate `6b1c78b19f4cdb69dfd070ea016430f03075b73d`,
 the provider bundle at `48f13a4eef68e219a51d188decb8749a5fba9282`,
 and contract digest
 `sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b`.
-The per-platform executable digests are in the
-[v0.2.0 catalog](../../contracts/v0.2.0/catalog.json). TASK-027 documentation
+The per-platform digests used for that qualification remain in the native
+qualification runbooks; the current
+[v0.2.0 catalog](../../contracts/v0.2.0/catalog.json) names the selected
+release artifacts separately. TASK-027 documentation
 was committed at `f88d0b54a17ead57a5745771b24a8f5a0914f3f5`.
 The whole-Epic validation corrections were committed at
 `ba6e79485527862f1d7fc5e51d6dd39fa6e826fa`. These commits do not
@@ -99,6 +101,27 @@ or publication.
 | Status and service interpretation | [Result contracts](../specs/contracts.md), [public guidance](../../README.md#inspect-a-two-node-sync-group), and [operations diagnosis](../ops/troubleshooting.md#sync-status-and-service-evidence-disagree) distinguish disabled/incomplete groups, local projections, service definitions, and listener evidence |
 | Inspection-only and legacy behavior | [PRD](../specs/PRD.md), frozen v0.1.0 catalog, and TASK-026 original ten-action regressions; no sync mutation is registered |
 | Final Epic and release decision | ARM-scoped whole-Epic cold validation is complete on the reviewed implementation; EPIC-009/TASK-033 gates the Linux amd64 v0.2.0 support claim, and exact-candidate release QA and publication have their own authorization |
+
+## Selected v0.2.0 release pair
+
+The Core source and provider-bundle commit is
+`ff0ae56a1087d3db9380743d907ce701314b5371`. Its semantic provider digest remains
+`sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b`.
+The Core release build stamps version `v0.2.0`, that full source commit,
+and commit date `2026-10-01T01:04:21+09:00`. The Plugin is source-only
+at version `0.2.0`, with release date `2026-10-01`.
+The [catalog](../../contracts/v0.2.0/catalog.json) and
+[qualification environment](../../TESTING.md#qualification-environment)
+identify the exact binaries for this pair. The dated changelog selects the
+release; it does not establish publication or final qualification.
+
+Run the clean-candidate gate set above for this exact Plugin commit and these
+Core artifacts on Darwin arm64 and native Linux arm64. Preserve the earlier
+EPIC-007 records as historical evidence. Native Linux amd64 v0.2.0 stays
+unqualified under EPIC-009/TASK-033. Freeze the source-only Plugin archive
+from the qualified commit, verify its checksum and extracted Plugin Doctor,
+and retain the exact-artifact validation summary outside source before
+requesting publication. Do not bundle a Core executable in the Plugin archive.
 
 ## Release checklist
 

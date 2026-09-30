@@ -5,10 +5,15 @@ Environment: disposable profile on Darwin arm64 (this runbook's evidence
 path never touches the operator's live Agent Dispatch configuration or
 state database; the current stage uses a unique disposable LaunchAgent).
 
-TASK-026 additionally requires the v0.2.0 Darwin arm64 candidate, SHA-256
+TASK-026 additionally used the v0.2.0 Darwin arm64 candidate, SHA-256
 `aa7ebe7af91a68f7a5a3137de9cd5ab5bbdcff4e8aa4502fc03f13f0d4636889`,
 at `AGENT_DISPATCH_QUALIFY_BINARY_V020`. The earlier TASK-012/TASK-021
 records below remain historical.
+
+The TASK-026 artifact identities in this record are historical. For a new
+release candidate, use the current [catalog](../../contracts/v0.2.0/catalog.json)
+and [qualification environment](../../TESTING.md#qualification-environment),
+then qualify that exact pair. Historical success does not admit rebuilt bytes.
 
 ## Exact artifact identities
 

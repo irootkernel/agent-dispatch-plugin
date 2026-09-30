@@ -20,6 +20,11 @@ LaunchAgent under the current user's account and requires a launchd GUI domain.
 | Plugin installation | source-only plugin directory at an exact pinned revision of this repository |
 | Host | darwin/arm64 |
 
+The v0.2.0 identity above records the earlier TASK-026 qualification. A new
+release uses the current [catalog](../../contracts/v0.2.0/catalog.json) and
+[qualification environment](../../TESTING.md#qualification-environment);
+rerun the lifecycle on the selected exact artifacts before publication.
+
 ## Recorded boundary: installer manifest support
 
 The Hermes v0.20.5 `hermes plugins install` subcommand rejects

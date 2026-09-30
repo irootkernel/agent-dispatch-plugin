@@ -10,14 +10,19 @@ This is maintainer qualification evidence for one advertised platform. It
 does not authorize a release, does not qualify `linux/amd64`, and does
 not replace Darwin arm64 as the current release host.
 
-For TASK-026, `make test-qualify` selects the currently available v0.1.8
+For TASK-026, `make test-qualify` selected the available v0.1.8
 Linux arm64 release binary, SHA-256
 `3d06d4d35493ce51581bb8c61f4ffc3dfd700499863a492a337ab7fb762ddf8e`,
 through `AGENT_DISPATCH_QUALIFY_BINARY_V018`, plus the v0.2.0 candidate
-through `AGENT_DISPATCH_QUALIFY_BINARY_V020`. The latter must match SHA-256
+through `AGENT_DISPATCH_QUALIFY_BINARY_V020`. The latter matched SHA-256
 `d760586c7db77023b462c940cc8f4904caff5d54b0e767ef29a2e1cf83f85ac8`.
 The stage requires a native systemd user manager. The v0.1.7 identity and
 TASK-021 observations below remain historical evidence.
+
+The TASK-026 artifact identities in this record are historical. For a new
+release candidate, use the current [catalog](../../contracts/v0.2.0/catalog.json)
+and [qualification environment](../../TESTING.md#qualification-environment),
+then qualify that exact pair. Historical success does not admit rebuilt bytes.
 
 ## Historical TASK-021 artifact identities
 

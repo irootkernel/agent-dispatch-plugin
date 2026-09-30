@@ -2,7 +2,7 @@
 
 Agent Dispatch Plugin connects [Agent Dispatch](https://github.com/irootkernel/agent-dispatch) to your interactive Hermes conversations. Ask Hermes to inspect routes, follow a dispatch through its recorded history, look up receipts, or explain diagnostic findings without composing Agent Dispatch CLI commands yourself.
 
-The current development source registers thirteen inspection tools. Ten retain the v0.1.0 behavior; three inspect the two-node sync provider when an exact allowlisted v0.2.0 executable and trusted group are configured. The new reads passed native qualification on Darwin arm64 and Linux arm64; Linux amd64 v0.2.0 qualification remains deferred under EPIC-009/TASK-033 and has no support claim for these reads. Agent Dispatch remains responsible for routing, execution, and stored state.
+The current development source registers thirteen inspection tools. Ten retain the v0.1.0 behavior; three inspect the two-node sync provider when an exact allowlisted v0.2.0 executable and trusted group are configured. The original TASK-026 artifacts passed native qualification on Darwin arm64 and Linux arm64; Linux amd64 v0.2.0 qualification remains deferred under EPIC-009/TASK-033 and has no support claim for these reads. Agent Dispatch remains responsible for routing, execution, and stored state.
 
 ## What you can do
 
@@ -32,7 +32,7 @@ The plugin does not submit jobs, retry or discard dispatches, change routes, or 
 
 | Component | Requirement |
 |---|---|
-| Host | Published v0.1.1: macOS on Apple Silicon (`darwin/arm64`) as the release host; native `linux/amd64` and `linux/arm64` qualified at the recorded v0.1.x artifacts. The development v0.2.0 reads are qualified on Darwin arm64 and Linux arm64 only. |
+| Host | Published v0.1.1: macOS on Apple Silicon (`darwin/arm64`) as the release host; native `linux/amd64` and `linux/arm64` qualified at the recorded v0.1.x artifacts. The original TASK-026 v0.2.0 artifacts were qualified on Darwin arm64 and Linux arm64. The selected release pair requires fresh qualification on those hosts before publication. |
 | Hermes | `>=0.20.5`; interactive CLI sessions only |
 | Agent Dispatch | `>=0.1.6,<0.2.0`, or an exact allowlisted v0.2.0 artifact (which also serves the original ten tools); `agent-dispatch.cli/v1` |
 | Distribution | Source directory; no wheel or bundled Agent Dispatch binary |
