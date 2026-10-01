@@ -71,8 +71,9 @@ and calls `register(ctx)`.
   allowed vocabulary, and no argv template token is a denied subcommand —
   for exactly thirteen tools by driving the real registration path.
 - `pyproject.toml` is the uv project authority; the runtime is
-  dependency-free and the dev group pins the validation toolchain
-  (jsonschema 4.26.0, referencing 0.37.0, PyYAML).
+  dependency-free. `requirements-dev.in` pins the validation toolchain
+  (jsonschema 4.26.0, referencing 0.37.0, PyYAML), and
+  `requirements-dev.txt` locks its dependencies and hashes for `make dev-sync`.
 
 ## Request flow and change boundaries
 

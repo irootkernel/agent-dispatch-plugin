@@ -98,6 +98,23 @@ def test_sync_result_must_be_an_object(plugin):
     assert "agent_dispatch" not in wrapped
 
 
+@pytest.mark.parametrize(
+    ("number", "valid"), [(7, True), (7.0, True), (-1.0, False), (1.5, False), (True, False)]
+)
+def test_result_integer_fields_follow_json_schema_semantics(plugin, number, valid):
+    status = copy.deepcopy(_case("agent_dispatch_sync_status", "sync-status-enabled"))
+    status["control_revision"] = number
+    status["peer_inbox_pending"] = 2.0
+    wrapped = _run(plugin, "sync status", status)
+    assert wrapped["ok"] is valid
+    if valid:
+        assert wrapped["agent_dispatch"]["result"]["control_revision"] == number
+        assert wrapped["agent_dispatch"]["result"]["peer_inbox_pending"] == 2.0
+    else:
+        assert wrapped["error"]["code"] == "contract_mismatch"
+        assert "agent_dispatch" not in wrapped
+
+
 def test_status_preserves_distinct_projections_and_only_public_identities(plugin):
     status = copy.deepcopy(
         _case("agent_dispatch_sync_status", "sync-status-public-commit-with-secret-neighbor")

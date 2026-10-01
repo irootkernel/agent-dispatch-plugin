@@ -17,8 +17,7 @@ durable non-goals unless the PRD is amended.
 
 ### EPIC-007 result-schema keyword shapes
 
-Source: Mulgae EPIC-007 whole-Epic final composite review
-`r_975f9f7e-56d9-789e-bdd3-8d5587ebbc55`, security F001 (Low).
+Source: Mulgae EPIC-007 whole-Epic final composite security review (Low).
 Disposition: deferred feedback. Owner: Plugin maintainer. Rationale:
 the three current closed result schemas use only
 `additionalProperties: false` and object-valued recursive keywords,
@@ -33,8 +32,7 @@ identity: EPIC-007 hardening follow-up; no new task ID allocated.
 
 ### EPIC-007 result-pattern oracle semantics
 
-Source: Mulgae EPIC-007 whole-Epic corrected-target review
-`r_01a0ecdf-c92f-7961-9467-b3e0ab4b047e`, F001 (Low).
+Source: Mulgae EPIC-007 whole-Epic corrected-target review (Low).
 Disposition: deferred feedback. Owner: Plugin maintainer. Rationale:
 the runtime uses whole-string matching and directly rejects trailing LF
 for result identities, while Python `jsonschema` applies `$` through
@@ -48,8 +46,7 @@ hardening follow-up; no new task ID allocated.
 
 ### EPIC-007 contract-oracle regression coverage
 
-Source: Mulgae EPIC-007 whole-Epic review
-`r_c02aca42-9d72-75ac-9509-494142e0e7cc`, testing Finding 1 (Low).
+Source: Mulgae EPIC-007 whole-Epic testing review (Low).
 Disposition: deferred feedback. Owner: Plugin maintainer. Rationale:
 `make test` already runs the v0.2.0 oracle before the test suites, while
 registry and manifest parity corruption tests cover adjacent boundaries.
@@ -63,8 +60,7 @@ no new task ID allocated.
 
 ### EPIC-007 requested sync read failure-path coverage
 
-Source: Mulgae EPIC-007 whole-Epic review
-`r_c02aca42-9d72-75ac-9509-494142e0e7cc`, testing Finding 2 (Low).
+Source: Mulgae EPIC-007 whole-Epic testing review (Low).
 Disposition: deferred feedback. Owner: Plugin maintainer. Rationale:
 the requested read uses the shared bounded executor already exercised by
 legacy timeout and overflow tests; sync-specific tests cover failures of
@@ -78,8 +74,8 @@ no new task ID allocated.
 
 ### Native service environment contract classification
 
-Source: Mulgae TASK-026 review `r_01a0eb64-73e5-702d-9088-5a916da354bd`
-finding F001 (Low). Disposition: deferred feedback. Owner: Plugin
+Source: Mulgae TASK-026 review (Low).
+Disposition: deferred feedback. Owner: Plugin
 maintainer. Rationale: the current catalog's two group-bound sync reads
 are exactly ADR-010's native-service reads, so the catalog-derived runner
 predicate gives the intended environment today. The equivalence is not
@@ -91,8 +87,7 @@ hardening follow-up; no new task ID allocated.
 
 ### TASK-026 qualification helper consolidation
 
-Source: Mulgae TASK-026 review `r_01a0eb3f-d5e9-7c3f-b2dd-5efc5f40f818`
-findings F002 and F003 (Low). Disposition: deferred feedback.
+Source: Mulgae TASK-026 review (Low). Disposition: deferred feedback.
 Owner: Plugin maintainer. Rationale: the qualification fixture verifies each
 pinned binary digest, while the matrix and lifecycle tests re-identify v0.2.0
 by hashing the same file; the native service test also imports private helpers

@@ -142,7 +142,7 @@ def _schema_matches(value: Any, schema: Mapping[str, Any]) -> bool:
             "object": lambda: isinstance(value, dict),
             "array": lambda: isinstance(value, list),
             "string": lambda: isinstance(value, str),
-            "integer": lambda: type(value) is int,
+            "integer": lambda: type(value) is int or (type(value) is float and value.is_integer()),
             "boolean": lambda: type(value) is bool,
             "null": lambda: value is None,
         }[kind]()
@@ -184,7 +184,7 @@ def _schema_matches(value: Any, schema: Mapping[str, Any]) -> bool:
         # position before a final newline, unlike the intended ECMA boundary.
         if "pattern" in schema and re.fullmatch(schema["pattern"], value) is None:
             return False
-    if type(value) is int and "minimum" in schema and value < schema["minimum"]:
+    if type(value) in (int, float) and "minimum" in schema and value < schema["minimum"]:
         return False
     if "allOf" in schema and not all(_schema_matches(value, branch) for branch in schema["allOf"]):
         return False

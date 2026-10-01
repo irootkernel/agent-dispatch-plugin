@@ -262,6 +262,27 @@ def test_unknown_protocol_version_stays_malformed_json(plugin, runner, tmp_path)
     assert result["error"]["code"] == "malformed_json"
 
 
+@pytest.mark.parametrize("token", ["NaN", "Infinity", "-Infinity", "1e999"])
+def test_non_finite_numbers_close_as_malformed_json(plugin, runner, tmp_path, token):
+    stdout = (
+        '{"api_version":"agent-dispatch.cli/v1","command":"status",'
+        '"ok":true,"result":{"measurement":' + token + "}}"
+    )
+    result = _run_raw(plugin, runner, tmp_path, stdout=stdout)
+    assert result["ok"] is False
+    assert result["error"]["code"] == "malformed_json"
+    assert "agent_dispatch" not in result
+    json.dumps(result, allow_nan=False)
+
+
+def test_finite_decimal_result_remains_a_valid_success(plugin, runner, tmp_path):
+    result = _run_raw(
+        plugin, runner, tmp_path, envelope={**VALID_ENVELOPE, "result": {"measurement": 1.25}}
+    )
+    assert result["ok"] is True
+    assert result["agent_dispatch"]["result"] == {"measurement": 1.25}
+
+
 @pytest.mark.parametrize(
     "member",
     ["warnings", "trace_id"],

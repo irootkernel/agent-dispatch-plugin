@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import time
 from pathlib import Path
 from types import SimpleNamespace
@@ -532,6 +533,68 @@ def test_term_to_force_kill_kills_the_whole_process_group(plugin, runner, tmp_pa
         time.sleep(0.05)
     else:
         pytest.fail("a child of the terminated process group is still present")
+
+
+@pytest.mark.parametrize("parent_exits", [False, True])
+def test_deadline_kills_same_group_helper_after_parent_exits(
+    plugin, runner, tmp_path, parent_exits
+):
+    child_info = tmp_path / "child.json"
+    heartbeat = tmp_path / "heartbeat"
+    body = f"""#!/usr/bin/env python3
+import json
+import os
+from pathlib import Path
+import signal
+import sys
+import time
+if sys.argv[1:2] == ["version"]:
+    print(json.dumps({{"name":"agent-dispatch","version":"v0.1.6"}}))
+    raise SystemExit(0)
+if os.fork() == 0:
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    Path({str(child_info)!r}).write_text(json.dumps({{"pid":os.getpid(),"pgid":os.getpgrp()}}))
+    while True:
+        with open({str(heartbeat)!r}, "a") as handle:
+            handle.write("tick\\n")
+        time.sleep(0.02)
+while not Path({str(child_info)!r}).exists():
+    time.sleep(0.01)
+if {parent_exits!r}:
+    print(json.dumps({{"api_version":"agent-dispatch.cli/v1","command":"status","ok":True,"result":{{}}}}))
+else:
+    time.sleep(60)
+"""
+    installation = make_fake_binary(tmp_path, body=body)
+    config = {**installation["config"], "timeout_seconds": 1}
+    action = _action(plugin, "agent_dispatch_status", "inspect")
+    try:
+        started = time.monotonic()
+        result = runner.run_inspection(action, "agent_dispatch_status", {}, config)
+        assert time.monotonic() - started < 5
+        assert result["error"]["code"] == "timeout"
+        assert result["exit_code"] == -1
+        assert "agent_dispatch" not in result
+        before = heartbeat.read_bytes()
+        time.sleep(0.1)
+        assert heartbeat.read_bytes() == before
+        child_pid = json.loads(child_info.read_text())["pid"]
+        for _ in range(60):
+            try:
+                os.kill(child_pid, 0)
+            except ProcessLookupError:
+                break
+            time.sleep(0.05)
+        else:
+            pytest.fail("same-group helper survived after its parent exited")
+    finally:
+        if child_info.exists():
+            child = json.loads(child_info.read_text())
+            try:
+                if os.getpgid(child["pid"]) == child["pgid"]:
+                    os.kill(child["pid"], signal.SIGKILL)
+            except ProcessLookupError:
+                pass
 
 
 def test_no_retry_under_every_failure_mode(plugin, runner, tmp_path):

@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import platform as platform_module
 import pwd
@@ -316,7 +317,7 @@ def _parse_version_output(stdout: bytes) -> tuple[int, int, int]:
         )
     try:
         payload = json.loads(stdout.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError, RecursionError) as exc:
         raise TrustFailure(
             UNSUPPORTED_AGENT_DISPATCH_VERSION,
             "the Agent Dispatch version probe did not return valid JSON",
@@ -682,6 +683,13 @@ def run_inspection(
     return _map_completed_process(operation, outcome, spec, trust)
 
 
+def _finite_json_number(value: str) -> float:
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError("non-finite JSON number")
+    return number
+
+
 def _map_completed_process(
     operation: str, outcome: _Outcome, spec: ActionSpec, trust: RunnerTrust
 ) -> dict[str, Any]:
@@ -695,7 +703,11 @@ def _map_completed_process(
     """
     exit_code = outcome.exit_code if outcome.exit_code is not None else -1
     try:
-        parsed = json.loads(outcome.stdout.decode("utf-8"))
+        parsed = json.loads(
+            outcome.stdout.decode("utf-8"),
+            parse_float=_finite_json_number,
+            parse_constant=_finite_json_number,
+        )
     except (UnicodeDecodeError, json.JSONDecodeError, RecursionError, ValueError):
         return _malformed_with_stderr_tail(
             operation, exit_code, outcome, trust, "stdout was not parseable JSON"
@@ -849,25 +861,28 @@ def _drain_stream(stream: Any, cap: int, state: _DrainState, sink: list[bytes]) 
 
 def _terminate_process_group(process: subprocess.Popen[Any], grace_seconds: float) -> None:
     """Run the frozen TERM-then-force-kill ladder over the whole group."""
+    # start_new_session makes the child PID the group identity, which
+    # remains usable after the direct child has exited and been reaped.
+    group = process.pid
     try:
-        group = os.getpgid(process.pid)
-    except ProcessLookupError:
-        group = None
-    if group is not None:
-        try:
-            os.killpg(group, signal.SIGTERM)
-        except (ProcessLookupError, PermissionError):
-            pass
+        os.killpg(group, signal.SIGTERM)
+    except (ProcessLookupError, PermissionError):
+        pass
+    grace_deadline = time.monotonic() + grace_seconds
     try:
         process.wait(timeout=grace_seconds)
-        return
     except subprocess.TimeoutExpired:
         pass
-    if group is not None:
+    while (remaining := grace_deadline - time.monotonic()) > 0:
         try:
-            os.killpg(group, signal.SIGKILL)
+            os.killpg(group, 0)
         except (ProcessLookupError, PermissionError):
-            pass
+            break
+        time.sleep(min(_WAIT_SLICE_SECONDS, remaining))
+    try:
+        os.killpg(group, signal.SIGKILL)
+    except (ProcessLookupError, PermissionError):
+        pass
     process.wait()
 
 
@@ -908,20 +923,30 @@ def _execute_bounded(
     timed_out = False
     deadline = time.monotonic() + trust.timeout_seconds
     while True:
-        try:
-            process.wait(timeout=_WAIT_SLICE_SECONDS)
-            break
-        except subprocess.TimeoutExpired:
-            pass
         with state.lock:
             overflow_now = state.overflow
         if overflow_now:
             _terminate_process_group(process, grace_seconds)
             break
-        if time.monotonic() >= deadline:
+        if process.poll() is not None and all(not reader.is_alive() for reader in readers):
+            break
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
             timed_out = True
             _terminate_process_group(process, grace_seconds)
             break
+        if process.returncode is None:
+            try:
+                process.wait(timeout=min(_WAIT_SLICE_SECONDS, remaining))
+            except subprocess.TimeoutExpired:
+                pass
+        else:
+            # A same-group helper can retain a pipe after its parent exits.
+            # Stream completion stays under the command's original deadline.
+            for reader in readers:
+                if reader.is_alive():
+                    reader.join(timeout=min(_WAIT_SLICE_SECONDS, remaining))
+                    break
 
     for reader in readers:
         reader.join(timeout=grace_seconds + 5.0)

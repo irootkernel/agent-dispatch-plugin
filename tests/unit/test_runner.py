@@ -32,6 +32,31 @@ def _expect_failure(runner, config, code):
     return excinfo.value
 
 
+@pytest.mark.parametrize("payload", ["9" * 5000, "[" * 1800 + "0" + "]" * 1800])
+def test_malformed_version_json_closes_handler_and_availability(plugin, runner, tmp_path, payload):
+    log = tmp_path / "invocations.jsonl"
+    body = f"""#!/usr/bin/env python3
+import json
+import sys
+with open({str(log)!r}, "a", encoding="utf-8") as handle:
+    handle.write(json.dumps(sys.argv[1:]) + "\\n")
+sys.stdout.write({payload!r})
+"""
+    installation = make_fake_binary(tmp_path, body=body)
+    tool = next(
+        spec for spec in plugin.registry.tool_specs() if spec.name == "agent_dispatch_status"
+    )
+    handler = plugin.tools.handler_for(tool, HermesCtxStub(installation["config"]))
+    result = json.loads(handler({}))
+    assert result["error"]["code"] == runner.UNSUPPORTED_AGENT_DISPATCH_VERSION
+    assert "agent_dispatch" not in result
+    assert runner.probe_availability(installation["config"]) is False
+    assert [json.loads(line) for line in log.read_text().splitlines()] == [
+        ["version", "--json"],
+        ["version", "--json"],
+    ]
+
+
 def test_unresolved_config_fails_closed_with_binary_unavailable(runner):
     failure = _expect_failure(runner, {}, runner.BINARY_UNAVAILABLE)
     assert failure.message == runner.NOT_CONFIGURED_MESSAGE

@@ -74,7 +74,7 @@ an identifier-named directory (proving the remediated import path):
 
 The fresh-session inventory transcript (from the integration stage) is
 the single-line JSON the fresh interpreter prints after registering the
-plugin through the Hermes directory loader: exactly the thirteen catalog tools
+plugin through the Hermes directory loader: exactly the ten catalog tools
 in catalog order, followed by one smoke inspection
 (`agent_dispatch_status` → `status`) returning the frozen wrapper with
 `smoke_ok: true`.
