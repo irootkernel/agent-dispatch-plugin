@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -122,7 +123,7 @@ def test_gate_reports_corruptions_boundedly(corruption, label):
         shutil.copytree(ROOT, work, ignore=IGNORE)
         corruption(work)
         result = subprocess.run(
-            ["uv", "run", "--project", str(work), "contracts/validate.py"],
+            [sys.executable, "contracts/validate.py"],
             cwd=work,
             capture_output=True,
             text=True,
@@ -272,7 +273,7 @@ def test_parity_gate_reports_corruptions_boundedly(corruption, label, needle):
         shutil.copytree(ROOT, work, ignore=IGNORE)
         corruption(work)
         result = subprocess.run(
-            ["uv", "run", "--project", str(work), "scripts/manifest_parity.py"],
+            [sys.executable, "scripts/manifest_parity.py"],
             cwd=work,
             capture_output=True,
             text=True,

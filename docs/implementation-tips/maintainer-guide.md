@@ -14,11 +14,11 @@ contracts, resource limits, and compatibility matrix are defined by
 baseline, and bound by `docs/specs/PRD.md` and
 `docs/specs/contracts.md`. Changes require explicit maintainer approval
 and a canonical amendment; the deterministic oracle
-(`uv run contracts/validate.py` and `uv run contracts/validate_v020.py`) and the parity gate
-(`uv run scripts/manifest_parity.py`) fail closed on any drift between
+(`uv run --frozen --no-sync contracts/validate.py` and `uv run --frozen --no-sync contracts/validate_v020.py`) and the parity gate
+(`uv run --frozen --no-sync scripts/manifest_parity.py`) fail closed on any drift between
 the catalog, schemas, `plugin.yaml`, and the registered inventory.
 `plugin.yaml` is derived — never edit it directly; regenerate with
-`uv run scripts/manifest_parity.py --write` after a catalog change.
+`uv run --frozen --no-sync scripts/manifest_parity.py --write` after a catalog change.
 
 ## Distinct states
 

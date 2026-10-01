@@ -6,9 +6,12 @@ authority. Start here when contributing to the plugin.
 
 ## Set up a checkout
 
-Clone the repository and run `uv sync` from its root. The project requires
-Python >=3.11 and pins development dependencies in `uv.lock`; it is source-only
-and has no third-party runtime dependencies. Read the
+Clone the repository and run `make dev-sync` from its root. The project
+requires Python >=3.11. `requirements-dev.in` names the pinned developer
+tools; `requirements-dev.txt` locks their complete dependency set and
+distribution hashes. The source-only plugin has no third-party runtime
+dependencies. Its `pyproject.toml` and `uv.lock` contain no developer tools.
+Read the
 [architecture](../architecture/README.md) before changing module boundaries.
 
 Unit and integration tests use deterministic fakes. Plugin Doctor e2e needs

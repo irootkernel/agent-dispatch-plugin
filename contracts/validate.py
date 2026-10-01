@@ -5,7 +5,7 @@ Validates contracts/v0.1.0 against the invariants frozen in docs/specs/PRD.md
 (the oracle below), the JSON Schema metaschema, and the fixture catalog.
 Requires only the pinned jsonschema toolchain; run:
 
-    uv run --with jsonschema==4.26.0 --with referencing==0.37.0 contracts/validate.py
+    uv run --frozen --no-sync --with jsonschema==4.26.0 --with referencing==0.37.0 contracts/validate.py
 
 Exit status 0 means every check passed. The script never starts a process,
 opens a database, or contacts the network. The oracle constants below are

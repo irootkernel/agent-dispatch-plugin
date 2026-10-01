@@ -7,8 +7,8 @@ without arguments to verify manifest, registry, registration, expected
 inventory, and command-vocabulary parity for exactly the thirteen declared
 tools.
 
-    uv run scripts/manifest_parity.py           # verify (exit 1 on mismatch)
-    uv run scripts/manifest_parity.py --write   # regenerate plugin.yaml
+    uv run --frozen --no-sync scripts/manifest_parity.py           # verify (exit 1 on mismatch)
+    uv run --frozen --no-sync scripts/manifest_parity.py --write   # regenerate plugin.yaml
 
 Verification loads the plugin package exactly the way Hermes loads a
 directory plugin (spec_from_file_location with the repo root as the package

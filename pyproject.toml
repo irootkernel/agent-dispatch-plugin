@@ -4,21 +4,9 @@ version = "0.2.0"
 description = "Inspection-only Hermes plugin over the Agent Dispatch public CLI."
 requires-python = ">=3.11"
 license = "MIT"
-# Runtime is dependency-free: the plugin reads only the frozen contract files
-# shipped in this repository. jsonschema and PyYAML are dev toolchain only.
+# Runtime is dependency-free. Development tools are pinned separately in
+# requirements-dev.in and requirements-dev.txt, outside Hermes's workspace.
 dependencies = []
-
-[dependency-groups]
-dev = [
-    "jsonschema==4.26.0",
-    "mypy==2.3.1",
-    "pytest==9.0.2",
-    "pyyaml==6.0.3",
-    "referencing==0.37.0",
-    "ruff==0.14.7",
-    "types-jsonschema==4.26.0.20260518",
-    "types-pyyaml==6.0.12.20260815",
-]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

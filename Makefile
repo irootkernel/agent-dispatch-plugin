@@ -4,7 +4,18 @@ PY_SOURCES := registry.py schemas.py envelopes.py runner.py __init__.py tools co
 # tree (TESTING.md documents the same split).
 MYPY_SOURCES := $(filter-out __init__.py tests,$(PY_SOURCES))
 
-.PHONY: test test-prepare test-unit test-int test-e2e test-qualify
+# Keep the separately prepared development environment intact: an automatic
+# project sync would remove tools absent from the runtime-only uv.lock.
+UV_RUN := uv run --frozen --no-sync
+
+.PHONY: dev-sync dev-lock test test-prepare test-unit test-int test-e2e test-qualify
+
+dev-sync:
+	uv sync --locked
+	uv pip sync --python .venv/bin/python --require-hashes requirements-dev.txt
+
+dev-lock:
+	uv pip compile --universal --python-version 3.11 --generate-hashes --output-file requirements-dev.txt requirements-dev.in
 
 test:
 	$(MAKE) test-prepare
@@ -13,22 +24,22 @@ test:
 	$(MAKE) test-e2e
 
 test-prepare:
-	uv run ruff format $(PY_SOURCES)
-	uv run ruff check $(PY_SOURCES)
-	uv run mypy $(MYPY_SOURCES)
-	uv run python -m compileall -q $(PY_SOURCES)
-	uv run contracts/validate.py
-	uv run contracts/validate_v020.py
-	uv run scripts/manifest_parity.py
+	$(UV_RUN) ruff format $(PY_SOURCES)
+	$(UV_RUN) ruff check $(PY_SOURCES)
+	$(UV_RUN) mypy $(MYPY_SOURCES)
+	$(UV_RUN) python -m compileall -q $(PY_SOURCES)
+	$(UV_RUN) contracts/validate.py
+	$(UV_RUN) contracts/validate_v020.py
+	$(UV_RUN) scripts/manifest_parity.py
 
 test-unit:
-	uv run pytest tests/unit
+	$(UV_RUN) pytest tests/unit
 
 test-int:
-	uv run pytest tests/integration
+	$(UV_RUN) pytest tests/integration
 
 test-e2e:
-	uv run pytest tests/e2e
+	$(UV_RUN) pytest tests/e2e
 
 # The real-artifact compatibility qualification (TASK-012): every public
 # action through the real Hermes runtime (v0.20.5 or newer) and the
@@ -42,4 +53,4 @@ test-e2e:
 # hard when the pinned prerequisites are absent (TESTING.md owns the
 # contract).
 test-qualify:
-	uv run pytest tests/qualification
+	$(UV_RUN) pytest tests/qualification

@@ -3,7 +3,7 @@
 Target: the `agent-dispatch-plugin` v0.1.0 complete deterministic gate set
 from a fresh clone of an exact revision.
 Environment: Darwin arm64 host; Hermes (v0.20.5 or newer) on `PATH` for the Plugin
-Doctor e2e stage; `uv` resolving the pinned `uv.lock`. No credentials, no
+Doctor e2e stage; `uv` preparing the separately hash-locked development requirements. No credentials, no
 network beyond the package cache, and no repository-local state are
 involved.
 
@@ -13,7 +13,7 @@ involved.
 |---|---|
 | Hermes (e2e only) | >=0.20.5 on `PATH` (qualified reference: v0.20.5, build 2026.8.19) |
 | Python | any `uv`-provided CPython satisfying `requires-python >=3.11` |
-| Test framework | pytest 9.0.2 with the dev group pinned in `uv.lock` |
+| Test framework | pytest 9.0.2 pinned in `requirements-dev.txt` |
 | Host | darwin/arm64 |
 
 ## Recorded defect and remediation (found by this stage)
@@ -44,8 +44,8 @@ git clone <repository-source> <any-directory>
 cd <any-directory>
 git checkout <exact-revision>
 
-# 2. Resolve the pinned environment and run the complete gate set.
-uv sync
+# 2. Prepare the separately pinned development environment and run the gates.
+make dev-sync
 make test
 ```
 

@@ -28,11 +28,11 @@ qualification before a support claim. The PRD and
 ## Validation
 
 Run the deterministic offline gate (no process, database, or network by the
-gate itself):
+gate itself) after `make dev-sync`:
 
 ```bash
-uv run --with jsonschema==4.26.0 --with referencing==0.37.0 contracts/validate.py
-uv run --frozen contracts/validate_v020.py
+uv run --frozen --no-sync --with jsonschema==4.26.0 --with referencing==0.37.0 contracts/validate.py
+uv run --frozen --no-sync contracts/validate_v020.py
 ```
 
 The validator asserts that the catalog equals the PRD invariants, every schema

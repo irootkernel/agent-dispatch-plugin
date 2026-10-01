@@ -11,13 +11,22 @@ blocking contract defect.
 ## Canonical Commands
 
 ```bash
+make dev-sync       # prepare .venv from the separately hash-locked development requirements
+make dev-lock       # regenerate requirements-dev.txt after an intentional tool-pin change
 make test           # aggregate: prepare, unit, integration, e2e in order, fail-fast
 make test-prepare   # format, lint, type checking, byte-compilation, two contract gates, parity gate
-make test-unit      # uv run pytest tests/unit
-make test-int       # uv run pytest tests/integration
-make test-e2e       # uv run pytest tests/e2e
-make test-qualify   # uv run pytest tests/qualification (real pinned artifacts; see below)
+make test-unit      # uv run --frozen --no-sync pytest tests/unit
+make test-int       # uv run --frozen --no-sync pytest tests/integration
+make test-e2e       # uv run --frozen --no-sync pytest tests/e2e
+make test-qualify   # uv run --frozen --no-sync pytest tests/qualification (real pinned artifacts; see below)
 ```
+
+Run `make dev-sync` before the checks. The runtime-only `pyproject.toml`
+and `uv.lock` declare no third-party dependencies; the developer tools live
+in `requirements-dev.in` and the hash-locked `requirements-dev.txt`.
+`make dev-sync` prepares only this checkout's `.venv`. Test commands use
+`uv run --frozen --no-sync` so the runtime-only lock does not remove those
+tools. Hermes does not consume the development requirements files.
 
 The aggregate calls each stage handler exactly once through recursive
 `$(MAKE)` invocations and stays serial under parallel Make.
@@ -84,10 +93,10 @@ platform's support claim.
 
 | Language | Layer | Framework | Evidence | Runner command |
 |---|---|---|---|---|
-| Python | unit | pytest (canonical) | pyproject.toml + uv.lock (pytest==9.0.2) | `uv run pytest tests/unit` |
-| Python | integration | pytest (canonical) | same | `uv run pytest tests/integration` |
-| Python | e2e | pytest (canonical) | same | `uv run pytest tests/e2e` |
-| Python | qualification | pytest (canonical) | same | `uv run pytest tests/qualification` |
+| Python | unit | pytest (canonical) | requirements-dev.in + requirements-dev.txt (pytest==9.0.2) | `uv run --frozen --no-sync pytest tests/unit` |
+| Python | integration | pytest (canonical) | same | `uv run --frozen --no-sync pytest tests/integration` |
+| Python | e2e | pytest (canonical) | same | `uv run --frozen --no-sync pytest tests/e2e` |
+| Python | qualification | pytest (canonical) | same | `uv run --frozen --no-sync pytest tests/qualification` |
 
 No framework waivers apply: every layer is newly established on pytest.
 

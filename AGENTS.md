@@ -80,6 +80,6 @@ This file is the local agent guidance for the agent-dispatch-plugin repository.
 ### Project-Specific Operating Rules
 
 - Preserve the plugin's inspection-only boundary. Do not add Agent Dispatch mutations, direct database access, or arbitrary CLI pass-through without the canonical contract amendment and maintainer approval required by the PRD.
-- `plugin.yaml` is derived from the frozen catalog. Change its authority first and regenerate with `uv run scripts/manifest_parity.py --write`; do not edit the manifest directly.
+- `plugin.yaml` is derived from the frozen catalog. Change its authority first and regenerate with `uv run --frozen --no-sync scripts/manifest_parity.py --write`; do not edit the manifest directly.
 - Contract changes require a canonical amendment. Keep schema, fixture, runtime, and qualification evidence aligned with the amended contract.
 - Keep machine-local profiles, credentials, raw transcripts, and tool runtime state out of tracked evidence. Use artifact identities rather than machine paths in durable documentation.

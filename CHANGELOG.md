@@ -17,6 +17,7 @@ This file records concise shipped outcomes and pending changes.
 
 ### Fixed
 
+- Keep Plugin developer tool pins out of Hermes package resolution.
 - Reject malformed sync capability and result evidence with a closed
   `contract_mismatch` response before admitting an inspection read.
 

@@ -32,7 +32,8 @@ candidate and intended destination before preparing any publication.
 Every candidate must pass, from a full-history clean clone of the exact revision
 ([clean-clone verification](clean-clone-verification.md) records the procedure):
 
-1. `uv sync` — the pinned environment resolves from `uv.lock`.
+1. `make dev-sync` — the isolated development environment resolves from
+   the hash-locked `requirements-dev.txt`; `uv.lock` covers runtime metadata only.
 2. `make test` — the prepare gates (format, lint, type check,
    byte-compilation, both contract oracles, manifest/registry
    parity), the deterministic unit suite, the integration suite

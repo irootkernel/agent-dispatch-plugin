@@ -40,7 +40,7 @@ command-specific envelope identity).
 ## Deterministic gate
 
 ```bash
-uv run --with jsonschema==4.26.0 --with referencing==0.37.0 contracts/validate.py
+uv run --frozen --no-sync --with jsonschema==4.26.0 --with referencing==0.37.0 contracts/validate.py
 ```
 
 must pass before any contract change is committed. The gate is offline: no
@@ -90,7 +90,7 @@ zero, ten, or thirteen according to the PRD trust and capability gates.
 Neither the provider's semantic fragments nor a version string alone admit
 a binary or validate a full result.
 
-`contracts/validate.py` continues to validate the frozen baseline. Run
-`uv run --frozen contracts/validate_v020.py` for this approved catalog,
-schemas, and positive and negative fixtures. Master approved the PRD
+`contracts/validate.py` continues to validate the frozen baseline. After
+`make dev-sync`, run `uv run --frozen --no-sync contracts/validate_v020.py`
+for this approved catalog, schemas, and positive and negative fixtures. Master approved the PRD
 amendment on 2026-09-29; platform qualification remains a separate gate.

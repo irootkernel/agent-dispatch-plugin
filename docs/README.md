@@ -70,13 +70,14 @@ Child task completion alone does not establish epic acceptance.
 
 ## Documentation checks
 
-Review links and relative anchors inside the repository, and compare examples
-with the frozen schemas and implementation. Run these non-writing checks:
+Prepare the development environment with `make dev-sync`, then review links
+and relative anchors inside the repository and compare examples with the frozen
+schemas and implementation. Run these non-writing checks:
 
 ```bash
-uv run contracts/validate.py
-uv run contracts/validate_v020.py
-uv run scripts/manifest_parity.py
+uv run --frozen --no-sync contracts/validate.py
+uv run --frozen --no-sync contracts/validate_v020.py
+uv run --frozen --no-sync scripts/manifest_parity.py
 git --no-pager diff --check
 ```
 
