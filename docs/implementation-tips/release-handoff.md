@@ -105,10 +105,10 @@ or publication.
 ## Selected v0.2.0 release pair
 
 The Core source and provider-bundle commit is
-`ff0ae56a1087d3db9380743d907ce701314b5371`. Its semantic provider digest remains
+`ffc8715d030ed3978e2c34d700798815975917d9`. Its semantic provider digest remains
 `sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b`.
 The Core release build stamps version `v0.2.0`, that full source commit,
-and commit date `2026-10-01T01:04:21+09:00`. The Plugin is source-only
+and commit date `2026-10-01T14:57:43+09:00`. The Plugin is source-only
 at version `0.2.0`, with release date `2026-10-01`.
 The [catalog](../../contracts/v0.2.0/catalog.json) and
 [qualification environment](../../TESTING.md#qualification-environment)

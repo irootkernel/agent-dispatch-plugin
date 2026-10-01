@@ -125,10 +125,10 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   linux-amd64 build (`AGENT_DISPATCH_QUALIFY_BINARY_V018`). Every host also
   requires its correctly stamped v0.2.0 binary at
   `AGENT_DISPATCH_QUALIFY_BINARY_V020`, built from reviewed source
-  `ff0ae56a1087d3db9380743d907ce701314b5371`. The v0.2.0 SHA-256 pins
-  are Darwin arm64 `20404e9e829928bffaa0de4220da1031be6b41f7db822ce3670fa736df1ecce9`,
-  Linux amd64 `83f82ff94bb94d6897df1dbfb9eafe86c3dae7d9a502580bb1cc8650179a60ed`,
-  and Linux arm64 `3465c6f54460d59ab95e83784b2e9bb4920566c4cfa30865d4618e8fc6c6d280`.
+  `ffc8715d030ed3978e2c34d700798815975917d9`. The v0.2.0 SHA-256 pins
+  are Darwin arm64 `7f9e68f7033ed7750f1d6912d510f617d2a06fd58f5f18400b73d68280604508`,
+  Linux amd64 `a749ad083c2028af3b0d500c95d448f5a90af80c5c6e9a70fe950b011393efb2`,
+  and Linux arm64 `9ca8f030b7763f05c229c5792836ea86ad3f2a8cc97912e47dda8f8a687d2cec`.
   Each case
   verifies its pinned SHA-256 before its version probe. PATH is a fallback
   only when its binary matches that exact case; missing or mismatching

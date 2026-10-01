@@ -258,7 +258,7 @@ before claiming the three sync reads on Linux amd64.
 ### v0.2.0 release artifact allowance
 
 The paired release preparation selects Core commit
-`ff0ae56a1087d3db9380743d907ce701314b5371` for the source and unchanged provider bundle.
+`ffc8715d030ed3978e2c34d700798815975917d9` for the source and unchanged provider bundle.
 The semantic digest remains
 `sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b`.
 The current [catalog](../../contracts/v0.2.0/catalog.json) names the three
