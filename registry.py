@@ -1,6 +1,6 @@
 """Declarative tool registry derived from the active versioned contract.
 
-The catalog at contracts/v0.2.0/catalog.json is the active handwritten
+The catalog at contracts/v0.3.0/catalog.json is the active handwritten
 authority (ADR-001). This module is its derived in-memory view: it parses the
 catalog once and exposes the tool roster, per-action command mappings, and
 the expected inventory that plugin.yaml and parity checks are generated from.
@@ -33,7 +33,7 @@ def native_schedule_platform() -> str:
 
 
 PLUGIN_ROOT = Path(__file__).resolve().parent
-CONTRACTS_VERSION_DIR = PLUGIN_ROOT / "contracts" / "v0.2.0"
+CONTRACTS_VERSION_DIR = PLUGIN_ROOT / "contracts" / "v0.3.0"
 CATALOG_PATH = CONTRACTS_VERSION_DIR / "catalog.json"
 TOOLSET = "agent_dispatch"
 
@@ -71,7 +71,7 @@ class ActionSpec:
     ) -> tuple[str, ...]:
         """Resolve the concrete argv for this action from validated params.
 
-        The versioned contract oracle in contracts/validate_v020.py checks
+        The versioned contract oracle in contracts/validate_v030.py checks
         the trusted binding semantics and command fixtures.
         Bindings whose parameter is absent are skipped; the caller is
         responsible for having validated params against the tool's input

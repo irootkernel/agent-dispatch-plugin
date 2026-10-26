@@ -1,0 +1,40 @@
+{
+  "cases": [
+    {
+      "id": "event-show-valid-plain",
+      "description": "A plain aggregate identifier.",
+      "expect": "valid",
+      "instance": {"aggregate_id": "evt_01jz"}
+    },
+    {
+      "id": "event-show-valid-namespaced",
+      "description": "A namespaced aggregate identifier with a colon is preserved literally.",
+      "expect": "valid",
+      "instance": {"aggregate_id": "occ:1234"}
+    },
+    {
+      "id": "event-show-invalid-missing-id",
+      "description": "aggregate_id is required.",
+      "expect": "invalid",
+      "instance": {}
+    },
+    {
+      "id": "event-show-invalid-empty-id",
+      "description": "An empty identifier is rejected.",
+      "expect": "invalid",
+      "instance": {"aggregate_id": ""}
+    },
+    {
+      "id": "event-show-invalid-shell-metacharacter",
+      "description": "Shell metacharacters are rejected by the grammar.",
+      "expect": "invalid",
+      "instance": {"aggregate_id": "evt;rm"}
+    },
+    {
+      "id": "event-show-invalid-forbidden-env",
+      "description": "A forbidden execution property is rejected before process creation.",
+      "expect": "invalid",
+      "instance": {"aggregate_id": "evt_01jz", "environment": {"HOME": "/tmp"}}
+    }
+  ]
+}

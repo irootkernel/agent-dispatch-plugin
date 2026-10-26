@@ -18,7 +18,7 @@ and `config_path`. The optional `sync_group_id` is a trusted two-node group
 identifier with a closed grammar. Timeout and output settings have bounded
 defaults. Trust is checked for availability and every inspection; verification is not cached.
 Registration itself reads contract files and creates no Agent Dispatch process.
-The three sync reads additionally require the exact v0.2.0 provider version,
+The three sync reads additionally require the exact v0.2.0 or v0.3.0 provider version,
 the platform SHA allowlist, and a fresh bounded capability/digest probe before
 each handler command. Registration declares thirteen tools; availability is
 zero, ten, or thirteen according to the common and sync trust gates.

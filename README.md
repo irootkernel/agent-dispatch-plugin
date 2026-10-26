@@ -2,7 +2,7 @@
 
 Agent Dispatch Plugin connects [Agent Dispatch](https://github.com/irootkernel/agent-dispatch) to your interactive Hermes conversations. Ask Hermes to inspect routes, follow a dispatch through its recorded history, look up receipts, or explain diagnostic findings without composing Agent Dispatch CLI commands yourself.
 
-The current development source registers thirteen inspection tools. Ten retain the v0.1.0 behavior; three inspect the two-node sync provider when an exact allowlisted v0.2.0 executable and trusted group are configured. The original TASK-026 artifacts passed native qualification on Darwin arm64 and Linux arm64; Linux amd64 v0.2.0 qualification remains deferred under EPIC-009/TASK-033 and has no support claim for these reads. Agent Dispatch remains responsible for routing, execution, and stored state.
+The current development source registers thirteen inspection tools. Ten retain the v0.1.0 behavior; three inspect the two-node sync provider when an exact allowlisted v0.2.0 or v0.3.0 executable and trusted group are configured. Sync support is scoped to Darwin arm64 and Linux arm64, with fresh exact-candidate qualification required before release. Linux amd64 sync qualification remains deferred under EPIC-009/TASK-033. Agent Dispatch remains responsible for routing, execution, and stored state.
 
 ## What you can do
 
@@ -32,16 +32,16 @@ The plugin does not submit jobs, retry or discard dispatches, change routes, or 
 
 | Component | Requirement |
 |---|---|
-| Host | Published v0.1.1: macOS on Apple Silicon (`darwin/arm64`) as the release host; native `linux/amd64` and `linux/arm64` qualified at the recorded v0.1.x artifacts. The original TASK-026 v0.2.0 artifacts were qualified on Darwin arm64 and Linux arm64. The selected release pair requires fresh qualification on those hosts before publication. |
+| Host | Darwin arm64 is the release host; sync reads target Darwin arm64 and native Linux arm64. Linux amd64 retains its qualified legacy ten-tool scope. |
 | Hermes | `>=0.20.5`; interactive CLI sessions only |
-| Agent Dispatch | `>=0.1.6,<0.2.0`, or an exact allowlisted v0.2.0 artifact (which also serves the original ten tools); `agent-dispatch.cli/v1` |
+| Agent Dispatch | `>=0.1.6,<0.2.0`, or an exact allowlisted v0.2.0 or v0.3.0 artifact (which also serves the original ten tools); `agent-dispatch.cli/v1` |
 | Distribution | Source directory; no wheel or bundled Agent Dispatch binary |
 
 The v0.1.1 qualification targets Hermes v0.21.0 and both Agent Dispatch
 v0.1.6 and v0.1.7 Darwin arm64 release artifacts, and historically recorded
 linux/arm64 against Agent Dispatch v0.1.7 and linux/amd64 against v0.1.8.
 The current Linux arm64 development gate selects v0.1.8 and the pinned
-v0.2.0 candidate. Version
+v0.2.0 and v0.3.0 releases. Version
 requirements do not mean that every newer combination has been tested; see the
 [Darwin](docs/implementation-tips/qualification-darwin-arm64.md),
 [Linux arm64](docs/implementation-tips/qualification-linux-arm64.md), and
@@ -53,6 +53,21 @@ Inspection can still trigger Agent Dispatch's forward store migration and
 backup behavior, and target probes can refresh capability caches. Enable it only for a configuration whose store you authorize
 it to open. Unattended workers, cron, gateways, and messaging surfaces are
 outside v0.1.0's supported use.
+
+### Core v0.3.0 upgrade boundary
+
+The selected Core v0.3.0 release is source commit
+`4b1e5dcaa9c2c6bb4b043448c9ee0d9d2ed00b4f`. Verify its published `SHA256SUMS`
+and the matching version/platform entry in the
+[active catalog](contracts/v0.3.0/catalog.json); an operator digest or version
+string alone does not admit another build. Later patch versions require
+explicit admission. The tool roster and profile settings stay unchanged.
+
+Core v0.3.0 can migrate an older store to schema 29 during inspection.
+Back up the database and matching configuration before opening it with the
+new executable. A Plugin source rollback does not undo that migration;
+Core rollback requires a compatible backup with services and writers stopped.
+Follow Core's [upgrade and recovery guidance](https://github.com/irootkernel/agent-dispatch/blob/v0.3.0/docs/ops/installation.md).
 
 ## Install
 
@@ -76,10 +91,9 @@ The Hermes profile configuration and the Agent Dispatch configuration are differ
 
 ### 2. Download the selected plugin revision
 
-The [v0.1.1 release](https://github.com/irootkernel/agent-dispatch-plugin/releases/tag/v0.1.1)
+The [selected release](https://github.com/irootkernel/agent-dispatch-plugin/releases)
 provides a source archive and `SHA256SUMS`. Verify the checksum before
-extracting it. The archive contains a top-level `agent-dispatch-plugin-v0.1.1/`
-directory; copy that directory's contents into a new profile plugin directory,
+extracting it. The archive contains a top-level versioned directory, for example `agent-dispatch-plugin-v0.3.0/`; copy that directory's contents into a new profile plugin directory,
 then follow the configuration steps below. Install Agent Dispatch separately.
 The release also records the exact source commit for the Git-based procedure:
 
@@ -221,7 +235,7 @@ You can also ask for diagnostics with `agent_dispatch_doctor`. Target probing is
 ### Inspect a two-node sync group
 
 First configure `sync_group_id` for a group you are authorized to inspect and
-verify the exact v0.2.0 Agent Dispatch artifact. In a fresh Hermes session, ask:
+verify the exact v0.2.0 or v0.3.0 Agent Dispatch artifact. In a fresh Hermes session, ask:
 
 > Use `agent_dispatch_sync_capabilities` to show the provider contract and its read capabilities. Then use `agent_dispatch_sync_status` to summarize the configured group's local state, including both expected nodes and the separate latest publication, delivery, import, and verification evidence.
 
@@ -229,7 +243,7 @@ verify the exact v0.2.0 Agent Dispatch artifact. In a fresh Hermes session, ask:
 
 All three inputs are empty objects; the trusted profile setting supplies the
 group for the latter two. The plugin registers thirteen names, but Hermes
-exposes only ten for a qualified legacy binary or when the pinned v0.2.0
+exposes only ten for a qualified legacy binary or when the selected sync
 provider lacks a valid group or fresh matching capability evidence. A failed
 common trust gate exposes none. A configured group that is disabled can still
 be inspected; `state: disabled` is not evidence of an active pair.

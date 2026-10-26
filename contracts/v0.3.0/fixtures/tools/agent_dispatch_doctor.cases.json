@@ -1,0 +1,28 @@
+{
+  "cases": [
+    {
+      "id": "doctor-valid-default",
+      "description": "An empty object defaults probe_targets to false.",
+      "expect": "valid",
+      "instance": {}
+    },
+    {
+      "id": "doctor-valid-probe",
+      "description": "An explicit boolean probe request is valid.",
+      "expect": "valid",
+      "instance": {"probe_targets": true}
+    },
+    {
+      "id": "doctor-invalid-probe-string",
+      "description": "A string is not a boolean.",
+      "expect": "invalid",
+      "instance": {"probe_targets": "yes"}
+    },
+    {
+      "id": "doctor-invalid-additional-property",
+      "description": "Undeclared properties are rejected.",
+      "expect": "invalid",
+      "instance": {"probe_targets": false, "integrity": "full"}
+    }
+  ]
+}

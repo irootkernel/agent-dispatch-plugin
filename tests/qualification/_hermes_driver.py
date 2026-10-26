@@ -16,7 +16,9 @@ carrying the dispatcher's JSON reply verbatim.
 
 from __future__ import annotations
 
+import importlib.util
 import json
+from pathlib import Path
 import os
 import sys
 
@@ -28,6 +30,13 @@ def main() -> int:
     with open(sys.argv[1], encoding="utf-8") as handle:
         cases = json.load(handle)
     os.environ.setdefault("HERMES_QUIET", "1")
+
+    # The public CLI prepends its install root. Editable installs can expose
+    # model_tools while newly added sibling modules are absent from the old
+    # editable finder, so establish that same source root before importing it.
+    spec = importlib.util.find_spec("model_tools")
+    if spec is not None and spec.origin:
+        sys.path.insert(0, str(Path(spec.origin).resolve().parent))
 
     # The import is the runtime bootstrap: it discovers built-in tools and
     # loads the enabled plugins from HERMES_HOME before anything is called.

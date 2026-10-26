@@ -35,7 +35,8 @@ explain technical decisions within that scope. The
 [contract reference](specs/contracts.md) binds the PRD to the executable
 artifacts in `contracts/v0.1.0/` and the approved EPIC-007 contract in
 `contracts/v0.2.0/`; derived manifest and runtime views must agree with the
-currently activated version. The roadmap alone owns delivery status. An
+currently activated version. The v0.3.0 compatibility amendment activates
+`contracts/v0.3.0/` while retaining both previous frozen baselines. The roadmap alone owns delivery status. An
 adopted dossier refines its epic without overriding these owners. Operational
 and implementation guidance explains how to execute accepted work.
 
@@ -77,6 +78,7 @@ schemas and implementation. Run these non-writing checks:
 ```bash
 uv run --frozen --no-sync contracts/validate.py
 uv run --frozen --no-sync contracts/validate_v020.py
+uv run --frozen --no-sync contracts/validate_v030.py
 uv run --frozen --no-sync scripts/manifest_parity.py
 git --no-pager diff --check
 ```

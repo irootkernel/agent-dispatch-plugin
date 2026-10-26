@@ -1,0 +1,52 @@
+{
+  "cases": [
+    {
+      "id": "sync-capabilities-match",
+      "instance": {
+        "expected_command": "sync capabilities",
+        "envelope_command": "sync capabilities",
+        "expected_match": true
+      }
+    },
+    {
+      "id": "sync-capabilities-mismatch",
+      "instance": {
+        "expected_command": "sync capabilities",
+        "envelope_command": "sync verify",
+        "expected_match": false
+      }
+    },
+    {
+      "id": "sync-status-match",
+      "instance": {
+        "expected_command": "sync status",
+        "envelope_command": "sync status",
+        "expected_match": true
+      }
+    },
+    {
+      "id": "sync-status-mismatch",
+      "instance": {
+        "expected_command": "sync status",
+        "envelope_command": "sync verify",
+        "expected_match": false
+      }
+    },
+    {
+      "id": "sync-service-inspect-match",
+      "instance": {
+        "expected_command": "sync service inspect",
+        "envelope_command": "sync service inspect",
+        "expected_match": true
+      }
+    },
+    {
+      "id": "sync-service-inspect-mismatch",
+      "instance": {
+        "expected_command": "sync service inspect",
+        "envelope_command": "sync verify",
+        "expected_match": false
+      }
+    }
+  ]
+}

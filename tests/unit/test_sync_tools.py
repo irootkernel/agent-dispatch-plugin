@@ -15,6 +15,7 @@ def _provider(
     broken_catalog,
     tmp_path: Path,
     *,
+    version="0.2.0",
     probe_command="sync capabilities",
     probe_raw=False,
     probe_mode="normal",
@@ -52,7 +53,7 @@ args = sys.argv[1:]
 with open({str(log)!r}, "a", encoding="utf-8") as handle:
     handle.write(json.dumps(args) + "\\n")
 if args == ["version", "--json"]:
-    print(json.dumps({{"name":"agent-dispatch","version":"v0.2.0"}}))
+    print(json.dumps({{"name":"agent-dispatch","version":{("v" + version)!r}}}))
 elif args == ["sync", "capabilities", "--output", "json"]:
     if {probe_mode!r} == "sleep":
         time.sleep(2)
@@ -70,10 +71,10 @@ else:
     command = " ".join(args[:3] if args[:3] == ["sync", "service", "inspect"] else args[:2])
     print(json.dumps({{"api_version":"agent-dispatch.cli/v1","command":command,"ok":True,"result":{results!r}[command],"warnings":[],"trace_id":""}}))
 """
-    installation = make_fake_binary(tmp_path, version="v0.2.0", body=body)
+    installation = make_fake_binary(tmp_path, version="v" + version, body=body)
     host = plugin.runner._host_platform()
     broken_catalog(
-        lambda catalog: catalog["sync_provider"]["artifact_sha256"].__setitem__(
+        lambda catalog: catalog["sync_providers"][version]["artifact_sha256"].__setitem__(
             host, installation["digest"]
         )
     )
@@ -87,8 +88,9 @@ def _lines(log: Path):
     return [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()]
 
 
-def test_registration_availability_and_exact_argv(plugin, broken_catalog, tmp_path):
-    config, log, _ = _provider(plugin, broken_catalog, tmp_path)
+@pytest.mark.parametrize("version", ["0.2.0", "0.3.0"])
+def test_registration_availability_and_exact_argv(plugin, broken_catalog, tmp_path, version):
+    config, log, _ = _provider(plugin, broken_catalog, tmp_path, version=version)
     specs = {spec.name: spec for spec in plugin.registry.tool_specs()}
     assert len(specs) == 13
     legacy = make_fake_binary(tmp_path / "legacy")
@@ -229,12 +231,15 @@ def test_missing_sync_capability_action_closes_without_raising(
     assert not any(line[:2] == ["sync", "status"] for line in _lines(log))
 
 
-def test_unallowlisted_v020_binary_is_unavailable(plugin, tmp_path):
-    installation = make_fake_binary(tmp_path, version="v0.2.0")
+@pytest.mark.parametrize("version", ["v0.2.0", "v0.3.0", "v0.2.1", "v0.3.1"])
+def test_unallowlisted_binary_is_unavailable(plugin, tmp_path, version):
+    installation = make_fake_binary(tmp_path, version=version)
     assert plugin.runner.probe_availability(installation["config"]) is False
     with pytest.raises(plugin.runner.TrustFailure) as error:
         plugin.runner.resolve_trust(installation["config"])
-    assert error.value.code == "binary_unavailable"
+    assert error.value.code == (
+        "unsupported_agent_dispatch_version" if version.endswith(".1") else "binary_unavailable"
+    )
 
 
 def test_legacy_binary_with_group_denies_sync_without_spawning_command(
@@ -304,3 +309,27 @@ def test_capability_drift_after_cached_visibility_denies_direct_dispatch(
     assert result["ok"] is False
     assert result["error"]["code"] == "contract_mismatch"
     assert not any(line[:2] == ["sync", "status"] for line in _lines(log))
+
+
+@pytest.mark.parametrize("host", ["darwin/arm64", "linux/arm64"])
+def test_v030_digest_cannot_be_borrowed_from_v020(
+    plugin, broken_catalog, tmp_path, monkeypatch, host
+):
+    monkeypatch.setattr(plugin.runner, "_host_platform", lambda: host)
+    config, log, _ = _provider(plugin, broken_catalog, tmp_path, version="0.3.0")
+
+    def move_pin(catalog):
+        catalog["sync_providers"]["0.2.0"]["artifact_sha256"][host] = config["binary_sha256"]
+        catalog["sync_providers"]["0.3.0"]["artifact_sha256"][host] = "0" * 64
+
+    broken_catalog(move_pin)
+    assert plugin.runner.probe_availability(config) is False
+    assert not any(line[:1] == ["sync"] for line in _lines(log))
+
+
+def test_v030_linux_amd64_remains_unavailable(plugin, tmp_path, monkeypatch):
+    monkeypatch.setattr(plugin.runner, "_host_platform", lambda: "linux/amd64")
+    installation = make_fake_binary(tmp_path, version="v0.3.0")
+    with pytest.raises(plugin.runner.TrustFailure) as error:
+        plugin.runner.resolve_trust(installation["config"])
+    assert error.value.code == "binary_unavailable"

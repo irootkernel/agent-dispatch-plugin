@@ -1,0 +1,22 @@
+{
+  "cases": [
+    {
+      "id": "status-valid-empty",
+      "description": "The closed empty object is the only valid input.",
+      "expect": "valid",
+      "instance": {}
+    },
+    {
+      "id": "status-invalid-additional-property",
+      "description": "Any additional property is rejected; the tool takes no parameters.",
+      "expect": "invalid",
+      "instance": {"extra": 1}
+    },
+    {
+      "id": "status-invalid-forbidden-flags",
+      "description": "A forbidden execution property is rejected before process creation.",
+      "expect": "invalid",
+      "instance": {"flags": ["--output", "raw"]}
+    }
+  ]
+}

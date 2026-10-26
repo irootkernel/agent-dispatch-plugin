@@ -1,5 +1,16 @@
 # Upgrade and Rollback Runbook: Pinned Revisions in a Disposable Profile
 
+## Core v0.3.0 compatibility and rollback
+
+The v0.3.0 Plugin accepts the separately published, exact ARM v0.3.0 Core
+artifact alongside existing compatibility. Recheck the version-specific
+[artifact pin](../../contracts/v0.3.0/catalog.json), operator SHA and fresh
+capability evidence after a swap. Core inspection may migrate state to schema
+29. Back up the database and matching configuration before opening it; Plugin
+source rollback does not undo a Core migration. To roll Core back, stop its
+services and writers and restore a compatible backup using the
+[Core procedure](https://github.com/irootkernel/agent-dispatch/blob/v0.3.0/docs/ops/installation.md).
+
 Target: moving an installed `agent-dispatch-plugin` between documented
 pinned revisions inside one Hermes profile.
 Environment: Hermes (v0.20.5 or newer) on `PATH`, the pinned Agent Dispatch v0.1.6

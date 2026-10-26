@@ -2,9 +2,9 @@
 
 This module validates completed Agent Dispatch output: the closed envelope
 boundary derived from ``contracts/v0.1.0`` schemas, the closed wrapper carrier
-rule, the bounded diagnostics pipeline, and redaction. For the three v0.2.0
+rule, the bounded diagnostics pipeline, and redaction. For the three sync
 sync reads, it loads and checks the closed result schemas from
-``contracts/v0.2.0`` at runtime and fails closed if they are unavailable or
+the active contract at runtime and fails closed if they are unavailable or
 unsupported. It never creates a process or raises into Hermes; violations
 become closed :class:`EnvelopeViolation` values mapped by the runner.
 """
@@ -14,8 +14,14 @@ from __future__ import annotations
 import json
 import re
 from functools import lru_cache
-from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import TYPE_CHECKING, Any, Iterable, Mapping
+
+if TYPE_CHECKING:
+    import registry
+elif "." in __package__:
+    from . import registry
+else:
+    import registry
 
 ENVELOPE_API_VERSION = "agent-dispatch.cli/v1"
 
@@ -106,14 +112,7 @@ class EnvelopeViolation(Exception):
 
 @lru_cache(maxsize=3)
 def _sync_result_schema(command: str) -> Mapping[str, Any]:
-    path = (
-        Path(__file__).resolve().parent
-        / "contracts"
-        / "v0.2.0"
-        / "schemas"
-        / "results"
-        / _SYNC_RESULT_SCHEMAS[command]
-    )
+    path = registry.CONTRACTS_VERSION_DIR / "schemas" / "results" / _SYNC_RESULT_SCHEMAS[command]
     with path.open(encoding="utf-8") as handle:
         schema = json.load(handle)
     _check_sync_schema(schema)

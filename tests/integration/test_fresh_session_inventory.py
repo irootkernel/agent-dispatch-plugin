@@ -102,7 +102,7 @@ def test_fresh_session_registers_thirteen_tools_and_smokes_one_inspection(tmp_pa
     transcript = json.loads(result.stdout.splitlines()[-1])
 
     catalog = json.loads(
-        (ROOT / "contracts" / "v0.2.0" / "catalog.json").read_text(encoding="utf-8")
+        (ROOT / "contracts" / "v0.3.0" / "catalog.json").read_text(encoding="utf-8")
     )
     roster = [tool["name"] for tool in catalog["tools"]]
     assert transcript["inventory"] == roster

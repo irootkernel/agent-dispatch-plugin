@@ -67,8 +67,10 @@ This file is the local agent guidance for the agent-dispatch-plugin repository.
 
 ### Repository Index and Authorities
 
+Aquarium release notes: CHANGELOG.md
+
 - This is a source-only, inspection-only Hermes plugin written for Python 3.11 or newer. `README.md` introduces the product; `docs/README.md` maps the canonical documentation owners.
-- `docs/specs/PRD.md` owns product scope; `docs/specs/contracts.md` and `contracts/v0.1.0/` own public contracts; accepted ADRs own technical decisions; `docs/roadmap/README.md` alone owns delivery identity and status.
+- `docs/specs/PRD.md` owns product scope; `docs/specs/contracts.md` and the versioned `contracts/` directories own public contracts; accepted ADRs own technical decisions; `docs/roadmap/README.md` alone owns delivery identity and status.
 - Start implementation navigation in `docs/implementation-tips/README.md`. The runtime boundary is in `runner.py` and `envelopes.py`; `registry.py`, `schemas.py`, and `tools/` define registration and handlers.
 - `TESTING.md` owns the test contract and `Makefile` owns executable commands. `make test` is the pre-commit gate; `make test-qualify` is additionally required for pinned runtime-surface changes and needs its documented real artifacts. `make test-prepare` runs a formatter and may change Python files.
 - `docs/deferred-feedback/` owns independent deferred findings. `CHANGELOG.md` owns release notes. Follow `docs/ops/` for installation and recovery.

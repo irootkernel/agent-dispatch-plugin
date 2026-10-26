@@ -2,6 +2,15 @@
 
 This file records concise shipped outcomes and pending changes.
 
+## v0.3.0 - Unreleased
+
+### Changed
+
+- Admit exact Agent Dispatch v0.3.0 release artifacts on Darwin arm64 and Linux arm64
+  while preserving the thirteen inspection tools and existing compatibility.
+- Back up Agent Dispatch state before opening it with v0.3.0; rolling back Core
+  requires a compatible backup with services and writers stopped.
+
 ## v0.2.0 - 2026-10-01
 
 ### Added

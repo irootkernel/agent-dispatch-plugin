@@ -169,12 +169,16 @@ def _supported_version_range() -> tuple[tuple[int, int, int], tuple[int, int, in
     return low, high
 
 
-def _sync_provider_version() -> tuple[int, int, int]:
-    value = load_catalog()["compatibility"]["sync_agent_dispatch"]["version"]
-    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", str(value))
-    if match is None:
-        raise TrustFailure(ADAPTER_USAGE_ERROR, "the sync provider version pin is malformed")
-    return int(match[1]), int(match[2]), int(match[3])
+def _sync_provider(version: tuple[int, int, int]) -> Mapping[str, Any] | None:
+    """Select one exact provider; an unknown version never inherits its pins."""
+    key = ".".join(str(part) for part in version)
+    versions = load_catalog()["compatibility"]["sync_agent_dispatch"]["versions"]
+    if key not in versions:
+        return None
+    provider = load_catalog()["sync_providers"].get(key)
+    if not isinstance(provider, Mapping):
+        raise TrustFailure(ADAPTER_USAGE_ERROR, "the sync provider pin is malformed")
+    return provider
 
 
 def _sync_capability_action() -> ActionSpec:
@@ -441,7 +445,7 @@ def _verify_supported_version(trust: RunnerTrust) -> tuple[int, int, int]:
     low, high = _supported_version_range()
     if low <= version < high:
         return version
-    if version == _sync_provider_version():
+    if _sync_provider(version) is not None:
         return version
     raise TrustFailure(
         UNSUPPORTED_AGENT_DISPATCH_VERSION,
@@ -503,12 +507,13 @@ def resolve_trust(config: Mapping[str, Any]) -> RunnerTrust:
         max_output_bytes=max_output,
     )
     version = _verify_supported_version(trust)
-    if version == _sync_provider_version():
-        allowlist = load_catalog()["sync_provider"]["artifact_sha256"]
+    provider = _sync_provider(version)
+    if provider is not None:
+        allowlist = provider["artifact_sha256"]
         if digest_raw != allowlist.get(_host_platform()):
             raise TrustFailure(
                 BINARY_UNAVAILABLE,
-                "the v0.2.0 executable is outside the platform artifact allowlist",
+                "the executable is outside its version/platform artifact allowlist",
             )
     return replace(trust, version=version)
 
@@ -531,7 +536,7 @@ def verify_sync_capabilities(config: Mapping[str, Any]) -> RunnerTrust:
     if not isinstance(group, str) or re.fullmatch(pattern, group) is None:
         raise TrustFailure(ADAPTER_USAGE_ERROR, "sync_group_id is missing or invalid")
     trust = resolve_trust(config)
-    if trust.version != _sync_provider_version():
+    if _sync_provider(trust.version) is None:
         raise TrustFailure(
             UNSUPPORTED_AGENT_DISPATCH_VERSION, "sync reads require the pinned provider"
         )

@@ -1,4 +1,4 @@
-PY_SOURCES := registry.py schemas.py envelopes.py runner.py __init__.py tools contracts/validate.py contracts/validate_v020.py scripts tests
+PY_SOURCES := registry.py schemas.py envelopes.py runner.py __init__.py tools contracts/validate.py contracts/validate_v020.py contracts/validate_v030.py scripts tests
 # The typed runtime subset of PY_SOURCES: the static view checks every
 # guarded runtime module and excludes the registration shim and the pytest
 # tree (TESTING.md documents the same split).
@@ -30,6 +30,7 @@ test-prepare:
 	$(UV_RUN) python -m compileall -q $(PY_SOURCES)
 	$(UV_RUN) contracts/validate.py
 	$(UV_RUN) contracts/validate_v020.py
+	$(UV_RUN) contracts/validate_v030.py
 	$(UV_RUN) scripts/manifest_parity.py
 
 test-unit:
@@ -48,7 +49,8 @@ test-e2e:
 # AGENT_DISPATCH_QUALIFY_BINARY_V017; Linux arm64 and amd64: v0.1.8 via
 # AGENT_DISPATCH_QUALIFY_BINARY_V018). Each host also requires its pinned
 # v0.2.0 binary via AGENT_DISPATCH_QUALIFY_BINARY_V020 and a native user
-# service manager. Not part of `make test`, which
+# service manager. ARM hosts additionally require the exact v0.3.0 release
+# via AGENT_DISPATCH_QUALIFY_BINARY_V030. Not part of `make test`, which
 # stays hermetic on the deterministic fake executable; this stage fails
 # hard when the pinned prerequisites are absent (TESTING.md owns the
 # contract).

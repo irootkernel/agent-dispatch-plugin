@@ -11,11 +11,12 @@ not the current execution sequence. Plugin G01 (EPIC-006) and Dispatch
 E20-E22 are Completed in their respective roadmaps. Dispatch ADR-0023
 replaced the proposed N-member/E26 provider with an implemented two-node
 v0.2.0 scope. The current development Plugin remains inspection-only and
-admits exact allowlisted v0.2.0 artifacts for three sync reads. Native
+admits exact allowlisted v0.2.0 and v0.3.0 artifacts for three sync reads under
+the [v0.3.0 compatibility amendment](../specs/PRD.md#approved-v030-inspection-compatibility-amendment). Native
 qualification of the original TASK-026 artifacts completed on Darwin arm64
 and Linux arm64. The selected release pair requires fresh qualification on
 those hosts before publication; its current pins are in the
-[v0.2.0 catalog](../../contracts/v0.2.0/catalog.json).
+[v0.3.0 catalog](../../contracts/v0.3.0/catalog.json).
 Native Linux amd64 v0.2.0 qualification is separate deferred work.
 
 EPIC-007 and all five member tasks are Completed. The ARM-scoped whole-Epic

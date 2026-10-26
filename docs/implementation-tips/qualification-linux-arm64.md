@@ -1,5 +1,16 @@
 # Qualification Runbook: Linux arm64 Compatibility Matrix
 
+## Current v0.3.0 compatibility gate
+
+Run `make test` and `make test-qualify` on native Linux arm64 with the legacy
+v0.1.8 binary and both exact sync providers. Add
+`AGENT_DISPATCH_QUALIFY_BINARY_V030=/path/to/agent-dispatch-v0.3.0-linux-arm64`
+to the environment below. Its published SHA-256 is
+`779b887596428a2d35ca040b7fcbf33fb7733b55902c0e210c9bd9713bb29804`.
+Use a non-root account, real Hermes and an active systemd user manager.
+The [active catalog](../../contracts/v0.3.0/catalog.json) owns the selected
+release identities. Historical transcripts below do not qualify new bytes.
+
 Target: the `agent-dispatch-plugin` public surface on native
 `linux/arm64`.
 Environment: disposable profile on Linux arm64 (this runbook's evidence

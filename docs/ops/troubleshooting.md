@@ -101,6 +101,15 @@ See [upgrade-rollback-linux.md](upgrade-rollback-linux.md).
 Native schedule inspect uses systemd on Linux and launchd on macOS; the
 model does not supply `--platform`.
 
+## Exact v0.3.0 admission
+
+A v0.3.0 version string alone does not admit a binary. Compare both the
+operator digest and the version/platform SHA in the
+[active catalog](../../contracts/v0.3.0/catalog.json). A v0.2.0 pin cannot
+admit a v0.3.0 executable; development rebuilds and later patch versions
+stay unavailable. v0.3.0 sync compatibility covers the two native ARM hosts.
+Do not weaken these checks to enable management requests or amd64 support.
+
 ## Escalation
 
 Anything not resolved above is a contract question: check

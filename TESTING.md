@@ -14,7 +14,7 @@ blocking contract defect.
 make dev-sync       # prepare .venv from the separately hash-locked development requirements
 make dev-lock       # regenerate requirements-dev.txt after an intentional tool-pin change
 make test           # aggregate: prepare, unit, integration, e2e in order, fail-fast
-make test-prepare   # format, lint, type checking, byte-compilation, two contract gates, parity gate
+make test-prepare   # format, lint, type checking, byte-compilation, three contract gates, parity gate
 make test-unit      # uv run --frozen --no-sync pytest tests/unit
 make test-int       # uv run --frozen --no-sync pytest tests/integration
 make test-e2e       # uv run --frozen --no-sync pytest tests/e2e
@@ -37,9 +37,10 @@ The aggregate calls each stage handler exactly once through recursive
   Python sources, `ruff check` (static analysis), `mypy` (type checking over
   the typed runtime subset, derived from the same source enumeration in the
   Makefile), `python -m compileall`
-  (byte-compilation), then three deterministic offline gates:
+  (byte-compilation), then four deterministic offline gates:
   `contracts/validate.py` (frozen v0.1.0 contract oracle),
-  `contracts/validate_v020.py` (approved v0.2.0 contract oracle), and
+  `contracts/validate_v020.py` (frozen v0.2.0 contract oracle),
+  `contracts/validate_v030.py` (active exact-provider compatibility oracle), and
   `scripts/manifest_parity.py` (manifest/registry/inventory parity through
   the real registration path).
 - `test-unit`: `tests/unit` — one logical unit per test module:
@@ -102,8 +103,7 @@ No framework waivers apply: every layer is newly established on pytest.
 
 ## Gaori Mapping
 
-Gaori is not configured for this repository (no `.gaori/tester.yaml`).
-When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
+Gaori is configured by `.gaori/tester.yaml`. The mapping is: `make test-unit`, `make test-int`, and
 `make test-e2e` each produce single-format pytest output (parser `pytest`);
 `make test-prepare` and the aggregate produce mixed output (parser
 `generic`).
@@ -138,7 +138,13 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   are Darwin arm64 `7f9e68f7033ed7750f1d6912d510f617d2a06fd58f5f18400b73d68280604508`,
   Linux amd64 `a749ad083c2028af3b0d500c95d448f5a90af80c5c6e9a70fe950b011393efb2`,
   and Linux arm64 `9ca8f030b7763f05c229c5792836ea86ad3f2a8cc97912e47dda8f8a687d2cec`.
-  Each case
+  ARM hosts additionally require `AGENT_DISPATCH_QUALIFY_BINARY_V030` for
+  published Core v0.3.0 source `4b1e5dcaa9c2c6bb4b043448c9ee0d9d2ed00b4f`.
+  Its SHA-256 pins are Darwin arm64
+  `9b359d715f6a039199d0046755f6b27f3c195c8b024262a085f8df3697a6ab9c` and
+  Linux arm64 `779b887596428a2d35ca040b7fcbf33fb7733b55902c0e210c9bd9713bb29804`.
+  The fixture carries verified version identity to matrix and lifecycle
+  consumers; `_qualification.py` owns shared disposable helpers. Each case
   verifies its pinned SHA-256 before its version probe. PATH is a fallback
   only when its binary matches that exact case; missing or mismatching
   prerequisites fail, never skip. Other hosts fail the platform
@@ -147,7 +153,7 @@ When it is adopted, the mapping is: `make test-unit`, `make test-int`, and
   (temporary `HERMES_HOME`, temporary Agent Dispatch configuration and
   state, controlled fake downstream Hermes target) and dispatches every
   advertised action through the real Hermes runtime deterministically —
-  no model, no peer network, no live Agent Dispatch state. The v0.2.0 cases
+  no model, no peer network, no live Agent Dispatch state. Both exact sync-provider versions
   verify 13 registered tools, 10/13 available definitions, disabled and
   enabled partial two-node status, and absent/loaded/drifted service
   inspection against the native user manager. The service check uses a
@@ -207,12 +213,14 @@ exit 3 when Watchman is unavailable in the fixed child environment. They
 are successful diagnostic retrievals, not expected `contract_mismatch`
 negatives. Unit fixtures cover exit 0, other exits, wrong command identity,
 malformed output, and redaction. Every host-selected pinned artifact,
-including v0.2.0, runs the complete matrix and lifecycle, including a
-source rollback to pre-release commit
-`0c4e70e384bc9891bc15820c4e0b6a42ba700d5a` and restoration of the candidate.
+including both sync providers, runs the complete matrix and lifecycle, including a
+source rollback to the last published stable Plugin v0.2.0 commit
+`a060d1363e6861fc113b928f238a39d2f4c11e7d` and restoration of the candidate.
 The lifecycle requires a full Git clone containing that commit; it preserves
-profile settings and proves fresh-session registration after each swap.
-Legacy Darwin artifacts pass the rollback smoke; Linux and v0.2.0 artifacts
-remain unavailable under the old source until the candidate returns.
+profile settings and proves thirteen-name fresh-session registration after each
+swap. Legacy and exact v0.2.0 binaries pass the rollback smoke on each qualified
+host. Core v0.3.0 remains unavailable under the v0.2.0 Plugin until restoration.
+The older pre-release `0c4e70e` rollback record remains historical: its dev
+pins conflict with the selected modern Hermes and it is not a current gate.
 Archive installation itself is checked separately by Plugin
 Doctor before release publication.

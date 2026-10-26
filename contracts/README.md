@@ -2,12 +2,11 @@
 
 `v0.1.0/` is the frozen ten-tool baseline from TASK-001.
 `v0.2.0/` is the approved EPIC-007 thirteen-tool contract for the exact
-Agent Dispatch v0.2.0 provider candidate. The running development plugin
-derives its manifest and registry from v0.2.0; v0.1.0 remains the frozen
-legacy baseline. TASK-026 qualified Darwin arm64 and Linux arm64 for
+Agent Dispatch v0.2.0 provider candidate. The v0.3.0 compatibility contract is now active and derives the running
+manifest and registry; both earlier directories remain frozen. TASK-026 qualified Darwin arm64 and Linux arm64 for
 EPIC-007; deferred EPIC-009/TASK-033 owns native Linux amd64 v0.2.0
 qualification before a support claim. The PRD and
-`docs/specs/contracts.md` bind both contract versions.
+`docs/specs/contracts.md` bind all three contract versions.
 
 ## Layout
 
@@ -25,6 +24,9 @@ qualification before a support claim. The PRD and
   unchanged wrapper and envelope, three closed sync result schemas, and
   deterministic admission, command, result, and legacy fixtures.
 
+- `v0.3.0/` — unchanged thirteen-tool and closed result semantics with new
+  schema URNs and exact version-keyed v0.2.0/v0.3.0 provider admission.
+
 ## Validation
 
 Run the deterministic offline gate (no process, database, or network by the
@@ -33,6 +35,7 @@ gate itself) after `make dev-sync`:
 ```bash
 uv run --frozen --no-sync --with jsonschema==4.26.0 --with referencing==0.37.0 contracts/validate.py
 uv run --frozen --no-sync contracts/validate_v020.py
+uv run --frozen --no-sync contracts/validate_v030.py
 ```
 
 The validator asserts that the catalog equals the PRD invariants, every schema

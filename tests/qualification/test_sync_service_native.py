@@ -1,4 +1,4 @@
-"""Native user-manager qualification of the v0.2.0 read-only service tool."""
+"""Native user-manager qualification of the exact-provider read-only service tool."""
 
 from __future__ import annotations
 
@@ -14,14 +14,14 @@ import yaml
 import pytest
 
 import runner
-from test_compatibility_matrix import (
+from _qualification import (
     _disposable_hermes_home,
     _enable_disposable_sync,
     _fake_hermes_target,
     _run,
     _seed_disposable_state,
     _wrapper_validator,
-    CONTRACTS_V020,
+    CONTRACTS_SYNC,
 )
 
 
@@ -156,7 +156,7 @@ def _inspect_through_hermes(home: Path, sandbox: Path, venv_python: Path) -> dic
     payload = json.loads(observed.stdout)
     assert len(payload["registered"]) == len(payload["available"]) == 13
     result = json.loads(payload["results"][0]["raw"])
-    _wrapper_validator(CONTRACTS_V020).validate(result)
+    _wrapper_validator(CONTRACTS_SYNC).validate(result)
     assert result["ok"] is True, result
     assert result["agent_dispatch"]["result"]["side_effects"] == []
     return result["agent_dispatch"]["result"]
@@ -170,17 +170,17 @@ def short_service_sandbox():
 
 
 def test_native_service_absent_loaded_and_drifted(
-    short_service_sandbox, v020_binary, qualification_runtime
+    short_service_sandbox, sync_binary, qualification_runtime
 ):
     _hermes, venv_python = qualification_runtime
     sandbox = short_service_sandbox
     _fake_hermes_target(sandbox)
-    _seed_disposable_state(v020_binary, sandbox)
+    _seed_disposable_state(sync_binary, sandbox)
     config = sandbox / "config.yaml"
     group_id = "qual-" + hashlib.sha256(str(sandbox).encode()).hexdigest()[:24]
     _enable_disposable_sync(config, group_id)
-    _seed_local_membership(v020_binary, config, sandbox, group_id)
-    home = _disposable_hermes_home(sandbox, v020_binary, config, sync_group_id=group_id)
+    _seed_local_membership(sync_binary, config, sandbox, group_id)
+    home = _disposable_hermes_home(sandbox, sync_binary, config, sync_group_id=group_id)
 
     if runner._host_platform() == "darwin/arm64":
         ready = subprocess.run(
@@ -196,7 +196,7 @@ def test_native_service_absent_loaded_and_drifted(
         )
     assert ready.returncode == 0, "missing prerequisite: native user service manager"
 
-    rendered = _service(v020_binary, config, group_id, "render")
+    rendered = _service(sync_binary, config, group_id, "render")
     definition = Path(rendered["definition_path"])
     assert definition.is_absolute()
     assert definition.parent.is_relative_to(Path(runner._native_service_environment()["HOME"]))
@@ -207,7 +207,7 @@ def test_native_service_absent_loaded_and_drifted(
     try:
         absent = _inspect_through_hermes(home, sandbox, venv_python)
         assert absent["present"] is False and absent["loaded"] is False
-        _service(v020_binary, config, group_id, "install")
+        _service(sync_binary, config, group_id, "install")
         installed = True
         assert _await_native_state(rendered["label"], True)
         loaded = _inspect_through_hermes(home, sandbox, venv_python)
@@ -223,6 +223,6 @@ def test_native_service_absent_loaded_and_drifted(
         if definition.exists():
             definition.write_text(rendered["definition"], encoding="utf-8")
         if installed or definition.exists():
-            _service(v020_binary, config, group_id, "uninstall")
+            _service(sync_binary, config, group_id, "uninstall")
         assert not definition.exists(), "qualification definition was not cleaned up"
         assert _await_native_state(rendered["label"], False), "qualification service remains loaded"

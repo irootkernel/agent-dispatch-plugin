@@ -10,11 +10,11 @@ instead of restating them.
 
 The product scope, tool roster, command vocabulary, wrapper and error
 contracts, resource limits, and compatibility matrix are defined by
-`contracts/v0.2.0/`, with `contracts/v0.1.0/` retained as the frozen legacy
+`contracts/v0.3.0/`, with `contracts/v0.1.0/` retained as the frozen legacy
 baseline, and bound by `docs/specs/PRD.md` and
 `docs/specs/contracts.md`. Changes require explicit maintainer approval
 and a canonical amendment; the deterministic oracle
-(`uv run --frozen --no-sync contracts/validate.py` and `uv run --frozen --no-sync contracts/validate_v020.py`) and the parity gate
+(`uv run --frozen --no-sync contracts/validate.py` and `uv run --frozen --no-sync contracts/validate_v020.py` and `uv run --frozen --no-sync contracts/validate_v030.py`) and the parity gate
 (`uv run --frozen --no-sync scripts/manifest_parity.py`) fail closed on any drift between
 the catalog, schemas, `plugin.yaml`, and the registered inventory.
 `plugin.yaml` is derived — never edit it directly; regenerate with
@@ -44,7 +44,7 @@ session start.
 ## Every-change gates
 
 Before any change is committed, `make test` must pass: the prepare
-gates (format, lint, type check, byte-compilation, both contract
+gates (format, lint, type check, byte-compilation, all three contract
 oracles, and manifest/registry parity), the deterministic unit and
 integration suites, and the Plugin Doctor e2e stage. Changes that touch
 the pinned runtime surface additionally run `make test-qualify`

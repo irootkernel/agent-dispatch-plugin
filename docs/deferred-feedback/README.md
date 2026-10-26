@@ -87,16 +87,12 @@ hardening follow-up; no new task ID allocated.
 
 ### TASK-026 qualification helper consolidation
 
-Source: Mulgae TASK-026 review (Low). Disposition: deferred feedback.
-Owner: Plugin maintainer. Rationale: the qualification fixture verifies each
-pinned binary digest, while the matrix and lifecycle tests re-identify v0.2.0
-by hashing the same file; the native service test also imports private helpers
-from another test module. Both are maintainability risks independent of the
-current pinned ARM qualification and task acceptance. Revisit: before adding
-another pinned Agent Dispatch version or restructuring the qualification suite,
-carry the fixture's artifact identity to consumers and move shared disposable
-state helpers into a dedicated helper module. Roadmap identity: TASK-026
-follow-up; no new task ID allocated.
+Source: Mulgae TASK-026 review (Low). Disposition: resolved in the v0.3.0
+compatibility work. Owner: Plugin maintainer. `QualifiedArtifact` carries the
+verified version and executable to matrix and lifecycle consumers, and
+`tests/qualification/_qualification.py` owns shared disposable state helpers.
+Native service qualification no longer imports another test module.
+Roadmap identity: TASK-026 follow-up; no new task ID allocated.
 
 ### Linux amd64 v0.2.0 sync inspection qualification
 

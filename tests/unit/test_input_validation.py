@@ -18,7 +18,7 @@ import pytest
 from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-CONTRACTS = ROOT / "contracts" / "v0.2.0"
+CONTRACTS = ROOT / "contracts" / "v0.3.0"
 
 
 def _schema_path(tool: str) -> Path:

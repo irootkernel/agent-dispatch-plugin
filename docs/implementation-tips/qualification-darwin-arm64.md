@@ -1,5 +1,17 @@
 # Qualification Runbook: Darwin arm64 Compatibility Matrix
 
+## Current v0.3.0 compatibility gate
+
+Run the existing matrix and native service cases against both exact sync
+providers plus the legacy binaries. Add
+`AGENT_DISPATCH_QUALIFY_BINARY_V030=/path/to/agent-dispatch-v0.3.0-darwin-arm64`
+to the environment below. Its published SHA-256 is
+`9b359d715f6a039199d0046755f6b27f3c195c8b024262a085f8df3697a6ab9c`.
+The [active catalog](../../contracts/v0.3.0/catalog.json) and
+[testing contract](../../TESTING.md#qualification-environment) own current pins.
+Earlier candidate identities and results below are historical. New candidate
+qualification must run all cases; this note claims no fresh result.
+
 Target: the `agent-dispatch-plugin` public surface.
 Environment: disposable profile on Darwin arm64 (this runbook's evidence
 path never touches the operator's live Agent Dispatch configuration or

@@ -94,3 +94,26 @@ a binary or validate a full result.
 `make dev-sync`, run `uv run --frozen --no-sync contracts/validate_v020.py`
 for this approved catalog, schemas, and positive and negative fixtures. Master approved the PRD
 amendment on 2026-09-29; platform qualification remains a separate gate.
+
+
+## Approved v0.3.0 compatibility contract
+
+The [v0.3.0 catalog](../../contracts/v0.3.0/catalog.json) activates the
+[approved PRD amendment](PRD.md#approved-v030-inspection-compatibility-amendment).
+It preserves all thirteen tools, their inputs and closed sync results, the
+wrapper and error vocabulary, limits, and public identity exceptions.
+Only schema URNs and compatibility admission change. The prior contract
+folders and oracles remain frozen.
+
+The shared `sync_provider` declares the unchanged base-sync attestation.
+The `sync_providers` map separates exact `0.2.0` and `0.3.0` artifact
+identities. Select by the probed version, require both the operator SHA and
+that version/platform pin, and never infer a version range from these keys.
+The v0.3.0 map admits Darwin arm64 and Linux arm64; its amd64 release binary
+is not admitted by this amendment. Existing v0.2.0 identity records remain
+historical platform pins, not new native qualification claims.
+
+`uv run --frozen --no-sync contracts/validate_v030.py` validates the exact
+release source and checksums, unchanged tool and schema semantics, and both
+versions' positive and negative admission fixtures. It runs alongside both
+older oracles in `make test-prepare`; manifest parity uses the active catalog.

@@ -1,5 +1,18 @@
 # Installation Lifecycle Runbook: Disposable Hermes Profile (Linux)
 
+## Current v0.3.0 lifecycle
+
+Recent Hermes releases remove plugin bookkeeping during `plugins remove`.
+Run the manual cleanup steps below only for keys that remain; the final
+profile must contain no plugin reference either way.
+
+On native Linux arm64, also provide the published v0.3.0 executable through
+`AGENT_DISPATCH_QUALIFY_BINARY_V030`; retain the v0.1.8 and v0.2.0 inputs.
+The lifecycle and systemd inspection run for both sync providers. The
+[active catalog](../../contracts/v0.3.0/catalog.json) owns the exact pins.
+Linux amd64 v0.3.0 is not admitted; its legacy scope and deferred v0.2.0
+qualification remain separate.
+
 Target: the `agent-dispatch-plugin` source-directory distribution
 lifecycle in a disposable Hermes profile on Linux.
 Environment: disposable `HERMES_HOME` on native `linux/arm64` or native

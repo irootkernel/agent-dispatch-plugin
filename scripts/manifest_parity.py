@@ -2,7 +2,7 @@
 """Generate and verify plugin.yaml from the frozen contract source.
 
 ADR-001: plugin.yaml is a derived view. Run with --write to regenerate it
-from contracts/v0.2.0/catalog.json after an approved contract change; run
+from contracts/v0.3.0/catalog.json after an approved contract change; run
 without arguments to verify manifest, registry, registration, expected
 inventory, and command-vocabulary parity for exactly the thirteen declared
 tools.
@@ -203,7 +203,7 @@ def main() -> int:
     roster = [tool["name"] for tool in catalog["tools"]]
     schema_files = sorted(
         path.name[: -len(".input.json")]
-        for path in (REPO_ROOT / "contracts" / "v0.2.0" / "schemas" / "tools").glob("*.input.json")
+        for path in (REPO_ROOT / "contracts" / "v0.3.0" / "schemas" / "tools").glob("*.input.json")
     )
 
     if not (len(roster) == 13 and len(set(roster)) == 13):

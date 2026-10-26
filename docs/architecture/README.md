@@ -31,7 +31,7 @@ flat package modules. Hermes imports it as `hermes_plugins.agent_dispatch_plugin
 and calls `register(ctx)`.
 
 - `registry.py` is the declarative registry: it parses
-  `contracts/v0.2.0/catalog.json` into tool and action specs and owns
+  `contracts/v0.3.0/catalog.json` into tool and action specs and owns
   the expected inventory. Every downstream view derives from it (ADR-001).
 - `schemas.py` serves the frozen input schemas and descriptions to Hermes;
   it composes nothing of its own.

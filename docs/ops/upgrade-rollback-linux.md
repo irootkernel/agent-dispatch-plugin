@@ -1,5 +1,15 @@
 # Upgrade and Rollback Runbook: Pinned Revisions on Linux
 
+## Core v0.3.0 compatibility and rollback
+
+On native Linux arm64 the v0.3.0 Plugin also admits the exact v0.3.0 Core
+release in the [active catalog](../../contracts/v0.3.0/catalog.json).
+Use the same disabled swap and fresh-session verification procedure. Back up
+the database and matching configuration before a v0.3.0 inspection migrates
+state to schema 29. Plugin rollback cannot reverse it; stop Core services and
+writers and restore a compatible backup before Core rollback. Linux amd64
+sync support remains outside this release's new compatibility claim.
+
 Target: moving an installed `agent-dispatch-plugin` between documented
 pinned revisions inside one Hermes profile on Linux.
 Environment: Hermes (>=0.20.5) on `PATH`, the host-selected pinned Agent

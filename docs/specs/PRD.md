@@ -289,3 +289,41 @@ a reviewed contract amendment. All other values and keys, including nearby
 hash-shaped strings, warnings, errors, diagnostics, malformed results, and
 unknown fields follow the existing redaction rules. No whole result object
 or arbitrary hash is exempt.
+
+
+## Approved v0.3.0 inspection compatibility amendment
+
+Status: Approved by Master through the v0.3.0 inspection-only release plan on
+2026-10-26. This amendment adds compatibility, not management authority.
+
+`contracts/v0.3.0/` is the active thirteen-tool contract. Preserve the frozen
+v0.1.0 and v0.2.0 contracts and all their command, input, result, resource,
+error, and redaction semantics. Public schema URNs identify the new contract;
+wire schema versions stay unchanged. `product_version` stays `0.3.0` while
+`plugin.version` follows the release or open development cycle and matches
+the generated manifest, Python project, lockfile and validation expectation.
+
+Keep the legacy `>=0.1.6,<0.2.0` ten-tool range. The catalog's
+`compatibility.sync_agent_dispatch.versions` lists only `0.2.0` and `0.3.0`;
+`sync_providers` keys those exact versions to independent source, bundle,
+checksum-file and per-platform executable identities. Preserve the v0.2.0
+release pins. Admit Core v0.3.0 source and provider bundle at
+`4b1e5dcaa9c2c6bb4b043448c9ee0d9d2ed00b4f` using its published release
+checksums on Darwin arm64 and Linux arm64 only. Its unchanged base-sync
+semantic digest is
+`sha256:30cf47b1bd854a0271aa9df3e7b37f0cc14cdd86d3f06a65a2cb787c6741131b`.
+Do not use the earlier management-provider handoff's candidate or binary pins.
+
+The runner selects the executable's exact version before checking that
+version's platform SHA; another version's allowlist cannot admit it.
+Unsupported builds fail closed before an inspection. Fresh capability
+attestation still precedes each sync handler, including direct dispatch;
+missing groups or invalid capabilities expose only the original ten tools.
+No request, prepare, submit, recovery, control, or other mutation is registered.
+
+Fresh exact-Plugin-candidate qualification through real Hermes and native
+user managers is required on Darwin arm64 and Linux arm64 for the legacy,
+v0.2.0 and newly selected v0.3.0 artifacts. Native Linux amd64 sync admission
+is not expanded; EPIC-008 and EPIC-009 remain Deferred. Core v0.3.0 store
+migration to schema 29 requires the documented backup and rollback boundary,
+even for diagnostics. Historical Core qualification is not Plugin evidence.

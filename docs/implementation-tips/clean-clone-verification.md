@@ -1,5 +1,13 @@
 # Clean-Clone Verification Runbook: CI, Plugin Doctor, and Tool Inventory
 
+## Current compatibility candidate
+
+The active v0.3.0 contract adds a third oracle,
+`contracts/validate_v030.py`, to `make test-prepare`. The full clean-clone
+release gate remains `make dev-sync`, `make test`, then `make test-qualify`
+with the host's exact legacy, v0.2.0 and v0.3.0 artifacts. Both native ARM
+hosts are required for sync compatibility. The transcript below is historical.
+
 Target: the `agent-dispatch-plugin` v0.1.0 complete deterministic gate set
 from a fresh clone of an exact revision.
 Environment: Darwin arm64 host; Hermes (v0.20.5 or newer) on `PATH` for the Plugin

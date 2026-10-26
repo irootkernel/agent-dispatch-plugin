@@ -35,11 +35,9 @@ import shutil
 import subprocess
 from pathlib import Path
 
-import runner
-from conftest import V020_SHA256
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-CONTRACTS = ROOT / "contracts" / "v0.2.0"
+CONTRACTS = ROOT / "contracts" / "v0.3.0"
 
 PLUGIN_NAME = "agent-dispatch-plugin"
 TOOLSET = "agent_dispatch"
@@ -50,11 +48,16 @@ TOOLSET = "agent_dispatch"
 # registration, availability, and one smoke dispatch through the real
 # dispatcher.
 LIFECYCLE_DRIVER_SCRIPT = r"""
+import importlib.util
 import json
+from pathlib import Path
 import os
 import sys
 
 os.environ.setdefault("HERMES_QUIET", "1")
+spec = importlib.util.find_spec("model_tools")
+if spec is not None and spec.origin:
+    sys.path.insert(0, str(Path(spec.origin).resolve().parent))
 import model_tools
 
 names = sorted(n for n in model_tools.get_all_tool_names() if n.startswith("agent_dispatch"))
@@ -149,7 +152,7 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(
     sandbox.mkdir()
     driver = sandbox / "lifecycle_driver.py"
     driver.write_text(LIFECYCLE_DRIVER_SCRIPT, encoding="utf-8")
-    binary = qualified_binary
+    binary = qualified_binary.path
 
     # Agent Dispatch configuration seeded through the binary's own command,
     # entirely inside the sandbox with absolute (non-symlinked) paths.
@@ -248,10 +251,10 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(
     assert TOOLSET in cli_toolsets, "an enabled plugin toolset joins the platform list"
 
     # Exercise a real source rollback and upgrade with identical profile settings.
-    # 0c4e70e is the recorded pre-release Darwin-only source: Darwin keeps
-    # inspecting through it; Linux hosts must keep the toolset closed until
-    # the candidate (which admits Linux) is restored.
-    previous = "0c4e70e384bc9891bc15820c4e0b6a42ba700d5a"
+    # Use the last published stable Plugin, whose runtime-only packaging
+    # remains installable under the selected Hermes. It supports the legacy
+    # and exact v0.2.0 cores; the newly admitted v0.3.0 core stays closed.
+    previous = "a060d1363e6861fc113b928f238a39d2f4c11e7d"
     archive = subprocess.run(
         ["git", "archive", "--format=zip", previous],
         cwd=ROOT,
@@ -279,15 +282,8 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(
         assert _hermes(hermes, home, "tools", "enable", TOOLSET).returncode == 0
         assert (home / "config.yaml").read_bytes() == profile_before
         observation = _observe(venv_python, home, driver)
-        assert observation["registered"] == (
-            sorted(name for name in roster if not name.startswith("agent_dispatch_sync_"))
-            if revision == "previous"
-            else roster
-        )
-        rollback_unavailable = revision == "previous" and (
-            runner._host_platform().startswith("linux/")
-            or hashlib.sha256(binary.read_bytes()).hexdigest() in V020_SHA256.values()
-        )
+        assert observation["registered"] == roster
+        rollback_unavailable = revision == "previous" and qualified_binary.version == "v0.3.0"
         if rollback_unavailable:
             assert observation["toolset_available"] is False, (
                 f"the rollback source must not open the toolset on this candidate: {observation}"
@@ -330,10 +326,13 @@ def test_install_lifecycle_proves_disabled_enable_disable_and_removal(
     # The profile config keeps inert bookkeeping for the removed plugin; the
     # documented cleanup path removes it so nothing named agent-dispatch-plugin
     # remains anywhere in the profile.
-    for key in (
-        f"plugins.entries.{PLUGIN_NAME}",
-        "plugins.disabled",
-    ):
+    remaining = _plugins_config(home).get("plugins") or {}
+    cleanup_keys = []
+    if PLUGIN_NAME in (remaining.get("entries") or {}):
+        cleanup_keys.append(f"plugins.entries.{PLUGIN_NAME}")
+    if "disabled" in remaining:
+        cleanup_keys.append("plugins.disabled")
+    for key in cleanup_keys:
         unset = _hermes(hermes, home, "config", "unset", key)
         assert unset.returncode == 0, f"config unset {key} failed: {unset.stdout}{unset.stderr}"
     residue = json.dumps(_plugins_config(home))

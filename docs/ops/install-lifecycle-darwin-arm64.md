@@ -1,5 +1,18 @@
 # Installation Lifecycle Runbook: Disposable Hermes Profile
 
+## Current v0.3.0 lifecycle
+
+Recent Hermes releases remove plugin bookkeeping during `plugins remove`.
+Run the manual cleanup steps below only for keys that remain; the final
+profile must contain no plugin reference either way.
+
+Also provide the exact published Darwin arm64 v0.3.0 executable through
+`AGENT_DISPATCH_QUALIFY_BINARY_V030`; retain all older required artifacts.
+`make test-qualify` runs the complete lifecycle for each selected version
+and native service inspection for both sync providers. Current release pins
+are in the [active catalog](../../contracts/v0.3.0/catalog.json); historical
+candidate SHA values below must not replace them.
+
 Target: the `agent-dispatch-plugin` source-directory distribution lifecycle in a
 disposable Hermes profile.
 Environment: disposable `HERMES_HOME` on Darwin arm64 with Hermes

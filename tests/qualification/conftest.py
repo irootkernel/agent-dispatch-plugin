@@ -1,13 +1,14 @@
 """Verified release artifacts shared by real-runtime qualification cases.
 
 The fixture is host-selected and fail-closed: Darwin arm64 runs v0.1.6 and
-v0.1.7; Linux arm64 and amd64 run v0.1.8. Every host also runs v0.2.0.
+v0.1.7; Linux arm64 and amd64 run v0.1.8. Every host also runs v0.2.0; ARM hosts additionally run v0.3.0.
 An unsupported host, missing binary, or digest mismatch fails the stage.
 There is no skip path.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import hashlib
 import json
 import os
@@ -59,15 +60,24 @@ V020_SHA256 = {
 V020_SOURCE_COMMIT = "ffc8715d030ed3978e2c34d700798815975917d9"
 
 
-def _check_v020_catalog_pins() -> None:
+V030_SHA256 = {
+    "darwin/arm64": "9b359d715f6a039199d0046755f6b27f3c195c8b024262a085f8df3697a6ab9c",
+    "linux/arm64": "779b887596428a2d35ca040b7fcbf33fb7733b55902c0e210c9bd9713bb29804",
+}
+V030_SOURCE_COMMIT = "4b1e5dcaa9c2c6bb4b043448c9ee0d9d2ed00b4f"
+
+
+def _check_sync_catalog_pins(version: str) -> None:
     catalog = json.loads(
-        (Path(__file__).resolve().parents[2] / "contracts/v0.2.0/catalog.json").read_text(
+        (Path(__file__).resolve().parents[2] / "contracts/v0.3.0/catalog.json").read_text(
             encoding="utf-8"
         )
     )
-    provider = catalog["sync_provider"]
-    assert provider["source_commit"] == V020_SOURCE_COMMIT
-    assert provider["artifact_sha256"] == V020_SHA256
+    provider = catalog["sync_providers"][version.removeprefix("v")]
+    expected_source = V020_SOURCE_COMMIT if version == "v0.2.0" else V030_SOURCE_COMMIT
+    expected_sha = V020_SHA256 if version == "v0.2.0" else V030_SHA256
+    assert provider["source_commit"] == expected_source
+    assert provider["artifact_sha256"] == expected_sha
 
 
 def qualification_host() -> str:
@@ -89,9 +99,14 @@ def artifacts_for_this_host() -> list[tuple[str, str, str]]:
     )
 
 
-ARTIFACTS = artifacts_for_this_host() + [
+SYNC_ARTIFACTS = [
     ("v0.2.0", V020_SHA256[qualification_host()], "AGENT_DISPATCH_QUALIFY_BINARY_V020")
 ]
+if qualification_host() in V030_SHA256:
+    SYNC_ARTIFACTS.append(
+        ("v0.3.0", V030_SHA256[qualification_host()], "AGENT_DISPATCH_QUALIFY_BINARY_V030")
+    )
+ARTIFACTS = artifacts_for_this_host() + SYNC_ARTIFACTS
 
 
 def require_qualification_prerequisites() -> tuple[str, Path]:
@@ -160,19 +175,24 @@ def _copy_verified_binary(tmp_path, version, expected_digest, variable):
     return Path(binary)
 
 
+@dataclass(frozen=True)
+class QualifiedArtifact:
+    path: Path
+    version: str
+
+    @property
+    def sync_provider(self) -> bool:
+        return self.version in ("v0.2.0", "v0.3.0")
+
+
 @pytest.fixture(params=ARTIFACTS, ids=[entry[0] for entry in ARTIFACTS])
 def qualified_binary(request, tmp_path):
-    if request.param[0] == "v0.2.0":
-        _check_v020_catalog_pins()
+    if request.param[0] in ("v0.2.0", "v0.3.0"):
+        _check_sync_catalog_pins(request.param[0])
+    return QualifiedArtifact(_copy_verified_binary(tmp_path, *request.param), request.param[0])
+
+
+@pytest.fixture(params=SYNC_ARTIFACTS, ids=[entry[0] for entry in SYNC_ARTIFACTS])
+def sync_binary(request, tmp_path):
+    _check_sync_catalog_pins(request.param[0])
     return _copy_verified_binary(tmp_path, *request.param)
-
-
-@pytest.fixture
-def v020_binary(tmp_path):
-    _check_v020_catalog_pins()
-    return _copy_verified_binary(
-        tmp_path,
-        "v0.2.0",
-        V020_SHA256[qualification_host()],
-        "AGENT_DISPATCH_QUALIFY_BINARY_V020",
-    )

@@ -4,7 +4,7 @@ Target: declaring and verifying an immutable release candidate. The original
 v0.1.0 handoff remains historical; the completed EPIC-007 development
 handoff is below.
 Environment: each claimed native host with Hermes (v0.20.5 or newer) on
-`PATH` and its catalog-pinned legacy and v0.2.0 Agent Dispatch artifacts;
+`PATH` and its catalog-pinned legacy, v0.2.0 and v0.3.0 Agent Dispatch artifacts;
 see the [qualification matrices](README.md#verify-and-hand-off).
 
 ## The immutable review target
@@ -27,6 +27,39 @@ separately authorized release action. Read-only diagnosis begins with
 `git status --short`, `git rev-parse HEAD`, and `git remote -v`; confirm the
 candidate and intended destination before preparing any publication.
 
+## Selected v0.3.0 compatibility release
+
+The active contract is `contracts/v0.3.0/`. Preserve the original thirteen
+inspection tools and existing compatibility while selecting published Core
+v0.3.0 source `4b1e5dcaa9c2c6bb4b043448c9ee0d9d2ed00b4f` and its exact
+Darwin arm64/Linux arm64 release checksums. Keep v0.2.0 qualification inputs;
+add `AGENT_DISPATCH_QUALIFY_BINARY_V030` on both ARM hosts. The base-sync
+provider digest and wire contract are unchanged. Management EPIC-008 and
+native amd64 sync qualification remain Deferred. Earlier handoff identities
+below are historical, not the selected release pair.
+
+The release gate is full mode: every checkpoint below must pass on the
+exact committed compatibility candidate. QA uses its clean `main` SHA and
+remote ancestry. After QA, only repository-authorized version/date metadata
+may change before the final full gate. Qualify the committed final revision
+from clean full-history clones before publication; an unchanged runtime does
+not turn historical qualification into exact-final-commit evidence.
+
+The current rollback target is the last published stable Plugin v0.2.0,
+`a060d1363e6861fc113b928f238a39d2f4c11e7d`. Preserve profile settings and
+thirteen-tool registration across the swap. Legacy and v0.2.0 Core inspections
+must succeed; v0.3.0 must stay unavailable until the candidate returns. The
+older `0c4e70e` pre-release rollback remains historical because its developer
+groups conflict with the selected Hermes. This changes the compatibility gate
+baseline only; it does not authorize changing the frozen historical source.
+
+The authoritative checkpoint order is `make dev-sync`, `make test-prepare`,
+`make test-unit`, `make test-int`, `make test-e2e`, `make test-qualify`.
+`make test` remains the aggregate for the four middle targets. Each target
+is independently invocable; a diagnostic suffix starts at the failed public
+target and continues through qualification. A suffix is never final PASS;
+the complete aggregate gate must subsequently pass without candidate changes.
+
 ## Candidate gate set
 
 Every candidate must pass, from a full-history clean clone of the exact revision
@@ -35,7 +68,7 @@ Every candidate must pass, from a full-history clean clone of the exact revision
 1. `make dev-sync` — the isolated development environment resolves from
    the hash-locked `requirements-dev.txt`; `uv.lock` covers runtime metadata only.
 2. `make test` — the prepare gates (format, lint, type check,
-   byte-compilation, both contract oracles, manifest/registry
+   byte-compilation, all three contract oracles, manifest/registry
    parity), the deterministic unit suite, the integration suite
    including the fresh-session thirteen-tool inventory, and the Plugin
    Doctor e2e stage.
