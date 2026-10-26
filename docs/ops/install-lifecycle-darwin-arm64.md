@@ -122,12 +122,14 @@ failures through [troubleshooting](troubleshooting.md#escalation).
 
 ## Current development matrix
 
-The current gate runs this lifecycle for pinned v0.1.6, v0.1.7, and v0.2.0
-executables. Set `AGENT_DISPATCH_QUALIFY_BINARY`,
-`AGENT_DISPATCH_QUALIFY_BINARY_V017`, and
-`AGENT_DISPATCH_QUALIFY_BINARY_V020` as described in the
+The current gate runs this lifecycle for pinned v0.1.6, v0.1.7, v0.2.0, and
+v0.3.0 executables. Set `AGENT_DISPATCH_QUALIFY_BINARY`,
+`AGENT_DISPATCH_QUALIFY_BINARY_V017`, `AGENT_DISPATCH_QUALIFY_BINARY_V020`,
+and `AGENT_DISPATCH_QUALIFY_BINARY_V030` as described in the
 [qualification runbook](../implementation-tips/qualification-darwin-arm64.md).
-The gate now also swaps to the pre-release revision and back to the candidate,
-checking that profile settings survive. The rollback smoke succeeds for the
-legacy artifacts and remains fail-closed for v0.2.0 until the candidate returns.
-The earlier v0.1.x qualification transcripts remain historical.
+The gate swaps to stable Plugin v0.2.0 at
+`a060d1363e6861fc113b928f238a39d2f4c11e7d` and back to the candidate,
+checking that profile settings and thirteen-tool registration survive.
+The rollback smoke succeeds for legacy and Core v0.2.0 artifacts; Core
+v0.3.0 remains unavailable until the candidate returns. Earlier pre-release
+rollback and v0.1.x qualification transcripts remain historical.
