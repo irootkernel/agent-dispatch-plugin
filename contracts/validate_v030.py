@@ -33,7 +33,7 @@ ARTIFACTS = {
     "darwin/arm64": "9b359d715f6a039199d0046755f6b27f3c195c8b024262a085f8df3697a6ab9c",
     "linux/arm64": "779b887596428a2d35ca040b7fcbf33fb7733b55902c0e210c9bd9713bb29804",
 }
-EXPECTED_PLUGIN_VERSION = "0.3.0"
+EXPECTED_PLUGIN_VERSION = "0.3.1"
 IDENTITY_PATHS = [
     "sync capabilities.result.contract_digest",
     "sync status.result.config_revision",
